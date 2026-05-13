@@ -12,3 +12,15 @@ export interface Tenant {
   additionalNotes?: string;
   imageUrl?: string;
 }
+
+export interface Outlet {
+  id: string;
+  tenantId: string;
+  name: string;
+  slug: string;
+  phone: string;
+  timezone: string;
+  city: string;
+  country: string;
+  status: 'Active' | 'Inactive';
+}

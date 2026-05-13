@@ -1,4 +1,4 @@
-import { Tenant } from './types';
+import { Tenant, Outlet } from './types';
 
 export const initialTenants: Tenant[] = [
   {
@@ -61,5 +61,41 @@ export const initialTenants: Tenant[] = [
     numberOfOutlets: 3,
     numberOfUsers: 12,
     imageUrl: 'https://picsum.photos/seed/56/200/200',
+  }
+];
+
+export const initialOutlets: Outlet[] = [
+  {
+    id: 'o1',
+    tenantId: '1',
+    name: 'Outburst',
+    slug: 'outburst',
+    phone: '+971502430508',
+    timezone: 'Indian/Antananarivo',
+    city: 'qcity',
+    country: 'United Kingdom',
+    status: 'Active'
+  },
+  {
+    id: 'o2',
+    tenantId: '1',
+    name: 'Crave',
+    slug: 'crave',
+    phone: '+971521650763',
+    timezone: 'Asia/Dubai',
+    city: 'Dubai',
+    country: 'Albania',
+    status: 'Active'
+  },
+  {
+    id: 'o3',
+    tenantId: '2',
+    name: 'QuickBite Downtown',
+    slug: 'qb-downtown',
+    phone: '+15551234567',
+    timezone: 'America/New_York',
+    city: 'New York',
+    country: 'USA',
+    status: 'Active'
   }
 ];

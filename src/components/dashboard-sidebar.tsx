@@ -50,9 +50,12 @@ const navGroups = [
   }
 ]
 
-export function DashboardSidebar() {
-  const [activeTab, setActiveTab] = React.useState("tenants")
+interface DashboardSidebarProps {
+  activeTab: string;
+  onTabChange: (id: string) => void;
+}
 
+export function DashboardSidebar({ activeTab, onTabChange }: DashboardSidebarProps) {
   return (
     <Sidebar className="border-r border-slate-100 bg-white">
       <SidebarHeader className="p-8 pb-10">
@@ -76,7 +79,7 @@ export function DashboardSidebar() {
                   <SidebarMenuItem key={item.id}>
                     <SidebarMenuButton
                       isActive={activeTab === item.id}
-                      onClick={() => setActiveTab(item.id)}
+                      onClick={() => onTabChange(item.id)}
                       className={cn(
                         "w-full px-8 py-7 rounded-none transition-all duration-300 border-l-[4px] border-transparent",
                         activeTab === item.id 
