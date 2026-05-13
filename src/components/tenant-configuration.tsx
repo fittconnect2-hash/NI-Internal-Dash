@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -21,6 +22,7 @@ import {
 } from "@/components/ui/select"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { Label } from "@/components/ui/label"
+import { cn } from "@/lib/utils"
 
 interface TenantConfigurationProps {
   tenant: Tenant | null;
@@ -69,11 +71,11 @@ export function TenantConfiguration({ tenant, isOpen, onClose, onSave }: TenantC
                     key={tab}
                     variant={activeTab === tab ? "default" : "ghost"}
                     onClick={() => setActiveTab(tab)}
-                    className={React.useMemo(() => {
-                      return activeTab === tab 
+                    className={cn(
+                      activeTab === tab 
                         ? "bg-white text-slate-900 border border-slate-200 shadow-sm hover:bg-white" 
                         : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
-                    }, [activeTab, tab])}
+                    )}
                     size="sm"
                   >
                     {tab}
