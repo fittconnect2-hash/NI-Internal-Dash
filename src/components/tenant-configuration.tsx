@@ -317,8 +317,37 @@ export function TenantConfiguration({ tenant, isOpen, onClose, onSave }: TenantC
                   </div>
                 </div>
               )}
+
+              {activeTab === "Fees" && (
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-slate-700">Delivery Fee Commission Rate (%) <span className="text-red-500">*</span></Label>
+                    <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-slate-700">Delivery Fee Commission Cap</Label>
+                    <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-slate-700">Payment Processing Fee Rate (%)</Label>
+                    <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-slate-700">Payment Processing Flat Fee</Label>
+                    <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-slate-700">Reservation Fee Rate (%)</Label>
+                    <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-slate-700">Reservation Flat Fee</Label>
+                    <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
+                  </div>
+                </div>
+              )}
               
-              {!["Currency", "Commission", "Tips", "Contract", "Payouts"].includes(activeTab) && (
+              {!["Currency", "Commission", "Tips", "Contract", "Payouts", "Fees"].includes(activeTab) && (
                 <div className="py-20 text-center space-y-2">
                   <h4 className="font-bold text-slate-900">{activeTab} Settings</h4>
                   <p className="text-sm text-slate-500">Configuration options for {activeTab.toLowerCase()} will appear here.</p>
