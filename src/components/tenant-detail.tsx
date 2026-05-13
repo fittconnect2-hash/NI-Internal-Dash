@@ -24,7 +24,8 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
   if (!tenant) return null
 
   const initials = tenant.tenantName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
-  const signupDate = tenant.lastLoginDate || "May 13, 2026" // Using mock date from image if missing
+  const signupDate = tenant.lastLoginDate || "May 13, 2026"
+  const isPending = tenant.configurationStatus === "Configuration pending"
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -32,16 +33,23 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
         <div className="flex flex-col h-full">
           <SheetHeader className="p-6 bg-white border-b border-slate-200 relative">
             <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-medium text-lg shrink-0">
+              <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-medium text-lg shrink-0 relative">
                 {initials}
+                <div className={cn(
+                  "absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white",
+                  isPending ? "bg-amber-400" : "bg-green-500"
+                )} />
               </div>
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
                   <SheetTitle className="text-2xl font-bold text-slate-900 leading-tight">
                     {tenant.tenantName}
                   </SheetTitle>
-                  <Badge className="bg-[#22c55e] hover:bg-[#22c55e] text-white border-none px-2.5 py-0.5 rounded-full text-[11px] font-semibold">
-                    Active
+                  <Badge className={cn(
+                    "border-none px-2.5 py-0.5 rounded-full text-[11px] font-semibold",
+                    isPending ? "bg-amber-100 text-amber-700" : "bg-[#22c55e] text-white"
+                  )}>
+                    {isPending ? "Pending" : "Active"}
                   </Badge>
                 </div>
                 <p className="text-sm text-slate-500">Tenant since {signupDate}</p>
@@ -69,7 +77,6 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
 
             <div className="flex-1 overflow-y-auto p-6">
               <TabsContent value="overview" className="m-0 space-y-6">
-                {/* Contact Information Card */}
                 <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
                   <div className="flex items-center gap-2 mb-6">
                     <div className="h-5 w-5 rounded bg-slate-50 border border-slate-100 flex items-center justify-center">
@@ -108,7 +115,6 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                   </div>
                 </div>
 
-                {/* Configuration Card */}
                 <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
                   <div className="flex items-center gap-2 mb-6">
                     <div className="h-5 w-5 rounded bg-slate-50 border border-slate-100 flex items-center justify-center">

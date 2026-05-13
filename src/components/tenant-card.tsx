@@ -59,6 +59,13 @@ export function TenantCard({ tenant, viewMode, onEdit, onViewOutlets, onView, on
     </DropdownMenu>
   )
 
+  const StatusDot = () => (
+    <div className={cn(
+      "absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white",
+      isPending ? "bg-amber-400" : "bg-green-500"
+    )} />
+  )
+
   if (viewMode === 'list') {
     return (
       <Card 
@@ -66,8 +73,9 @@ export function TenantCard({ tenant, viewMode, onEdit, onViewOutlets, onView, on
         onClick={() => onViewOutlets(tenant)}
       >
         <CardContent className="flex items-center p-4 gap-4">
-          <div className="h-10 w-10 rounded bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-sm shrink-0">
+          <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-sm shrink-0 relative">
             {initials}
+            <StatusDot />
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-sm text-slate-900 truncate">{tenant.tenantName}</h3>
@@ -110,8 +118,9 @@ export function TenantCard({ tenant, viewMode, onEdit, onViewOutlets, onView, on
     >
       <CardContent className="p-5 flex flex-col h-full">
         <div className="flex justify-between items-start mb-4">
-          <div className="h-12 w-12 rounded bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 font-bold text-lg">
+          <div className="h-12 w-12 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 font-bold text-lg relative">
             {initials}
+            <StatusDot />
           </div>
           <div className="flex items-center gap-2">
             <Badge className={cn("rounded px-2 py-0.5 text-[10px] font-bold uppercase", isPending ? "bg-amber-100 text-amber-700 border-amber-200" : "bg-green-100 text-green-700 border-green-200")}>
