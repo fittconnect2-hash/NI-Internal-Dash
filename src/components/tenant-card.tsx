@@ -11,6 +11,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 
@@ -40,21 +41,26 @@ export function TenantCard({ tenant, viewMode, onEdit, onViewOutlets, onView, on
           <MoreVertical className="h-4 w-4 text-slate-400" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
-        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onView(tenant); }}>
-          <Eye className="mr-2 h-4 w-4" /> View Detail
+      <DropdownMenuContent align="end" className="w-52 p-2">
+        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onView(tenant); }} className="py-2.5">
+          <Eye className="mr-3 h-4 w-4 text-slate-600" /> 
+          <span className="font-medium">View Detail</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEdit(tenant); }}>
-          <Edit2 className="mr-2 h-4 w-4" /> Edit Profile
+        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEdit(tenant); }} className="py-2.5">
+          <Edit2 className="mr-3 h-4 w-4 text-slate-600" /> 
+          <span className="font-medium">Edit Profile</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onConfigure(tenant); }}>
-          <Settings2 className="mr-2 h-4 w-4" /> Configure
+        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onConfigure(tenant); }} className="py-2.5">
+          <Settings2 className="mr-3 h-4 w-4 text-slate-600" /> 
+          <span className="font-medium">Configure</span>
         </DropdownMenuItem>
+        <DropdownMenuSeparator className="my-1" />
         <DropdownMenuItem 
-          className="text-destructive focus:text-destructive" 
+          className="text-destructive focus:text-destructive py-2.5" 
           onClick={(e) => { e.stopPropagation(); onDelete(tenant.id); }}
         >
-          <Trash2 className="mr-2 h-4 w-4" /> Delete
+          <Trash2 className="mr-3 h-4 w-4" /> 
+          <span className="font-medium">Delete</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
