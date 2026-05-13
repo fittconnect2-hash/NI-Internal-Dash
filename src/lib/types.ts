@@ -1,9 +1,17 @@
 export interface Tenant {
   id: string;
-  tenantName: string;
-  configurationStatus: 'Active' | 'Inactive' | 'Configuration pending';
+  tenantName: string; // Business Name
+  contactName: string;
   contactEmail: string;
   contactPhone: string;
+  businessType: string;
+  country: string;
+  state: string;
+  city: string;
+  zipCode: string;
+  addressLine1: string;
+  addressLine2?: string;
+  configurationStatus: 'Active' | 'Inactive' | 'Configuration pending';
   lastLoginDate?: string;
   isPaymentGatewayConfigured: boolean;
   numberOfOutlets: number;

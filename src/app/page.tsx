@@ -56,6 +56,10 @@ export default function DashboardPage() {
       const newTenant: Tenant = {
         ...data,
         id: Math.random().toString(36).substr(2, 9),
+        configurationStatus: 'Configuration pending',
+        isPaymentGatewayConfigured: false,
+        numberOfOutlets: 0,
+        numberOfUsers: 0,
       } as Tenant
       setTenants(prev => [newTenant, ...prev])
     }
@@ -165,7 +169,10 @@ export default function DashboardPage() {
                 key={tenant.id} 
                 tenant={tenant} 
                 viewMode={viewMode} 
-                onEdit={setEditingTenant}
+                onEdit={(t) => {
+                  setEditingTenant(t)
+                  setIsFormOpen(true)
+                }}
                 onViewOutlets={() => handleTenantClick(tenant)}
               />
             ))}
@@ -187,7 +194,12 @@ export default function DashboardPage() {
           {renderContent()}
         </main>
       </div>
-      <TenantForm isOpen={isFormOpen || !!editingTenant} onClose={() => {setIsFormOpen(false); setEditingTenant(null)}} tenant={editingTenant} onSubmit={handleAddTenant} />
+      <TenantForm 
+        isOpen={isFormOpen} 
+        onClose={() => {setIsFormOpen(false); setEditingTenant(null)}} 
+        tenant={editingTenant} 
+        onSubmit={handleAddTenant} 
+      />
     </SidebarProvider>
   )
 }

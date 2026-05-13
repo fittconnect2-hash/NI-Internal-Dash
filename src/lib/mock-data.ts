@@ -4,9 +4,16 @@ export const initialTenants: Tenant[] = [
   {
     id: '1',
     tenantName: 'Grand Hyatt Dining',
+    contactName: 'Jane Doe',
+    businessType: 'Hotel',
+    country: 'UAE',
+    state: 'Dubai',
+    city: 'Dubai',
+    zipCode: '00000',
+    addressLine1: 'Sheikh Zayed Rd',
     configurationStatus: 'Active',
     contactEmail: 'admin@grandhyatt.com',
-    contactPhone: '+1 (555) 123-4567',
+    contactPhone: '+971 50 123 4567',
     lastLoginDate: '2024-05-15',
     isPaymentGatewayConfigured: true,
     numberOfOutlets: 2,
@@ -17,26 +24,20 @@ export const initialTenants: Tenant[] = [
   {
     id: '2',
     tenantName: 'QuickBite Express',
+    contactName: 'John Smith',
+    businessType: 'Fast Food',
+    country: 'USA',
+    state: 'New York',
+    city: 'New York',
+    zipCode: '10001',
+    addressLine1: '5th Ave',
     configurationStatus: 'Configuration pending',
     contactEmail: 'setup@quickbite.io',
-    contactPhone: '+1 (555) 987-6543',
+    contactPhone: '+1 555 987 6543',
     isPaymentGatewayConfigured: false,
     numberOfOutlets: 1,
     numberOfUsers: 3,
     imageUrl: 'https://picsum.photos/seed/21/200/200',
-  },
-  {
-    id: '3',
-    tenantName: 'Seaside Brasserie',
-    configurationStatus: 'Active',
-    contactEmail: 'hello@seaside.com',
-    contactPhone: '+44 20 7123 4567',
-    lastLoginDate: '2024-05-20',
-    isPaymentGatewayConfigured: true,
-    numberOfOutlets: 1,
-    numberOfUsers: 5,
-    merchantId: 'M-00212',
-    imageUrl: 'https://picsum.photos/seed/33/200/200',
   }
 ];
 
@@ -64,18 +65,6 @@ export const initialOutlets: Outlet[] = [
     country: 'UAE',
     status: 'Active',
     userCount: 4
-  },
-  {
-    id: 'o3',
-    tenantId: '2',
-    name: 'QuickBite Downtown',
-    slug: 'qb-downtown',
-    phone: '+15551234567',
-    timezone: 'America/New_York',
-    city: 'New York',
-    country: 'USA',
-    status: 'Active',
-    userCount: 3
   }
 ];
 
@@ -89,25 +78,5 @@ export const initialUsers: User[] = [
     role: 'Admin',
     status: 'Active',
     lastActive: '2024-05-21 14:30'
-  },
-  {
-    id: 'u2',
-    tenantId: '1',
-    outletId: 'o1',
-    fullName: 'Sarah Smith',
-    email: 'sarah@grandhyatt.com',
-    role: 'Manager',
-    status: 'Active',
-    lastActive: '2024-05-21 09:15'
-  },
-  {
-    id: 'u3',
-    tenantId: '1',
-    outletId: 'o2',
-    fullName: 'Mike Ross',
-    email: 'mike@grandhyatt.com',
-    role: 'Staff',
-    status: 'Active',
-    lastActive: '2024-05-20 18:45'
   }
 ];
