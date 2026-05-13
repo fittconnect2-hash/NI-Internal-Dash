@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -15,7 +16,12 @@ import {
   Plus,
   X,
   Trash2,
-  PlusCircle
+  PlusCircle,
+  Edit2,
+  PauseCircle,
+  Mail,
+  Phone,
+  User as UserIcon
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -52,6 +58,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 
 interface UserManagementProps {
@@ -61,12 +68,14 @@ interface UserManagementProps {
 }
 
 export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps) {
-  const [users] = React.useState<User[]>(initialUsers)
+  const [users, setUsers] = React.useState<User[]>(initialUsers)
   const [userFilter, setUserFilter] = React.useState("")
   const [statusFilter, setStatusFilter] = React.useState<string | null>(null)
   const [roleFilter, setRoleFilter] = React.useState<string | null>(null)
   const [outletFilter, setOutletFilter] = React.useState<string | null>(null)
+  
   const [isAddingNew, setIsAddingNew] = React.useState(false)
+  const [editingUser, setEditingUser] = React.useState<User | null>(null)
 
   // Filter outlets by current tenant
   const tenantOutlets = React.useMemo(() => {
@@ -78,6 +87,24 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
     setStatusFilter(null)
     setRoleFilter(null)
     setOutletFilter(null)
+  }
+
+  const handleEditUser = (user: User) => {
+    setEditingUser(user)
+    setIsAddingNew(true)
+  }
+
+  const handleAddNewUser = () => {
+    setEditingUser(null)
+    setIsAddingNew(true)
+  }
+
+  const handleSuspendUser = (userId: string) => {
+    setUsers(prev => prev.map(u => u.id === userId ? { ...u, status: 'Inactive' } : u))
+  }
+
+  const handleDeleteUser = (userId: string) => {
+    setUsers(prev => prev.filter(u => u.id !== userId))
   }
 
   const filteredUsers = users.filter(u => {
@@ -100,6 +127,7 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
     <Sheet open={isOpen} onOpenChange={(open) => {
       if (!open) {
         setIsAddingNew(false)
+        setEditingUser(null)
         onClose()
       }
     }}>
@@ -109,7 +137,7 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
               <button 
-                onClick={isAddingNew ? () => setIsAddingNew(false) : onClose}
+                onClick={isAddingNew ? () => { setIsAddingNew(false); setEditingUser(null); } : onClose}
                 className="p-2 hover:bg-slate-50 rounded-lg transition-colors group"
               >
                 <ArrowLeft className="h-5 w-5 text-slate-400 group-hover:text-slate-900" />
@@ -123,18 +151,18 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
                   <span className="text-slate-400">Users</span>
                 </div>
                 <SheetTitle className="text-2xl font-black text-[#1e293b] tracking-tight">
-                  {isAddingNew ? "Add New Staff Member" : "User Management"}
+                  {editingUser ? `Edit ${editingUser.fullName}` : isAddingNew ? "Add New Staff Member" : "User Management"}
                 </SheetTitle>
                 {isAddingNew && (
                   <SheetDescription className="text-xs text-slate-500 font-medium">
-                    Enter the details for the new user. They will receive an email to set their password.
+                    {editingUser ? `Update permissions and profile for ${editingUser.fullName}.` : "Enter the details for the new user. They will receive an email to set their password."}
                   </SheetDescription>
                 )}
               </div>
             </div>
             {!isAddingNew && (
               <Button 
-                onClick={() => setIsAddingNew(true)}
+                onClick={handleAddNewUser}
                 className="h-10 px-6 font-black bg-[#1a73e8] hover:bg-[#1557b0] shadow-lg shadow-[#1a73e8]/20"
               >
                 <Plus className="h-4 w-4 mr-2" /> New User
@@ -295,10 +323,17 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
                                   <MoreHorizontal className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-48">
-                                <DropdownMenuItem className="font-medium">Modify Permissions</DropdownMenuItem>
-                                <DropdownMenuItem className="font-medium">Transfer Account</DropdownMenuItem>
-                                <DropdownMenuItem className="text-destructive font-bold">Revoke Access</DropdownMenuItem>
+                              <DropdownMenuContent align="end" className="w-48 p-2">
+                                <DropdownMenuItem className="font-bold py-2.5" onClick={() => handleEditUser(user)}>
+                                  <Edit2 className="h-4 w-4 mr-3 text-slate-400" /> Edit Profile
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="font-bold py-2.5" onClick={() => handleSuspendUser(user.id)}>
+                                  <PauseCircle className="h-4 w-4 mr-3 text-slate-400" /> Suspend Access
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator className="my-1" />
+                                <DropdownMenuItem className="text-destructive font-black py-2.5" onClick={() => handleDeleteUser(user.id)}>
+                                  <Trash2 className="h-4 w-4 mr-3" /> Delete User
+                                </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </TableCell>
@@ -332,24 +367,37 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
 
                       <div className="space-y-6">
                         <div className="space-y-2">
-                          <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Username <span className="text-red-500">*</span></Label>
-                          <Input placeholder="Enter username" className="h-12 border-slate-200 bg-slate-50/30 focus-visible:bg-white focus-visible:ring-1 ring-[#1a73e8]/20 transition-all font-bold" />
+                          <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Full Name <span className="text-red-500">*</span></Label>
+                          <Input 
+                            defaultValue={editingUser?.fullName || ""} 
+                            placeholder="Enter full name" 
+                            className="h-12 border-slate-200 bg-slate-50/30 focus-visible:bg-white focus-visible:ring-1 ring-[#1a73e8]/20 transition-all font-bold" 
+                          />
                         </div>
 
                         <div className="space-y-2">
                           <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email Address</Label>
-                          <Input type="email" placeholder="Enter email address" className="h-12 border-slate-200 bg-slate-50/30 font-medium" />
+                          <Input 
+                            type="email" 
+                            defaultValue={editingUser?.email || ""} 
+                            placeholder="Enter email address" 
+                            className="h-12 border-slate-200 bg-slate-50/30 font-medium" 
+                          />
                         </div>
 
-                        <div className="space-y-2">
-                          <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Password <span className="text-red-500">*</span></Label>
-                          <Input type="password" placeholder="Enter password" className="h-12 border-slate-200 bg-slate-50/30" />
-                        </div>
+                        {!editingUser && (
+                          <>
+                            <div className="space-y-2">
+                              <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Password <span className="text-red-500">*</span></Label>
+                              <Input type="password" placeholder="Enter password" className="h-12 border-slate-200 bg-slate-50/30" />
+                            </div>
 
-                        <div className="space-y-2">
-                          <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Confirm Password <span className="text-red-500">*</span></Label>
-                          <Input type="password" placeholder="Confirm password" className="h-12 border-slate-200 bg-slate-50/30" />
-                        </div>
+                            <div className="space-y-2">
+                              <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Confirm Password <span className="text-red-500">*</span></Label>
+                              <Input type="password" placeholder="Confirm password" className="h-12 border-slate-200 bg-slate-50/30" />
+                            </div>
+                          </>
+                        )}
 
                         <div className="space-y-2">
                           <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Phone Number <span className="text-red-500">*</span></Label>
@@ -370,7 +418,7 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
 
                         <div className="space-y-2">
                           <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Role <span className="text-red-500">*</span></Label>
-                          <Select defaultValue="Staff">
+                          <Select defaultValue={editingUser?.role || "Staff"}>
                             <SelectTrigger className="h-12 border-slate-200 bg-slate-50/30 font-bold">
                               <SelectValue placeholder="Select role" />
                             </SelectTrigger>
@@ -410,11 +458,23 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            <TableRow className="border-b-0">
-                              <TableCell colSpan={3} className="py-20 text-center">
-                                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">No assignments yet</p>
-                              </TableCell>
-                            </TableRow>
+                            {editingUser?.outletId ? (
+                              <TableRow className="border-b-0">
+                                <TableCell className="px-4 py-4 text-xs font-bold text-slate-900">{getOutletName(editingUser.outletId)}</TableCell>
+                                <TableCell className="px-4 py-4 text-xs font-medium text-slate-500">{editingUser.role}</TableCell>
+                                <TableCell className="px-4 py-4 text-right">
+                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive">
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            ) : (
+                              <TableRow className="border-b-0">
+                                <TableCell colSpan={3} className="py-20 text-center">
+                                  <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">No assignments yet</p>
+                                </TableCell>
+                              </TableRow>
+                            )}
                           </TableBody>
                         </Table>
                       </div>
@@ -427,15 +487,15 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
                   <Button 
                     variant="outline" 
                     className="h-12 px-8 font-black text-slate-500 border-slate-200 hover:bg-white active:scale-95 transition-all"
-                    onClick={() => setIsAddingNew(false)}
+                    onClick={() => { setIsAddingNew(false); setEditingUser(null); }}
                   >
                     Cancel
                   </Button>
                   <Button 
                     className="h-12 px-10 font-black bg-[#1a73e8] hover:bg-[#1557b0] text-white border-none shadow-lg shadow-[#1a73e8]/20 active:scale-95 transition-all"
-                    onClick={() => setIsAddingNew(false)}
+                    onClick={() => { setIsAddingNew(false); setEditingUser(null); }}
                   >
-                    Add User
+                    {editingUser ? "Save Changes" : "Add User"}
                   </Button>
                 </div>
               </div>
