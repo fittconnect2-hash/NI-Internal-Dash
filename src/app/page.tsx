@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -276,7 +277,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <SidebarProvider>
+    <SidebarProvider style={{ "--sidebar-width": "5rem" } as React.CSSProperties}>
       <div className="flex min-h-screen w-full bg-background overflow-hidden">
         <DashboardSidebar activeTab={activeTab} onTabChange={(tab) => {
           setActiveTab(tab)
