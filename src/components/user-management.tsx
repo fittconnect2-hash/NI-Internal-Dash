@@ -94,10 +94,10 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
                 <ChevronRight className="h-2.5 w-2.5 opacity-50" />
                 <span className="text-slate-900">{tenant?.tenantName || "Global Management"}</span>
                 <ChevronRight className="h-2.5 w-2.5 opacity-50" />
-                <span className="text-slate-400">Personnel</span>
+                <span className="text-slate-400">Users</span>
               </div>
               <SheetTitle className="text-2xl font-extrabold text-[#1e293b] tracking-tight">
-                Personnel Management
+                User Management
               </SheetTitle>
             </div>
           </div>
@@ -109,7 +109,7 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm mb-6 p-5">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
               <div className="space-y-2.5">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Search Personnel</label>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Search Users</label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
                   <Input 
@@ -169,7 +169,7 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
                 <TableHeader className="bg-slate-50/50">
                   <TableRow className="hover:bg-transparent border-b border-slate-100">
                     <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-8 uppercase tracking-widest">
-                      <div className="flex items-center gap-1.5 cursor-pointer hover:text-slate-900 transition-colors">Personnel <ChevronsUpDown className="h-3 w-3 opacity-50" /></div>
+                      <div className="flex items-center gap-1.5 cursor-pointer hover:text-slate-900 transition-colors">User <ChevronsUpDown className="h-3 w-3 opacity-50" /></div>
                     </TableHead>
                     <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">
                       Contact Details
@@ -245,7 +245,7 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
                   <div className="h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100">
                     <UsersIcon className="h-8 w-8 text-slate-200" />
                   </div>
-                  <h3 className="text-sm font-extrabold text-slate-900">No Personnel Found</h3>
+                  <h3 className="text-sm font-extrabold text-slate-900">No Users Found</h3>
                   <p className="text-xs text-slate-500 mt-1">Adjust your filters or invite new team members.</p>
                 </div>
               )}
