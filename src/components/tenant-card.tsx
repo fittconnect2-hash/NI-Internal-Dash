@@ -1,3 +1,4 @@
+
 "use client"
 
 import { Tenant } from "@/lib/types"
@@ -61,7 +62,7 @@ export function TenantCard({ tenant, viewMode, onEdit, onViewOutlets, onView, on
 
   const StatusDot = () => (
     <div className={cn(
-      "absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white",
+      "absolute bottom-0.5 right-0.5 h-3.5 w-3.5 rounded-full border-2 border-white shadow-sm",
       isPending ? "bg-amber-400" : "bg-green-500"
     )} />
   )
@@ -73,7 +74,7 @@ export function TenantCard({ tenant, viewMode, onEdit, onViewOutlets, onView, on
         onClick={() => onViewOutlets(tenant)}
       >
         <CardContent className="flex items-center p-4 gap-4">
-          <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-sm shrink-0 relative">
+          <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-sm shrink-0 relative">
             {initials}
             <StatusDot />
           </div>
@@ -101,7 +102,7 @@ export function TenantCard({ tenant, viewMode, onEdit, onViewOutlets, onView, on
           </div>
 
           <div className="flex items-center gap-4">
-            <Badge className={cn("rounded px-2 py-0.5 text-[10px] font-bold uppercase", isPending ? "bg-amber-100 text-amber-700 border-amber-200" : "bg-green-100 text-green-700 border-green-200")}>
+            <Badge className={cn("rounded px-2 py-0.5 text-[10px] font-bold uppercase border-none", isPending ? "bg-amber-100 text-amber-700" : "bg-green-100 text-green-700")}>
               {tenant.configurationStatus === "Configuration pending" ? "Pending" : "Active"}
             </Badge>
             <ActionsMenu />
@@ -118,12 +119,12 @@ export function TenantCard({ tenant, viewMode, onEdit, onViewOutlets, onView, on
     >
       <CardContent className="p-5 flex flex-col h-full">
         <div className="flex justify-between items-start mb-4">
-          <div className="h-12 w-12 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 font-bold text-lg relative">
+          <div className="h-14 w-14 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 font-bold text-lg relative">
             {initials}
             <StatusDot />
           </div>
           <div className="flex items-center gap-2">
-            <Badge className={cn("rounded px-2 py-0.5 text-[10px] font-bold uppercase", isPending ? "bg-amber-100 text-amber-700 border-amber-200" : "bg-green-100 text-green-700 border-green-200")}>
+            <Badge className={cn("rounded px-2 py-0.5 text-[10px] font-bold uppercase border-none", isPending ? "bg-amber-100 text-amber-700" : "bg-green-100 text-green-700")}>
               {tenant.configurationStatus === "Configuration pending" ? "Pending" : "Active"}
             </Badge>
             <ActionsMenu />
