@@ -13,6 +13,12 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 interface TenantCardProps {
   tenant: Tenant;
@@ -82,21 +88,30 @@ export function TenantCard({
     )} />
   )
 
-  const CountBox = ({ label, count, icon: Icon, onClick }: { label: string, count: number, icon: any, onClick: (e: React.MouseEvent) => void }) => (
-    <div 
-      className="flex-1 p-3 bg-slate-50/50 rounded-xl border border-slate-100 flex flex-col items-center justify-center transition-all duration-300 hover:bg-white hover:border-[#1a73e8]/30 hover:shadow-md cursor-pointer group/count"
-      onClick={onClick}
-    >
-      <div className="flex items-center gap-2 mb-2">
-        <Icon className="h-3 w-3 text-slate-400 group-hover/count:text-[#1a73e8] transition-colors" />
-        <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest group-hover/count:text-[#1a73e8] transition-colors">
-          {label}
-        </span>
-      </div>
-      <span className="text-xl font-extrabold text-[#1e293b] group-hover/count:scale-110 transition-transform">
-        {count}
-      </span>
-    </div>
+  const CountBox = ({ label, count, icon: Icon, onClick, tooltip }: { label: string, count: number, icon: any, onClick: (e: React.MouseEvent) => void, tooltip: string }) => (
+    <TooltipProvider delayDuration={300}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div 
+            className="flex-1 p-3 bg-slate-50/50 rounded-xl border border-slate-100 flex flex-col items-center justify-center transition-all duration-300 hover:bg-white hover:border-[#1a73e8]/30 hover:shadow-md cursor-pointer group/count"
+            onClick={onClick}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <Icon className="h-3 w-3 text-slate-400 group-hover/count:text-[#1a73e8] transition-colors" />
+              <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest group-hover/count:text-[#1a73e8] transition-colors">
+                {label}
+              </span>
+            </div>
+            <span className="text-xl font-extrabold text-[#1e293b] group-hover/count:scale-110 transition-transform">
+              {count}
+            </span>
+          </div>
+        </TooltipTrigger>
+        <TooltipContent className="bg-slate-900 text-slate-50 border-none px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider">
+          {tooltip}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   )
 
   if (viewMode === 'list') {
@@ -127,12 +142,14 @@ export function TenantCard({
               label="Outlets" 
               count={tenant.numberOfOutlets} 
               icon={Store}
+              tooltip="Review and organize branch locations for this brand"
               onClick={(e) => { e.stopPropagation(); onOutletsClick(tenant); }} 
             />
             <CountBox 
               label="Users" 
               count={tenant.numberOfUsers} 
               icon={Users}
+              tooltip="Manage administrative access and team personnel"
               onClick={(e) => { e.stopPropagation(); onUsersClick(tenant); }} 
             />
           </div>
@@ -198,12 +215,14 @@ export function TenantCard({
             label="Outlets" 
             count={tenant.numberOfOutlets} 
             icon={Store}
+            tooltip="Review and organize branch locations for this brand"
             onClick={(e) => { e.stopPropagation(); onOutletsClick(tenant); }} 
           />
           <CountBox 
             label="Users" 
             count={tenant.numberOfUsers} 
             icon={Users}
+            tooltip="Manage administrative access and team personnel"
             onClick={(e) => { e.stopPropagation(); onUsersClick(tenant); }} 
           />
         </div>
