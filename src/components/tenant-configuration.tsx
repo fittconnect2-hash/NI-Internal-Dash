@@ -375,20 +375,17 @@ export function TenantConfiguration({ tenant, isOpen, onClose, onSave }: TenantC
               {activeTab === "Small Order" && (
                 <div className="space-y-6">
                   <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-slate-700">Small Order Threshold</Label>
+                    <Label className="text-sm font-semibold text-slate-700">Minimum Order Amount</Label>
                     <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
                   </div>
                   <div className="space-y-2">
                     <Label className="text-sm font-semibold text-slate-700">Small Order Fee</Label>
                     <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
                   </div>
-                </div>
-              )}
-              
-              {!configTabs.includes(activeTab) && (
-                <div className="py-20 text-center space-y-2">
-                  <h4 className="font-bold text-slate-900">{activeTab} Settings</h4>
-                  <p className="text-sm text-slate-500">Configuration options for {activeTab.toLowerCase()} will appear here.</p>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-slate-700">Small Order Threshold</Label>
+                    <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
+                  </div>
                 </div>
               )}
             </div>
