@@ -169,7 +169,7 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
               <div className="relative flex-1 max-w-sm">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input 
-                  placeholder="Search outlets..." 
+                  placeholder="Nihal" 
                   className="pl-10 h-11 text-sm bg-white border-slate-200"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -177,10 +177,10 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
               </div>
               <Select onValueChange={(v) => setStatusFilter(v === 'all' ? null : v)}>
                 <SelectTrigger className="w-56 h-11 bg-white border-slate-200">
-                  <SelectValue placeholder="Filter Status" />
+                  <SelectValue placeholder="Select Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Filter Status</SelectItem>
+                  <SelectItem value="all">Select Status</SelectItem>
                   <SelectItem value="Active">Active</SelectItem>
                   <SelectItem value="Inactive">Inactive</SelectItem>
                 </SelectContent>
@@ -191,19 +191,25 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
               <Table>
                 <TableHeader className="bg-white">
                   <TableRow className="bg-white hover:bg-white border-b border-slate-100">
-                    <TableHead className="text-[10px] font-bold text-slate-400 uppercase tracking-widest h-14 px-8">
-                      <div className="flex items-center gap-1">Outlet Profile <ChevronsUpDown className="h-3 w-3" /></div>
+                    <TableHead className="text-[12px] font-medium text-slate-400 h-14 px-8">
+                      <div className="flex items-center gap-1">Name <ChevronsUpDown className="h-3 w-3" /></div>
                     </TableHead>
-                    <TableHead className="text-[10px] font-bold text-slate-400 uppercase tracking-widest h-14 px-4">
-                      <div className="flex items-center gap-1">Contact <ChevronsUpDown className="h-3 w-3" /></div>
+                    <TableHead className="text-[12px] font-medium text-slate-400 h-14 px-4">
+                      Phone
                     </TableHead>
-                    <TableHead className="text-[10px] font-bold text-slate-400 uppercase tracking-widest h-14 px-4">
-                      <div className="flex items-center gap-1">Location <ChevronsUpDown className="h-3 w-3" /></div>
+                    <TableHead className="text-[12px] font-medium text-slate-400 h-14 px-4">
+                      <div className="flex items-center gap-1">Timezone <ChevronsUpDown className="h-3 w-3" /></div>
                     </TableHead>
-                    <TableHead className="text-[10px] font-bold text-slate-400 uppercase tracking-widest h-14 px-4 text-center">
+                    <TableHead className="text-[12px] font-medium text-slate-400 h-14 px-4">
+                      <div className="flex items-center gap-1">City <ChevronsUpDown className="h-3 w-3" /></div>
+                    </TableHead>
+                    <TableHead className="text-[12px] font-medium text-slate-400 h-14 px-4">
+                      <div className="flex items-center gap-1">Country <ChevronsUpDown className="h-3 w-3" /></div>
+                    </TableHead>
+                    <TableHead className="text-[12px] font-medium text-slate-400 h-14 px-4">
                       <div className="flex items-center justify-center gap-1">Status <ChevronsUpDown className="h-3 w-3" /></div>
                     </TableHead>
-                    <TableHead className="text-[10px] font-bold text-slate-400 uppercase tracking-widest h-14 px-8 text-right">Actions</TableHead>
+                    <TableHead className="text-[12px] font-medium text-slate-400 h-14 px-8 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -214,21 +220,25 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                       onClick={() => onViewUsers(outlet)}
                     >
                       <TableCell className="py-5 px-8">
-                        <div className="font-bold text-[15px] text-[#1e293b] border-b-2 border-[#1e293b] inline-block leading-tight mb-1">{outlet.name}</div>
-                        <div className="text-[11px] text-slate-400 font-medium tracking-wide">/{outlet.slug}</div>
+                        <div className="font-bold text-[15px] text-[#1e293b] border-b border-[#1e293b] inline-block leading-tight mb-1">{outlet.name}</div>
+                        <div className="text-[11px] text-slate-400 font-medium tracking-wide">{outlet.slug}</div>
                       </TableCell>
-                      <TableCell className="px-4">
-                        <div className="text-[13px] font-bold text-slate-700">{outlet.phone}</div>
-                        <div className="text-[11px] text-slate-400">{outlet.timezone}</div>
+                      <TableCell className="px-4 text-[14px] text-[#1e293b]">
+                        {outlet.phone}
                       </TableCell>
-                      <TableCell className="px-4">
-                        <div className="text-[13px] font-bold text-[#1e293b]">{outlet.city}</div>
-                        <div className="text-[11px] text-slate-400">{outlet.country}</div>
+                      <TableCell className="px-4 text-[14px] text-[#1e293b]">
+                        {outlet.timezone}
+                      </TableCell>
+                      <TableCell className="px-4 text-[14px] text-[#1e293b]">
+                        {outlet.city}
+                      </TableCell>
+                      <TableCell className="px-4 text-[14px] text-[#1e293b]">
+                        {outlet.country}
                       </TableCell>
                       <TableCell className="text-center px-4">
                         <div className="flex justify-center">
                           <Badge className={cn(
-                            "rounded-full px-3 py-1 text-[10px] font-bold flex items-center gap-2 border-none shadow-none uppercase tracking-wider",
+                            "rounded-full px-3 py-1 text-[11px] font-medium flex items-center gap-2 border border-[#e1f9ef] shadow-none capitalize",
                             outlet.status === 'Active' 
                               ? "bg-[#e1f9ef] text-[#22c55e]" 
                               : "bg-slate-100 text-slate-500"
