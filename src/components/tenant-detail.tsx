@@ -1,7 +1,18 @@
 "use client"
 
 import * as React from "react"
-import { X, Mail, Phone, Building2, User, MapPin, Settings } from "lucide-react"
+import { 
+  X, 
+  Mail, 
+  Phone, 
+  Building2, 
+  User, 
+  MapPin, 
+  Settings, 
+  UserPlus, 
+  MoreVertical,
+  CheckCircle2
+} from "lucide-react"
 import { Tenant } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import {
@@ -13,6 +24,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 interface TenantDetailProps {
   tenant: Tenant | null;
@@ -26,6 +38,18 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
   const initials = tenant.tenantName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
   const signupDate = tenant.lastLoginDate || "May 13, 2026"
   const isPending = tenant.configurationStatus === "Configuration pending"
+
+  // Mock admin data for the detail view
+  const mockAdmins = [
+    {
+      id: "a1",
+      name: "Leoe Dase",
+      username: "@risiidhan@kptac.com",
+      email: "risiidhan@kptac.com",
+      phone: "+971544571754",
+      status: "Active"
+    }
+  ]
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -131,10 +155,65 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                 </div>
               </TabsContent>
 
-              <TabsContent value="admins" className="m-0">
-                <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm text-center py-20">
-                  <User className="h-10 w-10 text-slate-200 mx-auto mb-3" />
-                  <p className="text-sm text-slate-500 font-medium">No tenant admins assigned.</p>
+              <TabsContent value="admins" className="m-0 space-y-4">
+                <div className="flex justify-end pt-2">
+                  <Button size="sm" className="bg-[#1a73e8] hover:bg-[#1557b0] text-white gap-2 h-10 px-4 font-bold rounded-lg shadow-sm">
+                    <UserPlus className="h-4 w-4" />
+                    Add Admin
+                  </Button>
+                </div>
+
+                <div className="space-y-4 pt-2">
+                  {mockAdmins.map((admin) => (
+                    <div 
+                      key={admin.id} 
+                      className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm"
+                    >
+                      {/* Top Bar with Profile */}
+                      <div className="p-6 flex items-start justify-between border-b border-slate-50">
+                        <div className="flex items-center gap-4">
+                          <Avatar className="h-12 w-12 border border-slate-100">
+                            <AvatarFallback className="bg-slate-50 text-slate-500 font-bold">
+                              {admin.name.split(' ').map(n => n[0]).join('')}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex flex-col">
+                            <span className="font-bold text-slate-900 text-lg">{admin.name}</span>
+                            <span className="text-xs text-slate-400 font-medium tracking-tight mt-0.5">{admin.username}</span>
+                          </div>
+                        </div>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 rounded-full">
+                          <MoreVertical className="h-5 w-5" />
+                        </Button>
+                      </div>
+
+                      {/* Middle section: Contact Details */}
+                      <div className="px-6 py-4 space-y-3 border-b border-slate-50">
+                        <div className="flex items-center gap-3 text-slate-500">
+                          <Mail className="h-4 w-4 opacity-70" />
+                          <span className="text-sm font-medium">{admin.email}</span>
+                        </div>
+                        <div className="flex items-center gap-3 text-slate-500">
+                          <Phone className="h-4 w-4 opacity-70" />
+                          <span className="text-sm font-medium">{admin.phone}</span>
+                        </div>
+                      </div>
+
+                      {/* Bottom Bar: Status */}
+                      <div className="px-6 py-4 flex justify-end bg-slate-50/30">
+                        <Badge className="bg-[#22c55e] hover:bg-[#22c55e] text-white border-none px-4 py-1.5 rounded-full text-[11px] font-bold shadow-sm">
+                          {admin.status}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+
+                  {mockAdmins.length === 0 && (
+                    <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm text-center py-20">
+                      <User className="h-10 w-10 text-slate-200 mx-auto mb-3" />
+                      <p className="text-sm text-slate-500 font-medium">No tenant admins assigned.</p>
+                    </div>
+                  )}
                 </div>
               </TabsContent>
             </div>
