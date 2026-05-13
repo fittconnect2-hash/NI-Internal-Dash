@@ -90,8 +90,8 @@ export const initialOutlets: Outlet[] = [
   {
     id: 'o1',
     tenantId: '1',
-    name: 'Outburst Main',
-    slug: 'outburst-main',
+    name: 'Grand Hyatt - Downtown',
+    slug: 'grand-hyatt-downtown',
     phone: '+971502430508',
     timezone: 'Asia/Dubai',
     city: 'Dubai',
@@ -102,24 +102,49 @@ export const initialOutlets: Outlet[] = [
   {
     id: 'o2',
     tenantId: '1',
-    name: 'Crave Lounge',
-    slug: 'crave-lounge',
+    name: 'Grand Hyatt - Marina',
+    slug: 'grand-hyatt-marina',
     phone: '+971521650763',
     timezone: 'Asia/Dubai',
     city: 'Dubai',
     country: 'UAE',
     status: 'Active',
     userCount: 4
+  },
+  {
+    id: 'o3',
+    tenantId: '2',
+    name: 'QuickBite NYC - Broadway',
+    slug: 'quickbite-nyc-broadway',
+    phone: '+15559876543',
+    timezone: 'America/New_York',
+    city: 'New York',
+    country: 'USA',
+    status: 'Active',
+    userCount: 3
+  },
+  {
+    id: 'o4',
+    tenantId: '3',
+    name: 'Saffron Dubai - Creek',
+    slug: 'saffron-dubai-creek',
+    phone: '+971501112222',
+    timezone: 'Asia/Dubai',
+    city: 'Dubai',
+    country: 'UAE',
+    status: 'Active',
+    userCount: 5
   }
 ];
 
 export const initialUsers: User[] = [
+  // Tenant 1 (Grand Hyatt) Users
   {
     id: 'u1',
     tenantId: '1',
     outletId: 'o1',
     fullName: 'John Doe',
-    email: 'john@grandhyatt.com',
+    email: 'john.doe@grandhyatt.com',
     role: 'Admin',
     status: 'Active',
     lastActive: '2024-05-21 14:30'
@@ -127,21 +152,94 @@ export const initialUsers: User[] = [
   {
     id: 'u2',
     tenantId: '1',
+    outletId: 'o1',
+    fullName: 'Michael Smith',
+    email: 'michael.s@grandhyatt.com',
+    role: 'Manager',
+    status: 'Active',
+    lastActive: '2024-05-21 16:20'
+  },
+  {
+    id: 'u3',
+    tenantId: '1',
     outletId: 'o2',
     fullName: 'Sara Ahmed',
-    email: 'sara@grandhyatt.com',
+    email: 'sara.a@grandhyatt.com',
     role: 'Manager',
     status: 'Active',
     lastActive: '2024-05-21 15:45'
   },
   {
-    id: 'u3',
+    id: 'u4',
     tenantId: '1',
-    fullName: 'Global Admin',
-    email: 'global@grandhyatt.com',
+    outletId: 'o2',
+    fullName: 'David Wilson',
+    email: 'david.w@grandhyatt.com',
+    role: 'Staff',
+    status: 'Active',
+    lastActive: '2024-05-20 09:15'
+  },
+  {
+    id: 'u5',
+    tenantId: '1',
+    fullName: 'Executive Admin',
+    email: 'exec.admin@grandhyatt.com',
     role: 'Admin',
     status: 'Active',
     lastActive: '2024-05-21 12:00'
+  },
+  
+  // Tenant 2 (QuickBite) Users
+  {
+    id: 'u6',
+    tenantId: '2',
+    outletId: 'o3',
+    fullName: 'Robert Brown',
+    email: 'robert@quickbite.io',
+    role: 'Admin',
+    status: 'Active',
+    lastActive: '2024-05-21 11:30'
+  },
+  {
+    id: 'u7',
+    tenantId: '2',
+    outletId: 'o3',
+    fullName: 'Emily Davis',
+    email: 'emily@quickbite.io',
+    role: 'Staff',
+    status: 'Inactive',
+    lastActive: '2024-05-18 10:00'
+  },
+  
+  // Tenant 3 (Saffron) Users
+  {
+    id: 'u8',
+    tenantId: '3',
+    outletId: 'o4',
+    fullName: 'Ali Hassan',
+    email: 'ali@saffron.com',
+    role: 'Manager',
+    status: 'Active',
+    lastActive: '2024-05-21 17:00'
+  },
+  {
+    id: 'u9',
+    tenantId: '3',
+    outletId: 'o4',
+    fullName: 'Fatima Z.',
+    email: 'fatima@saffron.com',
+    role: 'Staff',
+    status: 'Active',
+    lastActive: '2024-05-21 08:30'
+  },
+  {
+    id: 'u10',
+    tenantId: '3',
+    fullName: 'Saffron Corp Admin',
+    email: 'corp@saffron.com',
+    role: 'Admin',
+    status: 'Active',
+    lastActive: '2024-05-19 22:00'
   }
 ];
 
