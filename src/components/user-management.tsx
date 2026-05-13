@@ -1,7 +1,8 @@
+
 "use client"
 
 import * as React from "react"
-import { Search, UserPlus, MoreHorizontal, ChevronRight, Building2, Store, Mail, User as UserIcon } from "lucide-react"
+import { Search, UserPlus, MoreHorizontal, ChevronRight, Building2, Store, Mail, User as UserIcon, ShieldCheck } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import {
@@ -15,6 +16,7 @@ import {
 import { User, Tenant, Outlet } from "@/lib/types"
 import { initialUsers } from "@/lib/mock-data"
 import { Badge } from "@/components/ui/badge"
+import { cn } from "@/lib/utils"
 
 interface UserManagementProps {
   tenant?: Tenant | null;
@@ -38,16 +40,16 @@ export function UserManagement({ tenant, outlet, onBack }: UserManagementProps) 
     <div className="p-8">
       <div className="max-w-7xl mx-auto">
         {/* Navigation Breadcrumbs */}
-        <div className="flex items-center gap-2 mb-6 text-[11px] font-bold tracking-widest text-slate-400 uppercase">
-          <button onClick={onBack} className="hover:text-primary transition-colors flex items-center gap-1.5">
-            <Building2 className="h-3 w-3" /> TENANTS
+        <div className="flex items-center gap-3 mb-10 text-[11px] font-black tracking-[0.2em] text-slate-300 uppercase">
+          <button onClick={onBack} className="hover:text-[#0071BC] transition-colors flex items-center gap-2">
+            <Building2 className="h-3.5 w-3.5" /> TENANT HUB
           </button>
           {tenant && (
             <>
               <ChevronRight className="h-3 w-3 opacity-30" />
               <button 
                 onClick={onBack}
-                className="hover:text-primary transition-colors flex items-center gap-1.5"
+                className="hover:text-[#0071BC] transition-colors bg-[#E3F2FD] px-3 py-1 rounded-full text-[#0071BC]"
               >
                 {tenant.tenantName}
               </button>
@@ -56,35 +58,40 @@ export function UserManagement({ tenant, outlet, onBack }: UserManagementProps) 
           {outlet && (
             <>
               <ChevronRight className="h-3 w-3 opacity-30" />
-              <span className="text-slate-900 flex items-center gap-1.5">
-                <Store className="h-3 w-3" /> {outlet.name}
-              </span>
+              <button 
+                onClick={onBack}
+                className="hover:text-slate-900 transition-colors flex items-center gap-2"
+              >
+                <Store className="h-3.5 w-3.5" /> {outlet.name}
+              </button>
             </>
           )}
           <ChevronRight className="h-3 w-3 opacity-30" />
-          <span className="text-slate-900">USERS</span>
+          <span className="text-slate-400">USERS</span>
         </div>
 
-        <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-8">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-12">
           <div>
-            <h1 className="text-[32px] font-black tracking-tight text-[#1A1A1A] mb-1">User Management</h1>
+            <h1 className="text-[42px] font-black tracking-tight text-[#121A26] leading-none mb-3">
+              Staff Directory
+            </h1>
             <p className="text-slate-500 font-medium text-lg">
-              {outlet ? `Managing personnel for ${outlet.name}` : tenant ? `All staff members for ${tenant.tenantName}` : "Manage user access and permissions."}
+              {outlet ? `Access management for ${outlet.name}` : tenant ? `Consolidated staff list for ${tenant.tenantName}` : "Manage system users and global permissions."}
             </p>
           </div>
-          <Button className="h-11 rounded-lg px-6 bg-[#0071BC] hover:bg-[#005a96] text-white font-bold gap-2 text-sm shadow-sm transition-all active:scale-95">
-            <UserPlus className="h-4 w-4" />
-            Add User
+          <Button className="h-14 rounded-2xl px-10 bg-[#0071BC] hover:bg-[#005a96] text-white font-black gap-3 text-sm shadow-xl shadow-blue-500/20 active:scale-95 transition-all">
+            <UserPlus className="h-5 w-5" />
+            ONBOARD STAFF
           </Button>
         </div>
 
-        <div className="bg-white rounded-[24px] border border-slate-200 overflow-hidden shadow-sm">
-          <div className="p-5 border-b border-slate-100 bg-white">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+        <div className="bg-white rounded-[32px] border border-slate-100 overflow-hidden shadow-xl shadow-slate-200/50">
+          <div className="p-6 border-b border-slate-50 bg-white">
+            <div className="relative flex-1 max-w-md group">
+              <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-[#0071BC] transition-colors" />
               <Input 
-                placeholder="Search by name or email..." 
-                className="pl-11 h-12 bg-slate-50 border-transparent rounded-xl w-full text-sm focus-visible:bg-white focus-visible:border-primary/20"
+                placeholder="Search staff by name or email identity..." 
+                className="pl-14 h-14 bg-slate-50/50 border-transparent rounded-2xl w-full text-base font-bold placeholder:text-slate-300 focus-visible:bg-white focus-visible:border-slate-100 transition-all"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -93,49 +100,52 @@ export function UserManagement({ tenant, outlet, onBack }: UserManagementProps) 
 
           <div className="overflow-x-auto">
             <Table>
-              <TableHeader className="bg-slate-50/50">
-                <TableRow className="hover:bg-transparent border-b border-slate-100">
-                  <TableHead className="text-[11px] font-black text-slate-400 uppercase tracking-[0.1em] py-5 pl-8">USER DETAILS</TableHead>
-                  <TableHead className="text-[11px] font-black text-slate-400 uppercase tracking-[0.1em] py-5">ROLE</TableHead>
-                  <TableHead className="text-[11px] font-black text-slate-400 uppercase tracking-[0.1em] py-5">LAST ACTIVE</TableHead>
-                  <TableHead className="text-[11px] font-black text-slate-400 uppercase tracking-[0.1em] py-5">STATUS</TableHead>
-                  <TableHead className="text-[11px] font-black text-slate-400 uppercase tracking-[0.1em] py-5 text-right pr-8">ACTIONS</TableHead>
+              <TableHeader className="bg-slate-50/30">
+                <TableRow className="hover:bg-transparent border-b border-slate-50">
+                  <TableHead className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] py-6 pl-10">INDIVIDUAL PROFILE</TableHead>
+                  <TableHead className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] py-6">AUTHORIZATION ROLE</TableHead>
+                  <TableHead className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] py-6">ACTIVITY LOG</TableHead>
+                  <TableHead className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] py-6">CURRENT STATUS</TableHead>
+                  <TableHead className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] py-6 text-right pr-10">CONTROLS</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredUsers.map((user) => (
-                  <TableRow key={user.id} className="hover:bg-slate-50/50 transition-colors border-b border-slate-50">
-                    <TableCell className="py-6 pl-8">
-                      <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 font-black text-xs shrink-0 border border-slate-200/50">
+                  <TableRow key={user.id} className="hover:bg-[#E3F2FD]/10 transition-colors border-b border-slate-50/50">
+                    <TableCell className="py-7 pl-10">
+                      <div className="flex items-center gap-5">
+                        <div className="h-14 w-14 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-300 font-black text-base shrink-0 border border-slate-100/50 shadow-sm transition-colors group-hover:bg-[#0071BC] group-hover:text-white">
                           {user.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
                         </div>
                         <div className="flex flex-col">
-                          <span className="font-bold text-[15px] text-slate-900 leading-none mb-1.5">{user.fullName}</span>
-                          <span className="text-[12px] text-slate-400 font-medium flex items-center gap-1.5 leading-none">
-                            <Mail className="h-3 w-3" /> {user.email}
+                          <span className="font-black text-[17px] text-[#121A26] leading-none mb-2">{user.fullName}</span>
+                          <span className="text-[11px] text-slate-400 font-black uppercase tracking-[0.15em] flex items-center gap-2 leading-none">
+                            <Mail className="h-3.5 w-3.5 opacity-30" /> {user.email}
                           </span>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="rounded-md font-black text-[10px] tracking-widest uppercase border-slate-200 text-slate-600 bg-slate-50 px-2 py-1">
-                        {user.role}
-                      </Badge>
+                      <div className="flex items-center gap-2 px-4 py-2 bg-slate-50 w-fit rounded-xl border border-slate-100">
+                        <ShieldCheck className={cn("h-4 w-4", user.role === 'Admin' ? "text-[#0071BC]" : "text-slate-400")} />
+                        <span className="font-black text-[10px] tracking-[0.2em] uppercase text-slate-600">
+                          {user.role}
+                        </span>
+                      </div>
                     </TableCell>
                     <TableCell>
-                      <div className="text-[13px] font-medium text-slate-500">{user.lastActive || "Never"}</div>
-                      <div className="text-[10px] font-bold text-slate-300 uppercase tracking-tighter">System Access</div>
+                      <div className="text-[13px] font-black text-slate-900 leading-tight mb-0.5">{user.lastActive || "Never Registered"}</div>
+                      <div className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Portal Access</div>
                     </TableCell>
                     <TableCell>
-                      <Badge className="bg-[#E8F5E9] text-[#2E7D32] border-none shadow-none rounded-md px-3 py-1.5 flex items-center w-fit gap-2 text-[10px] font-black uppercase tracking-widest">
-                        <div className="h-2 w-2 rounded-full bg-[#2E7D32]" />
+                      <Badge className="bg-white text-green-700 border border-green-100 shadow-sm rounded-lg px-4 py-2 flex items-center w-fit gap-2.5 text-[10px] font-black uppercase tracking-[0.15em]">
+                        <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
                         {user.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right pr-8">
-                      <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl border border-slate-100 bg-white hover:border-slate-200 shadow-sm transition-all">
-                        <MoreHorizontal className="h-4 w-4 text-slate-400" />
+                    <TableCell className="text-right pr-10">
+                      <Button variant="ghost" size="icon" className="h-12 w-12 rounded-2xl border border-slate-100 bg-white hover:border-slate-200 hover:shadow-lg transition-all">
+                        <MoreHorizontal className="h-5 w-5 text-slate-300" />
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -145,9 +155,12 @@ export function UserManagement({ tenant, outlet, onBack }: UserManagementProps) 
           </div>
           
           {filteredUsers.length === 0 && (
-            <div className="py-20 text-center">
-              <UserIcon className="h-12 w-12 text-slate-200 mx-auto mb-4" />
-              <p className="text-slate-400 font-bold text-lg">No staff members found matching your search</p>
+            <div className="py-32 text-center">
+              <div className="h-20 w-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                <UserIcon className="h-10 w-10 text-slate-200" />
+              </div>
+              <p className="text-slate-400 font-black text-2xl">No personnel records found</p>
+              <p className="text-slate-300 font-bold mt-2">Adjust your filters or invite new team members.</p>
             </div>
           )}
         </div>

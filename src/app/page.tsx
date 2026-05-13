@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -15,7 +16,8 @@ import {
   Grid2X2, 
   List, 
   ChevronDown,
-  ArrowLeft
+  ArrowLeft,
+  LayoutDashboard
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -34,7 +36,7 @@ export default function DashboardPage() {
   const [filterStatus, setFilterStatus] = React.useState<string | null>(null)
   const [viewMode, setViewMode] = React.useState<'grid' | 'list'>('grid')
   
-  // Drill-down State
+  // Drill-down Context State
   const [selectedTenant, setSelectedTenant] = React.useState<Tenant | null>(null)
   const [selectedOutlet, setSelectedOutlet] = React.useState<Outlet | null>(null)
   
@@ -71,18 +73,39 @@ export default function DashboardPage() {
     setIsFormOpen(true)
   }
 
-  const handleViewOutlets = (tenant: Tenant) => {
+  // Intuitive Navigation Handlers
+  const handleTenantClick = (tenant: Tenant) => {
     setSelectedTenant(tenant)
     setActiveTab('outlets')
   }
 
-  const handleViewUsers = (outlet: Outlet) => {
+  const handleOutletClick = (outlet: Outlet) => {
     setSelectedOutlet(outlet)
     setActiveTab('users')
   }
 
+  const resetSelection = () => {
+    setSelectedTenant(null)
+    setSelectedOutlet(null)
+    setActiveTab('tenants')
+  }
+
   const renderContent = () => {
-    if (activeTab === 'users') {
+    // 1. Dashboard Placeholder
+    if (activeTab === 'dashboard') {
+      return (
+        <div className="p-12 flex flex-col items-center justify-center min-h-[60vh] text-center">
+          <div className="h-20 w-20 bg-[#E3F2FD] rounded-3xl flex items-center justify-center mb-6">
+            <LayoutDashboard className="h-10 w-10 text-[#0071BC]" />
+          </div>
+          <h2 className="text-3xl font-black text-slate-900 mb-2">Welcome to DineNet</h2>
+          <p className="text-slate-500 max-w-md">Your command center for proactive restaurant management is ready. Select a category from the sidebar to begin.</p>
+        </div>
+      )
+    }
+
+    // 2. User Level (Drill-down from Outlet)
+    if (activeTab === 'users' || selectedOutlet) {
       return (
         <UserManagement 
           tenant={selectedTenant} 
@@ -92,139 +115,156 @@ export default function DashboardPage() {
               setSelectedOutlet(null)
               setActiveTab('outlets')
             } else {
-              setActiveTab('tenants')
+              resetSelection()
             }
           }} 
         />
       )
     }
 
-    if (activeTab === 'outlets') {
+    // 3. Outlet Level (Drill-down from Tenant or Global)
+    if (activeTab === 'outlets' || selectedTenant) {
       return (
         <OutletManagement 
           tenant={selectedTenant} 
           onBack={() => {
-            setSelectedTenant(null)
-            setActiveTab('tenants')
+            if (selectedTenant) {
+              setSelectedTenant(null)
+              setActiveTab('tenants')
+            } else {
+              resetSelection()
+            }
           }} 
-          onViewUsers={handleViewUsers}
+          onViewUsers={handleOutletClick}
         />
       )
     }
 
+    // 4. Default Tenant Level
     return (
       <div className="p-8">
         <div className="max-w-7xl mx-auto">
-          {/* Dashboard Header Icons */}
-          <div className="flex items-center gap-4 mb-8">
-            <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl bg-white border-slate-200">
-              <ArrowLeft className="h-5 w-5 text-slate-400" />
-            </Button>
+          {/* Top Bar with Profile Initial */}
+          <div className="flex items-center gap-4 mb-10">
+            <div className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-100 rounded-full shadow-sm">
+              <div className="h-6 w-6 rounded-full bg-[#0071BC] text-white flex items-center justify-center text-[10px] font-black">S</div>
+              <span className="text-xs font-bold text-slate-600 uppercase tracking-widest">Sys Admin</span>
+            </div>
             <div className="flex-1" />
-            <div className="h-10 w-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 text-sm font-bold shadow-sm">
-              S
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold text-slate-400 tracking-[0.2em] uppercase">Status:</span>
+              <div className="flex items-center gap-1.5 px-3 py-1 bg-green-50 rounded-full border border-green-100">
+                <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                <span className="text-[10px] font-bold text-green-600 uppercase">Live</span>
+              </div>
             </div>
           </div>
 
-          <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-8">
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10">
             <div>
-              <h1 className="text-[32px] font-black tracking-tight text-[#1A1A1A] mb-1">Tenant Management</h1>
-              <p className="text-slate-500 font-medium text-lg">Manage tenants, tenant admins, and configurations in one place.</p>
+              <h1 className="text-[42px] font-black tracking-tight text-[#121A26] leading-none mb-3">
+                Tenant Hub
+              </h1>
+              <p className="text-slate-500 font-medium text-lg">
+                Orchestrate your global restaurant network.
+              </p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
+              <div className="bg-white border border-slate-200 p-1 rounded-xl flex items-center shadow-sm">
+                <Button 
+                  variant="ghost"
+                  size="sm" 
+                  className={cn(
+                    "h-10 px-4 gap-2 rounded-lg font-bold text-xs transition-all", 
+                    viewMode === 'list' ? "bg-[#E3F2FD] text-[#0071BC]" : "text-slate-400 hover:text-slate-600"
+                  )}
+                  onClick={() => setViewMode('list')}
+                >
+                  <List className="h-4 w-4" />
+                  LIST
+                </Button>
+                <Button 
+                  variant="ghost"
+                  size="sm" 
+                  className={cn(
+                    "h-10 px-4 gap-2 rounded-lg font-bold text-xs transition-all", 
+                    viewMode === 'grid' ? "bg-[#0071BC] text-white" : "text-slate-400 hover:text-slate-600"
+                  )}
+                  onClick={() => setViewMode('grid')}
+                >
+                  <Grid2X2 className="h-4 w-4" />
+                  GRID
+                </Button>
+              </div>
               <Button 
-                className="h-11 rounded-lg px-6 bg-[#0071BC] hover:bg-[#005a96] text-white font-bold gap-2 text-sm shadow-sm"
+                className="h-12 rounded-xl px-8 bg-[#0071BC] hover:bg-[#005a96] text-white font-black gap-3 text-sm shadow-lg shadow-blue-500/20 active:scale-95 transition-all"
                 onClick={() => {
                   setEditingTenant(null)
                   setIsFormOpen(true)
                 }}
               >
-                <Plus className="h-4 w-4" />
-                Add Tenant
+                <Plus className="h-5 w-5" />
+                CREATE TENANT
               </Button>
-              
-              <div className="bg-white border border-slate-200 p-1 rounded-lg flex items-center shadow-sm">
-                <Button 
-                  variant="ghost"
-                  size="sm" 
-                  className={cn(
-                    "h-9 px-4 gap-2 rounded-md font-bold text-xs transition-colors", 
-                    viewMode === 'list' ? "bg-[#E3F2FD] text-[#0071BC]" : "text-slate-500"
-                  )}
-                  onClick={() => setViewMode('list')}
-                >
-                  <List className="h-4 w-4" />
-                  List
-                </Button>
-                <Button 
-                  variant="ghost"
-                  size="sm" 
-                  className={cn(
-                    "h-9 px-4 gap-2 rounded-md font-bold text-xs transition-colors", 
-                    viewMode === 'grid' ? "bg-[#0071BC] text-white" : "text-slate-500"
-                  )}
-                  onClick={() => setViewMode('grid')}
-                >
-                  <Grid2X2 className="h-4 w-4" />
-                  Grid
-                </Button>
-              </div>
             </div>
           </div>
 
-          {/* Search and Filter */}
-          <div className="flex flex-col md:flex-row gap-4 mb-10">
-            <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+          {/* Search and Filter Experience */}
+          <div className="bg-white p-2 rounded-[24px] border border-slate-100 shadow-sm flex flex-col md:flex-row gap-2 mb-10">
+            <div className="relative flex-1 group">
+              <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-[#0071BC] transition-colors" />
               <Input 
-                placeholder="Search tenants by name, email or phone number" 
-                className="pl-12 h-14 bg-white border-slate-200 rounded-xl w-full text-base focus-visible:ring-primary/20"
+                placeholder="Find tenants by brand, email or contact..." 
+                className="pl-14 h-16 bg-white border-transparent rounded-[20px] w-full text-lg font-medium placeholder:text-slate-300 focus-visible:ring-0 focus-visible:bg-slate-50/50 transition-all"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
+            <div className="h-16 w-px bg-slate-100 hidden md:block" />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="h-14 px-6 rounded-xl bg-white border-slate-200 text-slate-500 justify-between min-w-[200px] text-base">
-                  <span>{filterStatus || "Filter by Status"}</span>
-                  <ChevronDown className="h-5 w-5 ml-2 opacity-40" />
+                <Button variant="ghost" className="h-16 px-8 rounded-[20px] text-slate-500 hover:bg-slate-50 justify-between min-w-[240px] text-base font-bold">
+                  <span className={cn(filterStatus ? "text-[#0071BC]" : "text-slate-400")}>
+                    {filterStatus || "All Statuses"}
+                  </span>
+                  <ChevronDown className={cn("h-5 w-5 ml-4 transition-transform", filterStatus ? "text-[#0071BC]" : "opacity-20")} />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-[200px] rounded-xl p-2">
-                <DropdownMenuItem className="rounded-lg py-2" onClick={() => setFilterStatus(null)}>All Statuses</DropdownMenuItem>
-                <DropdownMenuItem className="rounded-lg py-2" onClick={() => setFilterStatus('Active')}>Active</DropdownMenuItem>
-                <DropdownMenuItem className="rounded-lg py-2" onClick={() => setFilterStatus('Configuration pending')}>Pending</DropdownMenuItem>
-                <DropdownMenuItem className="rounded-lg py-2" onClick={() => setFilterStatus('Inactive')}>Inactive</DropdownMenuItem>
+              <DropdownMenuContent align="end" className="w-[240px] rounded-2xl p-2 border-slate-100 shadow-2xl">
+                <DropdownMenuItem className="rounded-xl py-3 font-bold text-slate-500" onClick={() => setFilterStatus(null)}>Show All</DropdownMenuItem>
+                <DropdownMenuItem className="rounded-xl py-3 font-bold text-green-600" onClick={() => setFilterStatus('Active')}>Active Brands</DropdownMenuItem>
+                <DropdownMenuItem className="rounded-xl py-3 font-bold text-[#827717]" onClick={() => setFilterStatus('Configuration pending')}>Pending Setup</DropdownMenuItem>
+                <DropdownMenuItem className="rounded-xl py-3 font-bold text-slate-400" onClick={() => setFilterStatus('Inactive')}>Inactive</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
 
-          {/* Content Area */}
+          {/* Grid/List Content */}
           {filteredTenants.length > 0 ? (
-            <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'}>
+            <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8' : 'space-y-4'}>
               {filteredTenants.map((tenant) => (
                 <TenantCard 
                   key={tenant.id} 
                   tenant={tenant} 
                   viewMode={viewMode} 
                   onEdit={openEditForm}
-                  onViewOutlets={() => handleViewOutlets(tenant)}
+                  onViewOutlets={() => handleTenantClick(tenant)}
                 />
               ))}
             </div>
           ) : (
-            <div className="bg-white rounded-[32px] p-24 text-center border-2 border-dashed border-slate-200">
-              <div className="h-24 w-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Search className="h-12 w-12 text-slate-300" />
+            <div className="bg-white rounded-[40px] p-32 text-center border-2 border-dashed border-slate-100">
+              <div className="h-24 w-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-8">
+                <Search className="h-12 w-12 text-slate-200" />
               </div>
-              <h3 className="text-2xl font-bold mb-3">No tenants found</h3>
-              <p className="text-slate-500 mb-8 max-w-sm mx-auto">Try adjusting your search or filters.</p>
+              <h3 className="text-3xl font-black text-slate-900 mb-4">No Matches Found</h3>
+              <p className="text-slate-400 mb-10 max-w-sm mx-auto font-medium text-lg">We couldn't find any tenants matching your current filters. Try resetting them.</p>
               <Button 
                 variant="outline" 
-                className="rounded-xl h-12 px-8 font-bold border-slate-200"
+                className="rounded-2xl h-14 px-10 font-black text-slate-600 border-slate-200 hover:bg-slate-50 transition-all"
                 onClick={() => {setSearchQuery(""); setFilterStatus(null)}}
               >
-                Clear all filters
+                RESET ALL FILTERS
               </Button>
             </div>
           )}
