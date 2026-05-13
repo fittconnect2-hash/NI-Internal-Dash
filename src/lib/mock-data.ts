@@ -1,4 +1,4 @@
-import { Tenant, Outlet } from './types';
+import { Tenant, Outlet, User } from './types';
 
 export const initialTenants: Tenant[] = [
   {
@@ -9,8 +9,8 @@ export const initialTenants: Tenant[] = [
     contactPhone: '+1 (555) 123-4567',
     lastLoginDate: '2024-05-15',
     isPaymentGatewayConfigured: true,
-    numberOfOutlets: 12,
-    numberOfUsers: 45,
+    numberOfOutlets: 2,
+    numberOfUsers: 12,
     merchantId: 'M-78291',
     imageUrl: 'https://picsum.photos/seed/10/200/200',
   },
@@ -21,8 +21,8 @@ export const initialTenants: Tenant[] = [
     contactEmail: 'setup@quickbite.io',
     contactPhone: '+1 (555) 987-6543',
     isPaymentGatewayConfigured: false,
-    numberOfOutlets: 2,
-    numberOfUsers: 5,
+    numberOfOutlets: 1,
+    numberOfUsers: 3,
     imageUrl: 'https://picsum.photos/seed/21/200/200',
   },
   {
@@ -34,33 +34,9 @@ export const initialTenants: Tenant[] = [
     lastLoginDate: '2024-05-20',
     isPaymentGatewayConfigured: true,
     numberOfOutlets: 1,
-    numberOfUsers: 8,
+    numberOfUsers: 5,
     merchantId: 'M-00212',
     imageUrl: 'https://picsum.photos/seed/33/200/200',
-  },
-  {
-    id: '4',
-    tenantName: 'Urban Coffee Co.',
-    configurationStatus: 'Inactive',
-    contactEmail: 'accounts@urbancoffee.com',
-    contactPhone: '+1 (555) 444-3333',
-    lastLoginDate: '2024-04-10',
-    isPaymentGatewayConfigured: true,
-    numberOfOutlets: 8,
-    numberOfUsers: 24,
-    merchantId: 'M-55123',
-    imageUrl: 'https://picsum.photos/seed/45/200/200',
-  },
-  {
-    id: '5',
-    tenantName: 'Mountain Lodge Eats',
-    configurationStatus: 'Configuration pending',
-    contactEmail: 'manager@mountainlodge.com',
-    contactPhone: '+1 (555) 777-8888',
-    isPaymentGatewayConfigured: false,
-    numberOfOutlets: 3,
-    numberOfUsers: 12,
-    imageUrl: 'https://picsum.photos/seed/56/200/200',
   }
 ];
 
@@ -68,24 +44,26 @@ export const initialOutlets: Outlet[] = [
   {
     id: 'o1',
     tenantId: '1',
-    name: 'Outburst',
-    slug: 'outburst',
+    name: 'Outburst Main',
+    slug: 'outburst-main',
     phone: '+971502430508',
-    timezone: 'Indian/Antananarivo',
-    city: 'qcity',
-    country: 'United Kingdom',
-    status: 'Active'
+    timezone: 'Asia/Dubai',
+    city: 'Dubai',
+    country: 'UAE',
+    status: 'Active',
+    userCount: 8
   },
   {
     id: 'o2',
     tenantId: '1',
-    name: 'Crave',
-    slug: 'crave',
+    name: 'Crave Lounge',
+    slug: 'crave-lounge',
     phone: '+971521650763',
     timezone: 'Asia/Dubai',
     city: 'Dubai',
-    country: 'Albania',
-    status: 'Active'
+    country: 'UAE',
+    status: 'Active',
+    userCount: 4
   },
   {
     id: 'o3',
@@ -96,6 +74,40 @@ export const initialOutlets: Outlet[] = [
     timezone: 'America/New_York',
     city: 'New York',
     country: 'USA',
-    status: 'Active'
+    status: 'Active',
+    userCount: 3
+  }
+];
+
+export const initialUsers: User[] = [
+  {
+    id: 'u1',
+    tenantId: '1',
+    outletId: 'o1',
+    fullName: 'John Doe',
+    email: 'john@grandhyatt.com',
+    role: 'Admin',
+    status: 'Active',
+    lastActive: '2024-05-21 14:30'
+  },
+  {
+    id: 'u2',
+    tenantId: '1',
+    outletId: 'o1',
+    fullName: 'Sarah Smith',
+    email: 'sarah@grandhyatt.com',
+    role: 'Manager',
+    status: 'Active',
+    lastActive: '2024-05-21 09:15'
+  },
+  {
+    id: 'u3',
+    tenantId: '1',
+    outletId: 'o2',
+    fullName: 'Mike Ross',
+    email: 'mike@grandhyatt.com',
+    role: 'Staff',
+    status: 'Active',
+    lastActive: '2024-05-20 18:45'
   }
 ];

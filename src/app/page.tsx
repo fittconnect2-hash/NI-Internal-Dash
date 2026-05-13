@@ -5,8 +5,9 @@ import { DashboardSidebar } from "@/components/dashboard-sidebar"
 import { TenantCard } from "@/components/tenant-card"
 import { TenantForm } from "@/components/tenant-form"
 import { OutletManagement } from "@/components/outlet-management"
+import { UserManagement } from "@/components/user-management"
 import { initialTenants } from "@/lib/mock-data"
-import { Tenant } from "@/lib/types"
+import { Tenant, Outlet } from "@/lib/types"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { 
   Search, 
@@ -32,6 +33,11 @@ export default function DashboardPage() {
   const [searchQuery, setSearchQuery] = React.useState("")
   const [filterStatus, setFilterStatus] = React.useState<string | null>(null)
   const [viewMode, setViewMode] = React.useState<'grid' | 'list'>('grid')
+  
+  // Drill-down State
+  const [selectedTenant, setSelectedTenant] = React.useState<Tenant | null>(null)
+  const [selectedOutlet, setSelectedOutlet] = React.useState<Outlet | null>(null)
+  
   const [isFormOpen, setIsFormOpen] = React.useState(false)
   const [editingTenant, setEditingTenant] = React.useState<Tenant | null>(null)
 
@@ -65,9 +71,45 @@ export default function DashboardPage() {
     setIsFormOpen(true)
   }
 
+  const handleViewOutlets = (tenant: Tenant) => {
+    setSelectedTenant(tenant)
+    setActiveTab('outlets')
+  }
+
+  const handleViewUsers = (outlet: Outlet) => {
+    setSelectedOutlet(outlet)
+    setActiveTab('users')
+  }
+
   const renderContent = () => {
+    if (activeTab === 'users') {
+      return (
+        <UserManagement 
+          tenant={selectedTenant} 
+          outlet={selectedOutlet} 
+          onBack={() => {
+            if (selectedOutlet) {
+              setSelectedOutlet(null)
+              setActiveTab('outlets')
+            } else {
+              setActiveTab('tenants')
+            }
+          }} 
+        />
+      )
+    }
+
     if (activeTab === 'outlets') {
-      return <OutletManagement />
+      return (
+        <OutletManagement 
+          tenant={selectedTenant} 
+          onBack={() => {
+            setSelectedTenant(null)
+            setActiveTab('tenants')
+          }} 
+          onViewUsers={handleViewUsers}
+        />
+      )
     }
 
     return (
@@ -86,7 +128,7 @@ export default function DashboardPage() {
           <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-8">
             <div>
               <h1 className="text-[32px] font-black tracking-tight text-[#1A1A1A] mb-1">Tenant Management</h1>
-              <p className="text-slate-500 font-medium text-lg">Manage tenants, tenant admins, and tenant configurations in one place.</p>
+              <p className="text-slate-500 font-medium text-lg">Manage tenants, tenant admins, and configurations in one place.</p>
             </div>
             <div className="flex items-center gap-3">
               <Button 
@@ -158,14 +200,14 @@ export default function DashboardPage() {
 
           {/* Content Area */}
           {filteredTenants.length > 0 ? (
-            <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6' : 'space-y-4'}>
+            <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'}>
               {filteredTenants.map((tenant) => (
                 <TenantCard 
                   key={tenant.id} 
                   tenant={tenant} 
                   viewMode={viewMode} 
                   onEdit={openEditForm}
-                  onViewOutlets={() => setActiveTab('outlets')}
+                  onViewOutlets={() => handleViewOutlets(tenant)}
                 />
               ))}
             </div>
@@ -175,7 +217,7 @@ export default function DashboardPage() {
                 <Search className="h-12 w-12 text-slate-300" />
               </div>
               <h3 className="text-2xl font-bold mb-3">No tenants found</h3>
-              <p className="text-slate-500 mb-8 max-w-sm mx-auto">We couldn't find any results matching your search or filters. Try adjusting your query.</p>
+              <p className="text-slate-500 mb-8 max-w-sm mx-auto">Try adjusting your search or filters.</p>
               <Button 
                 variant="outline" 
                 className="rounded-xl h-12 px-8 font-bold border-slate-200"
@@ -193,7 +235,11 @@ export default function DashboardPage() {
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-[#F8F9FA]">
-        <DashboardSidebar activeTab={activeTab} onTabChange={setActiveTab} />
+        <DashboardSidebar activeTab={activeTab} onTabChange={(tab) => {
+          setActiveTab(tab)
+          setSelectedTenant(null)
+          setSelectedOutlet(null)
+        }} />
         
         <main className="flex-1 flex flex-col min-w-0">
           {renderContent()}

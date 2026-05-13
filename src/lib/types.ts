@@ -23,4 +23,16 @@ export interface Outlet {
   city: string;
   country: string;
   status: 'Active' | 'Inactive';
+  userCount: number;
+}
+
+export interface User {
+  id: string;
+  tenantId: string;
+  outletId?: string;
+  fullName: string;
+  email: string;
+  role: 'Admin' | 'Manager' | 'Staff';
+  status: 'Active' | 'Inactive';
+  lastActive?: string;
 }
