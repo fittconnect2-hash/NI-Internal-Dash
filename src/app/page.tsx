@@ -113,8 +113,6 @@ export default function DashboardPage() {
 
   const handleOutletClick = (outlet: Outlet) => {
     setSelectedOutlet(outlet)
-    // For Personnel view, we can swap the main content or use another drawer
-    // In this app, we'll navigate to users tab
     setActiveTab('users')
     setIsOutletsDrawerOpen(false)
   }
@@ -139,10 +137,6 @@ export default function DashboardPage() {
 
     if (activeTab === 'users' || selectedOutlet) {
       return <UserManagement tenant={selectedTenant} outlet={selectedOutlet} onBack={() => selectedOutlet ? setSelectedOutlet(null) : setActiveTab('tenants')} />
-    }
-
-    if (activeTab === 'outlets') {
-      return <OutletManagement tenant={null} isOpen={true} onClose={() => setActiveTab('tenants')} onViewUsers={handleOutletClick} />
     }
 
     return (
