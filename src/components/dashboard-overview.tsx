@@ -59,7 +59,7 @@ export function DashboardOverview() {
             <RefreshCw className="h-4 w-4" /> Refresh
           </Button>
           <Button size="sm" className="h-10 bg-[#e91e63] hover:bg-[#d81b60] font-bold gap-2 shadow-lg shadow-[#e91e63]/20">
-            <Share className="h-4 w-4" /> Export
+            <Share className="h-4 w-4" /> Export Data
           </Button>
         </div>
       </div>
@@ -71,7 +71,7 @@ export function DashboardOverview() {
           { label: "Orders today", value: "1,382", change: "+7%", trend: "up", icon: Receipt, color: "bg-[#22c55e]/10 text-[#22c55e]" },
           { label: "Active restaurants", value: "247", change: "-3", trend: "down", icon: Store, color: "bg-[#1a73e8]/10 text-[#1a73e8]" },
           { label: "Avg delivery", value: "28 min", change: "-3 min", trend: "up", icon: Clock, color: "bg-amber-100 text-amber-600" },
-        ].map((stat, i) => (stat &&
+        ].map((stat, i) => (
           <Card key={i} className="border-slate-200 shadow-sm overflow-hidden group hover:border-[#1a73e8]/20 transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
@@ -97,19 +97,20 @@ export function DashboardOverview() {
       <Card className="border-slate-200 shadow-sm p-8">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h3 className="text-lg font-black text-slate-900 tracking-tight">Avg delivery time (min) — today</h3>
+            <h3 className="text-lg font-black text-slate-900 tracking-tight">Average Delivery Performance (min)</h3>
+            <p className="text-xs text-slate-400 font-bold uppercase tracking-tight mt-1">Real-time network latency check</p>
           </div>
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
               <div className="h-2.5 w-2.5 rounded-full bg-[#e91e63]" />
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Selected</span>
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Selected Period</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="h-2.5 w-2.5 rounded-full bg-[#f8bbd0]" />
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Previous</span>
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Previous Average</span>
             </div>
             <Button variant="link" className="text-[#e91e63] font-bold text-xs uppercase tracking-widest gap-1 p-0 h-auto">
-              Full analytics <ExternalLink className="h-3 w-3" />
+              Full Analytics <ExternalLink className="h-3 w-3" />
             </Button>
           </div>
         </div>
@@ -142,7 +143,7 @@ export function DashboardOverview() {
       </Card>
 
       {/* Bottom Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pb-8">
         {/* Top Restaurants */}
         <Card className="border-slate-200 shadow-sm overflow-hidden flex flex-col">
           <CardHeader className="p-8 border-b border-slate-50 flex flex-row items-center justify-between">
@@ -150,10 +151,10 @@ export function DashboardOverview() {
               <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center">
                 <Store className="h-4 w-4 text-[#1a73e8]" />
               </div>
-              <CardTitle className="text-lg font-black text-slate-900 tracking-tight">Top restaurants</CardTitle>
+              <CardTitle className="text-lg font-black text-slate-900 tracking-tight">Top Performing Restaurants</CardTitle>
             </div>
             <Button variant="link" className="text-[#e91e63] font-bold text-xs uppercase tracking-widest gap-1 p-0">
-              View all <ArrowUpRight className="h-4 w-4" />
+              View All <ArrowUpRight className="h-4 w-4" />
             </Button>
           </CardHeader>
           <CardContent className="p-0 flex-1 overflow-y-auto">
@@ -171,7 +172,7 @@ export function DashboardOverview() {
                   </div>
                   <div className="text-right">
                     <div className="font-black text-slate-900 leading-none mb-1">{res.orders} orders</div>
-                    <div className="text-[11px] font-bold text-slate-400">{res.revenue}</div>
+                    <div className="text-[11px] font-bold text-slate-400 tabular-nums">{res.revenue}</div>
                   </div>
                 </div>
                 <Progress value={res.progress} className="h-1.5 bg-slate-100">
@@ -189,10 +190,10 @@ export function DashboardOverview() {
               <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center">
                 <Receipt className="h-4 w-4 text-[#e91e63]" />
               </div>
-              <CardTitle className="text-lg font-black text-slate-900 tracking-tight">Live orders</CardTitle>
+              <CardTitle className="text-lg font-black text-slate-900 tracking-tight">Real-time Order Stream</CardTitle>
             </div>
             <Button variant="link" className="text-[#e91e63] font-bold text-xs uppercase tracking-widest gap-1 p-0">
-              View all <ArrowUpRight className="h-4 w-4" />
+              Live Monitor <ArrowUpRight className="h-4 w-4" />
             </Button>
           </CardHeader>
           <CardContent className="p-0 flex-1 overflow-y-auto">
@@ -215,7 +216,7 @@ export function DashboardOverview() {
                   )}>
                     {order.status}
                   </Badge>
-                  <span className="font-black text-slate-900 tabular-nums">{order.amount}</span>
+                  <span className="font-black text-slate-900 tabular-nums min-w-[70px] text-right">{order.amount}</span>
                   <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
                     <MoreHorizontal className="h-4 w-4 text-slate-400" />
                   </Button>
