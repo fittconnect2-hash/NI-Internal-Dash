@@ -68,16 +68,37 @@ const orderVolumeData = [
 ];
 
 type DashboardTab = 'revenue' | 'orders' | 'restaurants' | 'serving';
+type TimeRange = '7d' | 'Today' | 'MTD';
 
 export function DashboardOverview() {
   const [activeTab, setActiveTab] = React.useState<DashboardTab>('revenue')
+  const [timeRange, setTimeRange] = React.useState<TimeRange>('Today')
+  const [isRefreshing, setIsRefreshing] = React.useState(false)
 
-  const stats = [
-    { id: 'revenue', label: "Total revenue", value: "AED 84.2k", change: "+12%", trend: "up", icon: DollarSign, color: "text-[#1a73e8]" },
-    { id: 'orders', label: "Orders today", value: "1,382", change: "+7%", trend: "up", icon: Receipt, color: "text-[#22c55e]" },
-    { id: 'restaurants', label: "Active network", value: "247", change: "-3", trend: "down", icon: Store, color: "text-[#1a73e8]" },
-    { id: 'serving', label: "Avg serving", value: "28 min", change: "-3 min", trend: "up", icon: Clock, color: "text-amber-600" },
-  ]
+  const handleRefresh = () => {
+    setIsRefreshing(true)
+    setTimeout(() => setIsRefreshing(false), 800)
+  }
+
+  // Mock stats that "change" based on range
+  const getStats = (range: TimeRange) => {
+    const baseStats = [
+      { id: 'revenue', label: "Total revenue", value: "AED 84.2k", change: "+12%", trend: "up", icon: DollarSign, color: "text-[#1a73e8]" },
+      { id: 'orders', label: "Orders today", value: "1,382", change: "+7%", trend: "up", icon: Receipt, color: "text-[#22c55e]" },
+      { id: 'restaurants', label: "Active network", value: "247", change: "-3", trend: "down", icon: Store, color: "text-[#1a73e8]" },
+      { id: 'serving', label: "Avg serving", value: "28 min", change: "-3 min", trend: "up", icon: Clock, color: "text-amber-600" },
+    ]
+
+    if (range === '7d') {
+      return baseStats.map(s => s.id === 'revenue' ? { ...s, value: 'AED 582.4k', change: '+18%' } : s)
+    }
+    if (range === 'MTD') {
+      return baseStats.map(s => s.id === 'revenue' ? { ...s, value: 'AED 2.4M', change: '+24%' } : s)
+    }
+    return baseStats
+  }
+
+  const stats = getStats(timeRange)
 
   const renderContent = () => {
     switch (activeTab) {
@@ -87,7 +108,7 @@ export function DashboardOverview() {
             <Card className="border-slate-200 shadow-sm p-8">
               <div className="flex items-center justify-between mb-8">
                 <div>
-                  <h3 className="text-xl font-black text-slate-900 tracking-tight">Financial Performance</h3>
+                  <h3 className="text-xl font-black text-slate-900 tracking-tight">Financial Performance ({timeRange})</h3>
                   <p className="text-xs text-slate-400 font-bold uppercase tracking-tight mt-1">Daily revenue vs transaction volume</p>
                 </div>
                 <div className="flex items-center gap-6">
@@ -175,7 +196,7 @@ export function DashboardOverview() {
             <Card className="border-slate-200 shadow-sm p-8">
               <div className="flex items-center justify-between mb-8">
                 <div>
-                  <h3 className="text-xl font-black text-slate-900 tracking-tight">Order Velocity</h3>
+                  <h3 className="text-xl font-black text-slate-900 tracking-tight">Order Velocity ({timeRange})</h3>
                   <p className="text-xs text-slate-400 font-bold uppercase tracking-tight mt-1">Transaction flow by hour</p>
                 </div>
                 <div className="flex items-center gap-6">
@@ -364,13 +385,31 @@ export function DashboardOverview() {
           <h1 className="text-3xl font-black text-slate-900 tracking-tight">Overview</h1>
         </div>
         <div className="flex items-center gap-3">
-          <div className="bg-white border border-slate-200 rounded-lg p-1 flex items-center gap-1">
-            <Button variant="ghost" size="sm" className="h-8 text-xs font-bold text-slate-500">7d</Button>
-            <Button variant="default" size="sm" className="h-8 text-xs font-bold bg-slate-900 hover:bg-slate-800 shadow-none">Today</Button>
-            <Button variant="ghost" size="sm" className="h-8 text-xs font-bold text-slate-500">MTD</Button>
+          <div className="bg-white border border-slate-200 rounded-[18px] p-1.5 flex items-center gap-1 shadow-sm">
+            {(['7d', 'Today', 'MTD'] as TimeRange[]).map((range) => (
+              <Button 
+                key={range}
+                variant="ghost" 
+                size="sm" 
+                className={cn(
+                  "h-8 px-5 text-sm font-bold transition-all duration-300 rounded-[12px]",
+                  timeRange === range 
+                    ? "bg-[#0f172a] text-white hover:bg-[#0f172a] shadow-lg" 
+                    : "text-slate-500 hover:text-slate-900 hover:bg-slate-100"
+                )}
+                onClick={() => setTimeRange(range)}
+              >
+                {range}
+              </Button>
+            ))}
           </div>
-          <Button variant="outline" size="sm" className="h-10 border-slate-200 font-bold gap-2 text-slate-600">
-            <RefreshCw className="h-4 w-4" /> Refresh
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className={cn("h-10 border-slate-200 font-bold gap-2 text-slate-600", isRefreshing && "opacity-50 pointer-events-none")}
+            onClick={handleRefresh}
+          >
+            <RefreshCw className={cn("h-4 w-4", isRefreshing && "animate-spin")} /> Refresh
           </Button>
           <Button size="sm" className="h-10 bg-[#e91e63] hover:bg-[#d81b60] font-bold gap-2 shadow-lg shadow-[#e91e63]/20">
             <Share className="h-4 w-4" /> Export Data
@@ -379,7 +418,7 @@ export function DashboardOverview() {
       </div>
 
       {/* Stats Grid - Acting as Tabs */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className={cn("grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6", isRefreshing && "opacity-70 grayscale transition-all")}>
         {stats.map((stat) => (
           <Card 
             key={stat.id} 
@@ -424,7 +463,7 @@ export function DashboardOverview() {
       </div>
 
       {/* Dynamic Content Based on Selected Tab */}
-      <div className="pb-10">
+      <div className={cn("pb-10", isRefreshing && "opacity-50 pointer-events-none")}>
         {renderContent()}
       </div>
     </div>
