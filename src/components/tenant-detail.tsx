@@ -2,18 +2,20 @@
 
 import * as React from "react"
 import { 
-  X, 
   Mail, 
   Phone, 
   Building2, 
   User, 
-  MapPin, 
   Settings, 
   UserPlus, 
   MoreVertical,
-  CheckCircle2,
   ChevronRight,
-  ArrowLeft
+  ArrowLeft,
+  Globe,
+  Briefcase,
+  MapPin,
+  CalendarDays,
+  ShieldCheck
 } from "lucide-react"
 import { Tenant } from "@/lib/types"
 import { Button } from "@/components/ui/button"
@@ -60,100 +62,173 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
       name: "Leoe Dase",
       username: "@risiidhan@kptac.com",
       email: "risiidhan@kptac.com",
-      phone: "+971544571754",
+      phone: "+971 54 457 1754",
+      status: "Active"
+    },
+    {
+      id: "a2",
+      name: "Saurabh Mishra",
+      username: "@saurabh.m",
+      email: "saurabh.m@example.com",
+      phone: "+971 52 123 4567",
       status: "Active"
     }
   ]
 
-  const handleClose = () => {
-    onClose()
-  }
-
   return (
-    <Sheet open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <SheetContent side="right" className="p-0 border-l border-slate-200 bg-[#f8f9fc] sm:max-w-[1200px] w-full transition-all duration-300">
+    <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <SheetContent side="right" className="p-0 border-l border-slate-200 bg-[#f8f9fc] sm:max-w-[1200px] w-full transition-all duration-500">
         <div className="flex flex-col h-full">
-          <SheetHeader className="p-6 bg-white border-b border-slate-200 relative">
-            <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-medium text-lg shrink-0 relative">
+          {/* Header Section */}
+          <SheetHeader className="p-8 bg-white border-b border-slate-100 flex-shrink-0">
+            <div className="flex items-center gap-6">
+              <button onClick={onClose} className="p-2 hover:bg-slate-50 rounded-lg group transition-colors">
+                <ArrowLeft className="h-6 w-6 text-slate-400 group-hover:text-slate-900" />
+              </button>
+              <div className="h-16 w-16 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 font-extrabold text-2xl shrink-0 relative shadow-sm">
                 {initials}
                 <div className={cn(
-                  "absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white",
+                  "absolute -bottom-1 -right-1 h-5 w-5 rounded-full border-[3px] border-white shadow-sm",
                   isPending ? "bg-amber-400" : "bg-green-500"
                 )} />
               </div>
               <div className="flex flex-col">
-                <div className="flex items-center gap-2">
-                  <SheetTitle className="text-2xl font-bold text-slate-900 leading-tight">
+                <div className="flex items-center gap-3">
+                  <SheetTitle className="text-2xl font-black text-slate-900 leading-none tracking-tight">
                     {tenant.tenantName}
                   </SheetTitle>
                   <Badge className={cn(
-                    "border-none px-2.5 py-0.5 rounded-full text-[11px] font-semibold",
-                    isPending ? "bg-amber-100 text-amber-700" : "bg-[#22c55e] text-white"
+                    "border-none px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest",
+                    isPending ? "bg-amber-100 text-amber-700" : "bg-[#e1f9ef] text-[#22c55e]"
                   )}>
                     {isPending ? "Pending" : "Active"}
                   </Badge>
                 </div>
-                <p className="text-sm text-slate-500">Tenant since {signupDate}</p>
+                <div className="flex items-center gap-4 mt-2">
+                  <div className="flex items-center gap-1.5 text-xs text-slate-400 font-bold uppercase tracking-tighter">
+                    <CalendarDays className="h-3.5 w-3.5" />
+                    Partner Since {signupDate}
+                  </div>
+                  <div className="w-1 h-1 rounded-full bg-slate-200" />
+                  <div className="flex items-center gap-1.5 text-xs text-[#1a73e8] font-bold uppercase tracking-tighter">
+                    <Globe className="h-3.5 w-3.5" />
+                    ID: {tenant.id}
+                  </div>
+                </div>
               </div>
             </div>
           </SheetHeader>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
-            <div className="bg-white px-6 border-b border-slate-200 flex-shrink-0">
-              <TabsList className="bg-transparent h-12 p-0 gap-8 justify-start">
+            <div className="bg-white px-8 border-b border-slate-200 flex-shrink-0 shadow-sm z-10">
+              <TabsList className="bg-transparent h-14 p-0 gap-10 justify-start">
                 <TabsTrigger 
                   value="overview" 
-                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-0 h-12 text-sm font-medium text-slate-500 data-[state=active]:text-slate-900"
+                  className="rounded-none border-b-[3px] border-transparent data-[state=active]:border-[#1a73e8] data-[state=active]:bg-transparent data-[state=active]:shadow-none px-0 h-14 text-xs font-bold uppercase tracking-widest text-slate-400 data-[state=active]:text-[#1a73e8] transition-all"
                 >
-                  Overview
+                  Brand Overview
                 </TabsTrigger>
                 <TabsTrigger 
                   value="admins" 
-                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-0 h-12 text-sm font-medium text-slate-500 data-[state=active]:text-slate-900"
+                  className="rounded-none border-b-[3px] border-transparent data-[state=active]:border-[#1a73e8] data-[state=active]:bg-transparent data-[state=active]:shadow-none px-0 h-14 text-xs font-bold uppercase tracking-widest text-slate-400 data-[state=active]:text-[#1a73e8] transition-all"
                 >
-                  Tenant Admins
+                  Account Personnel
                 </TabsTrigger>
               </TabsList>
             </div>
 
             <div className="flex-1 overflow-hidden">
-              <TabsContent value="overview" className="m-0 h-full overflow-y-auto p-6 space-y-6">
-                <div className="max-w-4xl mx-auto">
-                  <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-                    <div className="flex items-center gap-2 mb-6">
-                      <div className="h-5 w-5 rounded bg-slate-50 border border-slate-100 flex items-center justify-center">
-                        <User className="h-3 w-3 text-slate-400" />
+              <TabsContent value="overview" className="m-0 h-full overflow-y-auto p-8 space-y-8">
+                <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+                  {/* Company Profile Section */}
+                  <div className="lg:col-span-2 space-y-8">
+                    <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
+                      <div className="flex items-center gap-3 mb-8">
+                        <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center">
+                          <Building2 className="h-4 w-4 text-[#1a73e8]" />
+                        </div>
+                        <h3 className="font-extrabold text-slate-900 tracking-tight">Business Profile</h3>
                       </div>
-                      <h3 className="font-bold text-slate-900">Contact Information</h3>
+
+                      <div className="grid grid-cols-2 gap-y-10 gap-x-12">
+                        <div className="space-y-1.5">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Official Name</p>
+                          <p className="text-sm font-extrabold text-slate-900">{tenant.tenantName}</p>
+                        </div>
+                        <div className="space-y-1.5">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Industry Category</p>
+                          <p className="text-sm font-extrabold text-slate-900">{tenant.businessType || "Hospitality"}</p>
+                        </div>
+                        <div className="space-y-1.5">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Headquarters</p>
+                          <p className="text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
+                            <MapPin className="h-3.5 w-3.5 text-slate-300" />
+                            {tenant.city}, {tenant.country}
+                          </p>
+                        </div>
+                        <div className="space-y-1.5">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Merchant Identification</p>
+                          <p className="text-sm font-extrabold text-[#1a73e8]">{tenant.merchantId || "M-PENDING"}</p>
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-y-6 gap-x-12">
-                      <div>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Company</p>
-                        <p className="text-sm font-semibold text-slate-900">{tenant.tenantName}</p>
+                    <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
+                      <div className="flex items-center gap-3 mb-8">
+                        <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center">
+                          <User className="h-4 w-4 text-[#1a73e8]" />
+                        </div>
+                        <h3 className="font-extrabold text-slate-900 tracking-tight">Primary Contact</h3>
                       </div>
-                      <div>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Business Type</p>
-                        <p className="text-sm font-semibold text-slate-900">{tenant.businessType || "Unknown"}</p>
+
+                      <div className="grid grid-cols-2 gap-y-10 gap-x-12">
+                        <div className="space-y-1.5">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Authorized Person</p>
+                          <p className="text-sm font-extrabold text-slate-900">{tenant.contactName || tenant.tenantName}</p>
+                        </div>
+                        <div className="space-y-1.5">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Email Channel</p>
+                          <p className="text-sm font-extrabold text-[#1a73e8] flex items-center gap-1.5 truncate">
+                            <Mail className="h-3.5 w-3.5 text-slate-300" />
+                            {tenant.contactEmail}
+                          </p>
+                        </div>
+                        <div className="space-y-1.5">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Direct Phone</p>
+                          <p className="text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
+                            <Phone className="h-3.5 w-3.5 text-slate-300" />
+                            {tenant.contactPhone}
+                          </p>
+                        </div>
+                        <div className="space-y-1.5">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Mailing Address</p>
+                          <p className="text-sm font-extrabold text-slate-900 leading-relaxed">
+                            {tenant.addressLine1 || "Not Provided"}<br />
+                            <span className="text-slate-400 text-xs">{tenant.zipCode} {tenant.city}</span>
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Contact Person</p>
-                        <p className="text-sm font-semibold text-slate-900">{tenant.contactName || tenant.tenantName}</p>
-                      </div>
-                      <div>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Email</p>
-                        <p className="text-sm font-semibold text-slate-900 text-[#1a73e8]">{tenant.contactEmail}</p>
-                      </div>
-                      <div>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Phone</p>
-                        <p className="text-sm font-semibold text-slate-900">{tenant.contactPhone}</p>
-                      </div>
-                      <div>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Address</p>
-                        <p className="text-sm font-semibold text-slate-900">
-                          {tenant.addressLine1 ? `${tenant.addressLine1}, ${tenant.city}` : "N/A"}
-                        </p>
+                    </div>
+                  </div>
+
+                  {/* Sidebar Stats */}
+                  <div className="space-y-6">
+                    <div className="bg-[#0f172a] rounded-2xl p-6 text-white shadow-xl">
+                      <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Account Health</h4>
+                      <div className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-slate-300">Total Outlets</span>
+                          <span className="text-xl font-black">{tenant.numberOfOutlets}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-slate-300">Active Users</span>
+                          <span className="text-xl font-black">{tenant.numberOfUsers}</span>
+                        </div>
+                        <div className="pt-4 border-t border-slate-800">
+                          <Button className="w-full bg-[#1a73e8] hover:bg-[#1557b0] text-xs font-bold uppercase tracking-widest h-10 border-none">
+                            Manage Credentials
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -161,117 +236,145 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
               </TabsContent>
 
               <TabsContent value="admins" className="m-0 h-full flex flex-col">
-                <div className="flex-1 flex min-h-0 p-6 gap-6 overflow-hidden">
-                  {/* Form Section - Left Side, Fixed Width */}
-                  <div className="w-[450px] bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col min-h-0 overflow-hidden">
-                    <div className="p-6 border-b border-slate-50">
-                      <h3 className="text-lg font-bold text-[#1e293b]">Add New Tenant Admin</h3>
+                <div className="flex-1 flex min-h-0 p-8 gap-8 overflow-hidden bg-slate-50/50">
+                  {/* Persistent Form Section */}
+                  <div className="w-[450px] bg-white rounded-2xl border border-slate-200 shadow-xl flex flex-col min-h-0 overflow-hidden ring-1 ring-slate-100">
+                    <div className="p-6 border-b border-slate-50 flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-full bg-[#1a73e8]/10 flex items-center justify-center">
+                        <UserPlus className="h-4 w-4 text-[#1a73e8]" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-black text-[#1e293b] leading-tight">Account Admin</h3>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Enrollment Portal</p>
+                      </div>
                     </div>
                     <ScrollArea className="flex-1">
-                      <div className="p-8 space-y-8">
-                        <div className="grid grid-cols-2 gap-6">
-                          <div className="space-y-2">
-                            <Label className="text-sm font-semibold text-slate-700">First Name <span className="text-red-500">*</span></Label>
-                            <Input placeholder="First name" className="h-11 border-slate-200 bg-slate-50/30" />
+                      <div className="p-8 space-y-10">
+                        <div className="grid grid-cols-2 gap-8">
+                          <div className="space-y-2.5">
+                            <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">First Name <span className="text-red-500 font-black">*</span></Label>
+                            <Input placeholder="First Name" className="h-12 border-slate-200 bg-slate-50/30 focus-visible:bg-white focus-visible:ring-1 ring-[#1a73e8]/20 transition-all font-medium" />
                           </div>
-                          <div className="space-y-2">
-                            <Label className="text-sm font-semibold text-slate-700">Last Name <span className="text-red-500">*</span></Label>
-                            <Input placeholder="Last name" className="h-11 border-slate-200 bg-slate-50/30" />
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-6">
-                          <div className="space-y-2">
-                            <Label className="text-sm font-semibold text-slate-700">Username <span className="text-red-500">*</span></Label>
-                            <Input placeholder="Enter username" className="h-11 border-slate-200 bg-slate-50/30" />
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-sm font-semibold text-slate-700">Email Address</Label>
-                            <Input type="email" placeholder="Enter email address" className="h-11 border-slate-200 bg-slate-50/30" />
+                          <div className="space-y-2.5">
+                            <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Last Name <span className="text-red-500 font-black">*</span></Label>
+                            <Input placeholder="Last Name" className="h-12 border-slate-200 bg-slate-50/30 focus-visible:bg-white focus-visible:ring-1 ring-[#1a73e8]/20 transition-all font-medium" />
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-6">
-                          <div className="space-y-2">
-                            <Label className="text-sm font-semibold text-slate-700">Password <span className="text-red-500">*</span></Label>
-                            <Input type="password" placeholder="Enter password" className="h-11 border-slate-200 bg-slate-50/30" />
+                        <div className="grid grid-cols-2 gap-8">
+                          <div className="space-y-2.5">
+                            <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Username <span className="text-red-500 font-black">*</span></Label>
+                            <Input placeholder="@username" className="h-12 border-slate-200 bg-slate-50/30 font-bold" />
                           </div>
-                          <div className="space-y-2">
-                            <Label className="text-sm font-semibold text-slate-700">Confirm Password <span className="text-red-500">*</span></Label>
-                            <Input type="password" placeholder="Confirm password" className="h-11 border-slate-200 bg-slate-50/30" />
+                          <div className="space-y-2.5">
+                            <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email Identity</Label>
+                            <Input type="email" placeholder="admin@brand.com" className="h-12 border-slate-200 bg-slate-50/30 font-medium" />
                           </div>
                         </div>
 
-                        <div className="space-y-2">
-                          <Label className="text-sm font-semibold text-slate-700">Phone Number <span className="text-red-500">*</span></Label>
-                          <div className="flex gap-2">
+                        <div className="grid grid-cols-2 gap-8">
+                          <div className="space-y-2.5">
+                            <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Secure Password <span className="text-red-500 font-black">*</span></Label>
+                            <Input type="password" placeholder="••••••••" className="h-12 border-slate-200 bg-slate-50/30" />
+                          </div>
+                          <div className="space-y-2.5">
+                            <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Confirm Access <span className="text-red-500 font-black">*</span></Label>
+                            <Input type="password" placeholder="••••••••" className="h-12 border-slate-200 bg-slate-50/30" />
+                          </div>
+                        </div>
+
+                        <div className="space-y-2.5">
+                          <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Primary Phone <span className="text-red-500 font-black">*</span></Label>
+                          <div className="flex gap-3">
                             <Select defaultValue="+971">
-                              <SelectTrigger className="w-[100px] h-11 border-slate-200 bg-slate-50/30">
+                              <SelectTrigger className="w-[110px] h-12 border-slate-200 bg-slate-50/30 font-bold">
                                 <SelectValue placeholder="+971" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="+971">+971</SelectItem>
-                                <SelectItem value="+1">+1</SelectItem>
-                                <SelectItem value="+44">+44</SelectItem>
+                                <SelectItem value="+971">+971 (UAE)</SelectItem>
+                                <SelectItem value="+1">+1 (USA)</SelectItem>
+                                <SelectItem value="+44">+44 (UK)</SelectItem>
                               </SelectContent>
                             </Select>
-                            <Input placeholder="Phone number" className="h-11 flex-1 border-slate-200 bg-slate-50/30" />
+                            <Input placeholder="5X XXX XXXX" className="h-12 flex-1 border-slate-200 bg-slate-50/30 font-bold tracking-widest" />
                           </div>
                         </div>
                       </div>
                     </ScrollArea>
-                    <div className="p-6 border-t border-slate-100 flex justify-end gap-3 bg-white flex-shrink-0">
-                      <Button variant="outline" className="h-10 px-6 font-bold text-slate-600 border-slate-200">
-                        Cancel
+                    <div className="p-6 border-t border-slate-100 flex justify-end gap-4 bg-slate-50/30 flex-shrink-0">
+                      <Button variant="outline" className="h-12 px-8 font-extrabold text-slate-600 border-slate-200 hover:bg-white active:scale-95 transition-all">
+                        Reset
                       </Button>
-                      <Button className="h-10 px-6 font-bold bg-[#94b8d7] hover:bg-[#83a7c6] text-white border-none">
-                        Add Admin
+                      <Button className="h-12 px-8 font-extrabold bg-[#1a73e8] hover:bg-[#1557b0] text-white border-none shadow-lg shadow-[#1a73e8]/20 active:scale-95 transition-all">
+                        Enroll Admin
                       </Button>
                     </div>
                   </div>
 
-                  {/* List Section - Right Side, Much Larger Width */}
-                  <div className="flex-1 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col min-h-0 overflow-hidden">
-                    <div className="p-6 border-b border-slate-50">
-                      <h3 className="text-lg font-bold text-slate-900">Personnel List</h3>
+                  {/* Active Personnel List */}
+                  <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col min-h-0 overflow-hidden">
+                    <div className="p-6 border-b border-slate-50 flex items-center justify-between">
+                      <div>
+                        <h3 className="text-lg font-black text-slate-900 tracking-tight leading-tight">Brand Personnel</h3>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Registered Administrators</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-[#1a73e8]/10 text-[#1a73e8] border-none px-3 py-1 text-[10px] font-bold shadow-none">
+                          {mockAdmins.length} Total
+                        </Badge>
+                      </div>
                     </div>
                     <ScrollArea className="flex-1">
-                      <div className="p-6 grid grid-cols-1 xl:grid-cols-2 gap-4">
+                      <div className="p-8 grid grid-cols-1 xl:grid-cols-2 gap-6">
                         {mockAdmins.map((admin) => (
                           <div 
                             key={admin.id} 
-                            className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm h-fit"
+                            className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-md hover:border-[#1a73e8]/20 transition-all group/card cursor-pointer"
                           >
-                            <div className="p-4 flex items-start justify-between border-b border-slate-50">
-                              <div className="flex items-center gap-3">
-                                <Avatar className="h-10 w-10 border border-slate-100">
-                                  <AvatarFallback className="bg-slate-50 text-slate-500 font-bold text-xs">
+                            <div className="p-5 flex items-start justify-between border-b border-slate-50/50">
+                              <div className="flex items-center gap-4">
+                                <Avatar className="h-12 w-12 border-2 border-slate-50 shadow-sm">
+                                  <AvatarFallback className="bg-[#1a73e8]/5 text-[#1a73e8] font-black text-sm">
                                     {admin.name.split(' ').map(n => n[0]).join('')}
                                   </AvatarFallback>
                                 </Avatar>
                                 <div className="flex flex-col">
-                                  <span className="font-bold text-slate-900 text-sm">{admin.name}</span>
-                                  <span className="text-[10px] text-slate-400 font-medium tracking-tight">{admin.username}</span>
+                                  <span className="font-black text-slate-900 text-[15px] group-hover/card:text-[#1a73e8] transition-colors">{admin.name}</span>
+                                  <span className="text-[11px] text-slate-400 font-bold tracking-tight uppercase">{admin.username}</span>
                                 </div>
                               </div>
-                              <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-300 rounded-full">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-300 rounded-full hover:bg-slate-50 active:scale-90">
+                                    <MoreVertical className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem className="font-bold">Edit Profile</DropdownMenuItem>
+                                  <DropdownMenuItem className="font-bold">Reset Password</DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem className="text-destructive font-black">Disable User</DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                             </div>
 
-                            <div className="px-4 py-3 space-y-2 border-b border-slate-50">
-                              <div className="flex items-center gap-2 text-slate-500">
-                                <Mail className="h-3.5 w-3.5 opacity-60" />
-                                <span className="text-[12px] font-medium">{admin.email}</span>
+                            <div className="px-5 py-5 space-y-3 bg-slate-50/10">
+                              <div className="flex items-center gap-3 text-slate-500">
+                                <Mail className="h-4 w-4 text-slate-300 group-hover/card:text-[#1a73e8] transition-colors" />
+                                <span className="text-[13px] font-bold tracking-tight">{admin.email}</span>
                               </div>
-                              <div className="flex items-center gap-2 text-slate-500">
-                                <Phone className="h-3.5 w-3.5 opacity-60" />
-                                <span className="text-[12px] font-medium">{admin.phone}</span>
+                              <div className="flex items-center gap-3 text-slate-500">
+                                <Phone className="h-4 w-4 text-slate-300 group-hover/card:text-[#1a73e8] transition-colors" />
+                                <span className="text-[13px] font-bold tracking-tight">{admin.phone}</span>
                               </div>
                             </div>
 
-                            <div className="px-4 py-2 flex justify-end bg-slate-50/30">
-                              <Badge className="bg-[#22c55e] hover:bg-[#22c55e] text-white border-none px-3 py-0.5 rounded-full text-[10px] font-bold shadow-none">
+                            <div className="px-5 py-3 flex justify-between items-center bg-slate-50/30 border-t border-slate-50/50">
+                              <div className="flex items-center gap-1.5">
+                                <ShieldCheck className="h-3.5 w-3.5 text-[#22c55e]" />
+                                <span className="text-[10px] font-bold uppercase text-[#22c55e] tracking-widest">Master Admin</span>
+                              </div>
+                              <Badge className="bg-[#e1f9ef] text-[#22c55e] border-none px-4 py-1 rounded-full text-[10px] font-bold shadow-none uppercase tracking-widest">
                                 {admin.status}
                               </Badge>
                             </div>
@@ -279,9 +382,12 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                         ))}
 
                         {mockAdmins.length === 0 && (
-                          <div className="col-span-full text-center py-20">
-                            <User className="h-10 w-10 text-slate-200 mx-auto mb-3" />
-                            <p className="text-sm text-slate-500 font-medium">No tenant admins assigned.</p>
+                          <div className="col-span-full text-center py-24">
+                            <div className="h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                              <User className="h-8 w-8 text-slate-200" />
+                            </div>
+                            <h3 className="text-sm font-extrabold text-slate-900">No Administrators Found</h3>
+                            <p className="text-xs text-slate-500 mt-1">Enroll your first team member to manage this brand.</p>
                           </div>
                         )}
                       </div>
