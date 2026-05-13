@@ -82,6 +82,20 @@ export function TenantCard({
     )} />
   )
 
+  const CountBox = ({ label, count, onClick }: { label: string, count: number, onClick: (e: React.MouseEvent) => void }) => (
+    <div 
+      className="flex-1 p-4 bg-slate-50/50 rounded-xl border border-slate-100 flex flex-col items-center justify-center transition-all duration-200 hover:bg-white hover:border-primary/20 hover:shadow-sm cursor-pointer group/count"
+      onClick={onClick}
+    >
+      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-2 group-hover/count:text-primary transition-colors">
+        {label}
+      </span>
+      <span className="text-xl font-bold text-slate-900">
+        {count}
+      </span>
+    </div>
+  )
+
   if (viewMode === 'list') {
     return (
       <Card 
@@ -105,21 +119,17 @@ export function TenantCard({
             </div>
           </div>
           
-          <div className="flex gap-8 items-center px-6 border-x border-slate-100">
-            <div 
-              className="flex flex-col items-center hover:bg-slate-50 p-2 rounded transition-colors cursor-pointer"
-              onClick={(e) => { e.stopPropagation(); onOutletsClick(tenant); }}
-            >
-              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wide">Outlets</span>
-              <span className="text-sm font-bold text-slate-900">{tenant.numberOfOutlets}</span>
-            </div>
-            <div 
-              className="flex flex-col items-center hover:bg-slate-50 p-2 rounded transition-colors cursor-pointer"
-              onClick={(e) => { e.stopPropagation(); onUsersClick(tenant); }}
-            >
-              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wide">Users</span>
-              <span className="text-sm font-bold text-slate-900">{tenant.numberOfUsers}</span>
-            </div>
+          <div className="flex gap-4 items-center px-6 border-x border-slate-100 min-w-[280px]">
+            <CountBox 
+              label="Outlets" 
+              count={tenant.numberOfOutlets} 
+              onClick={(e) => { e.stopPropagation(); onOutletsClick(tenant); }} 
+            />
+            <CountBox 
+              label="Users" 
+              count={tenant.numberOfUsers} 
+              onClick={(e) => { e.stopPropagation(); onUsersClick(tenant); }} 
+            />
           </div>
 
           <div className="flex items-center gap-4">
@@ -168,21 +178,17 @@ export function TenantCard({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 mt-auto">
-          <div 
-            className="p-3 bg-slate-50 rounded border border-slate-100 flex flex-col items-center group/count hover:bg-slate-100 transition-colors cursor-pointer"
-            onClick={(e) => { e.stopPropagation(); onOutletsClick(tenant); }}
-          >
-            <span className="text-[9px] text-slate-400 font-bold uppercase mb-1">Outlets</span>
-            <span className="text-sm font-bold text-slate-900">{tenant.numberOfOutlets}</span>
-          </div>
-          <div 
-            className="p-3 bg-slate-50 rounded border border-slate-100 flex flex-col items-center group/count hover:bg-slate-100 transition-colors cursor-pointer"
-            onClick={(e) => { e.stopPropagation(); onUsersClick(tenant); }}
-          >
-            <span className="text-[9px] text-slate-400 font-bold uppercase mb-1">Users</span>
-            <span className="text-sm font-bold text-slate-900">{tenant.numberOfUsers}</span>
-          </div>
+        <div className="flex gap-3 mt-auto">
+          <CountBox 
+            label="Outlets" 
+            count={tenant.numberOfOutlets} 
+            onClick={(e) => { e.stopPropagation(); onOutletsClick(tenant); }} 
+          />
+          <CountBox 
+            label="Users" 
+            count={tenant.numberOfUsers} 
+            onClick={(e) => { e.stopPropagation(); onUsersClick(tenant); }} 
+          />
         </div>
       </CardContent>
     </Card>
