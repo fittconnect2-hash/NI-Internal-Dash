@@ -126,7 +126,7 @@ export const initialUsers: User[] = [
   }
 ];
 
-export const deliveryPerformance = [
+export const servingPerformance = [
   { time: '6am', selected: 24, previous: 20 },
   { time: '8am', selected: 26, previous: 22 },
   { time: '10am', selected: 28, previous: 24 },
@@ -145,9 +145,9 @@ export const topRestaurants = [
 ];
 
 export const liveOrders = [
-  { id: '#48821', customer: 'Khalid M.', restaurant: 'Al Fanar', status: 'Delivered', amount: 'AED 94' },
+  { id: '#48821', customer: 'Khalid M.', restaurant: 'Al Fanar', status: 'Served', amount: 'AED 94' },
   { id: '#48820', customer: 'Sara J.', restaurant: 'Noodle House', status: 'On the way', amount: 'AED 67' },
   { id: '#48819', customer: 'Ahmed K.', restaurant: 'Pizzeria Napoli', status: 'Preparing', amount: 'AED 112' },
-  { id: '#48818', customer: 'Layla K.', restaurant: 'Grains Bowl', status: 'Delivered', amount: 'AED 55' },
+  { id: '#48818', customer: 'Layla K.', restaurant: 'Grains Bowl', status: 'Served', amount: 'AED 55' },
   { id: '#48817', customer: 'Omar H.', restaurant: 'Bedouin Grill', status: 'Cancelled', amount: 'AED 88' },
 ];

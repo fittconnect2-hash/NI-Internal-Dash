@@ -18,7 +18,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { 
   BarChart, 
   Bar, 
@@ -26,11 +25,10 @@ import {
   YAxis, 
   CartesianGrid, 
   Tooltip, 
-  ResponsiveContainer,
-  Cell
+  ResponsiveContainer
 } from "recharts"
 import { 
-  deliveryPerformance, 
+  servingPerformance, 
   topRestaurants, 
   liveOrders 
 } from "@/lib/mock-data"
@@ -70,7 +68,7 @@ export function DashboardOverview() {
           { label: "Total revenue", value: "AED 84.2k", change: "+12%", trend: "up", icon: DollarSign, color: "bg-[#1a73e8]/10 text-[#1a73e8]" },
           { label: "Orders today", value: "1,382", change: "+7%", trend: "up", icon: Receipt, color: "bg-[#22c55e]/10 text-[#22c55e]" },
           { label: "Active restaurants", value: "247", change: "-3", trend: "down", icon: Store, color: "bg-[#1a73e8]/10 text-[#1a73e8]" },
-          { label: "Avg delivery", value: "28 min", change: "-3 min", trend: "up", icon: Clock, color: "bg-amber-100 text-amber-600" },
+          { label: "Avg serving", value: "28 min", change: "-3 min", trend: "up", icon: Clock, color: "bg-amber-100 text-amber-600" },
         ].map((stat, i) => (
           <Card key={i} className="border-slate-200 shadow-sm overflow-hidden group hover:border-[#1a73e8]/20 transition-all duration-300">
             <CardContent className="p-6">
@@ -97,7 +95,7 @@ export function DashboardOverview() {
       <Card className="border-slate-200 shadow-sm p-8">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h3 className="text-lg font-black text-slate-900 tracking-tight">Average Delivery Performance (min)</h3>
+            <h3 className="text-lg font-black text-slate-900 tracking-tight">Average Serving Performance (min)</h3>
             <p className="text-xs text-slate-400 font-bold uppercase tracking-tight mt-1">Real-time network latency check</p>
           </div>
           <div className="flex items-center gap-6">
@@ -116,7 +114,7 @@ export function DashboardOverview() {
         </div>
         <div className="h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={deliveryPerformance} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+            <BarChart data={servingPerformance} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
               <XAxis 
                 dataKey="time" 
@@ -209,7 +207,7 @@ export function DashboardOverview() {
                 <div className="flex items-center gap-8">
                   <Badge className={cn(
                     "rounded-full px-4 py-1 text-[10px] font-bold border shadow-none uppercase tracking-widest",
-                    order.status === 'Delivered' ? "bg-[#e1f9ef] text-[#22c55e] border-none" :
+                    order.status === 'Served' ? "bg-[#e1f9ef] text-[#22c55e] border-none" :
                     order.status === 'On the way' ? "bg-blue-50 text-blue-500 border-none" :
                     order.status === 'Preparing' ? "bg-amber-50 text-amber-600 border-none" :
                     "bg-rose-50 text-rose-500 border-none"
