@@ -12,10 +12,8 @@ import {
   Plus, 
   Grid2X2, 
   List, 
-  Filter,
-  ArrowUpDown,
-  Bell,
-  User
+  ChevronDown,
+  ArrowLeft
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -24,10 +22,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator,
-  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu"
-import { Badge } from "@/components/ui/badge"
+import { cn } from "@/lib/utils"
 
 export default function DashboardPage() {
   const [tenants, setTenants] = React.useState<Tenant[]>(initialTenants)
@@ -69,116 +65,99 @@ export default function DashboardPage() {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-background">
+      <div className="flex min-h-screen w-full bg-[#F8F9FA]">
         <DashboardSidebar />
         
         <main className="flex-1 flex flex-col min-w-0">
-          {/* Top Navbar */}
-          <header className="h-20 border-b bg-white flex items-center justify-between px-8 sticky top-0 z-10">
-            <div className="flex items-center gap-4 flex-1 max-w-xl">
-              <div className="relative w-full">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input 
-                  placeholder="Search tenants, emails, or phone numbers..." 
-                  className="pl-10 h-11 bg-slate-50 border-none rounded-xl w-full focus-visible:ring-1 focus-visible:ring-primary/20"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
+          {/* Main Top Header */}
+          <div className="p-8">
+            <div className="max-w-7xl mx-auto">
+              <div className="flex items-center gap-4 mb-8">
+                <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl bg-white border-slate-200">
+                  <ArrowLeft className="h-5 w-5 text-slate-400" />
+                </Button>
+                <div className="flex-1" />
+                <div className="h-10 w-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 text-sm font-bold shadow-sm">
+                  S
+                </div>
               </div>
-            </div>
 
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" className="relative rounded-full hover:bg-slate-100">
-                <Bell className="h-5 w-5 text-muted-foreground" />
-                <span className="absolute top-2 right-2 h-2 w-2 bg-destructive rounded-full" />
-              </Button>
-              <div className="h-8 w-px bg-slate-200 mx-1" />
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-3 p-1 pl-3 pr-2 rounded-full hover:bg-slate-100">
-                    <div className="text-right hidden sm:block">
-                      <p className="text-sm font-bold leading-none">Admin User</p>
-                      <p className="text-[10px] text-muted-foreground mt-0.5">Super Admin</p>
-                    </div>
-                    <div className="h-9 w-9 bg-primary/10 rounded-full flex items-center justify-center text-primary">
-                      <User className="h-5 w-5" />
-                    </div>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 rounded-xl">
-                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>Profile Settings</DropdownMenuItem>
-                  <DropdownMenuItem>Admin Logs</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-destructive">Log out</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </header>
-
-          {/* Content Area */}
-          <div className="flex-1 p-8">
-            <div className="max-w-7xl mx-auto space-y-8">
-              
-              {/* Stats / Header */}
-              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+              <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-8">
                 <div>
-                  <h1 className="text-3xl font-headline font-black tracking-tight mb-2">Tenants Overview</h1>
-                  <p className="text-muted-foreground">Manage and monitor all active and pending tenant profiles.</p>
+                  <h1 className="text-[32px] font-black tracking-tight text-[#1A1A1A] mb-1">Tenant Management</h1>
+                  <p className="text-slate-500 font-medium text-lg">Manage tenants, tenant admins, and tenant configurations in one place.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                   <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" className="rounded-xl h-11 border-none bg-white shadow-sm gap-2">
-                        <Filter className="h-4 w-4 text-muted-foreground" />
-                        <span>Filter By Status</span>
-                        {filterStatus && <Badge className="ml-1 h-5 px-1.5">{filterStatus}</Badge>}
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="rounded-xl">
-                      <DropdownMenuItem onClick={() => setFilterStatus(null)}>All Statuses</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setFilterStatus('Active')}>Active</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setFilterStatus('Configuration pending')}>Pending</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setFilterStatus('Inactive')}>Inactive</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-
-                  <div className="bg-white p-1 rounded-xl shadow-sm flex items-center">
-                    <Button 
-                      variant={viewMode === 'grid' ? 'secondary' : 'ghost'} 
-                      size="icon" 
-                      className="rounded-lg h-9 w-9"
-                      onClick={() => setViewMode('grid')}
-                    >
-                      <Grid2X2 className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      variant={viewMode === 'list' ? 'secondary' : 'ghost'} 
-                      size="icon" 
-                      className="rounded-lg h-9 w-9"
-                      onClick={() => setViewMode('list')}
-                    >
-                      <List className="h-4 w-4" />
-                    </Button>
-                  </div>
-
                   <Button 
-                    className="h-11 rounded-xl px-6 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 gap-2"
+                    className="h-11 rounded-lg px-6 bg-[#0071BC] hover:bg-[#005a96] text-white font-bold gap-2 text-sm shadow-sm"
                     onClick={() => {
                       setEditingTenant(null)
                       setIsFormOpen(true)
                     }}
                   >
-                    <Plus className="h-5 w-5" />
+                    <Plus className="h-4 w-4" />
                     Add Tenant
                   </Button>
+                  
+                  <div className="bg-white border border-slate-200 p-1 rounded-lg flex items-center shadow-sm">
+                    <Button 
+                      variant="ghost"
+                      size="sm" 
+                      className={cn(
+                        "h-9 px-4 gap-2 rounded-md font-bold text-xs transition-colors", 
+                        viewMode === 'list' ? "bg-[#E3F2FD] text-[#0071BC]" : "text-slate-500"
+                      )}
+                      onClick={() => setViewMode('list')}
+                    >
+                      <List className="h-4 w-4" />
+                      List
+                    </Button>
+                    <Button 
+                      variant="ghost"
+                      size="sm" 
+                      className={cn(
+                        "h-9 px-4 gap-2 rounded-md font-bold text-xs transition-colors", 
+                        viewMode === 'grid' ? "bg-[#0071BC] text-white" : "text-slate-500"
+                      )}
+                      onClick={() => setViewMode('grid')}
+                    >
+                      <Grid2X2 className="h-4 w-4" />
+                      Grid
+                    </Button>
+                  </div>
                 </div>
               </div>
 
-              {/* Grid/List of Tenants */}
+              {/* Search and Filter */}
+              <div className="flex flex-col md:flex-row gap-4 mb-10">
+                <div className="relative flex-1">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                  <Input 
+                    placeholder="Search tenants by name, email or phone number" 
+                    className="pl-12 h-14 bg-white border-slate-200 rounded-xl w-full text-base"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="h-14 px-6 rounded-xl bg-white border-slate-200 text-slate-500 justify-between min-w-[200px] text-base">
+                      <span>Filter by Status</span>
+                      <ChevronDown className="h-5 w-5 ml-2 opacity-40" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-[200px] rounded-xl p-2">
+                    <DropdownMenuItem className="rounded-lg py-2" onClick={() => setFilterStatus(null)}>All Statuses</DropdownMenuItem>
+                    <DropdownMenuItem className="rounded-lg py-2" onClick={() => setFilterStatus('Active')}>Active</DropdownMenuItem>
+                    <DropdownMenuItem className="rounded-lg py-2" onClick={() => setFilterStatus('Configuration pending')}>Pending</DropdownMenuItem>
+                    <DropdownMenuItem className="rounded-lg py-2" onClick={() => setFilterStatus('Inactive')}>Inactive</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              {/* Content Area */}
               {filteredTenants.length > 0 ? (
-                <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'}>
+                <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6' : 'space-y-4'}>
                   {filteredTenants.map((tenant) => (
                     <TenantCard 
                       key={tenant.id} 
@@ -189,13 +168,19 @@ export default function DashboardPage() {
                   ))}
                 </div>
               ) : (
-                <div className="bg-white rounded-3xl p-16 text-center border-2 border-dashed border-slate-200">
-                  <div className="h-20 w-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <Search className="h-10 w-10 text-slate-300" />
+                <div className="bg-white rounded-[32px] p-24 text-center border-2 border-dashed border-slate-200">
+                  <div className="h-24 w-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Search className="h-12 w-12 text-slate-300" />
                   </div>
-                  <h3 className="text-xl font-bold mb-2">No tenants found</h3>
-                  <p className="text-muted-foreground mb-6">We couldn't find any results matching your search or filters.</p>
-                  <Button variant="outline" onClick={() => {setSearchQuery(""); setFilterStatus(null)}}>Clear all filters</Button>
+                  <h3 className="text-2xl font-bold mb-3">No tenants found</h3>
+                  <p className="text-slate-500 mb-8 max-w-sm mx-auto">We couldn't find any results matching your search or filters. Try adjusting your query.</p>
+                  <Button 
+                    variant="outline" 
+                    className="rounded-xl h-12 px-8 font-bold border-slate-200"
+                    onClick={() => {setSearchQuery(""); setFilterStatus(null)}}
+                  >
+                    Clear all filters
+                  </Button>
                 </div>
               )}
             </div>

@@ -4,30 +4,36 @@
 
 @layer base {
   :root {
-    --background: 210 50% 98%;
+    --background: 210 20% 98%;
     --foreground: 222 47% 11%;
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
-    --primary: 219 100% 58%;
+    --primary: 201 100% 36%;
     --primary-foreground: 210 40% 98%;
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222 47% 11.2%;
     --muted: 210 40% 94%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 191 67% 53%;
+    --accent: 0 72% 51%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 219 100% 58%;
+    --ring: 201 100% 36%;
     --radius: 0.75rem;
 
-    /* Pending Status Colors */
-    --pending-bg: 48 100% 97%;
-    --pending-text: 54 100% 32%;
+    /* Sidebar Variables */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 215.4 16.3% 46.9%;
+    --sidebar-primary: 201 100% 36%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 40% 96.1%;
+    --sidebar-accent-foreground: 222 47% 11.2%;
+    --sidebar-border: 214.3 31.8% 91.4%;
+    --sidebar-ring: 201 100% 36%;
   }
 
   .dark {
@@ -37,19 +43,19 @@
     --card-foreground: 210 40% 98%;
     --popover: 222 47% 6%;
     --popover-foreground: 210 40% 98%;
-    --primary: 219 100% 58%;
+    --primary: 201 100% 36%;
     --primary-foreground: 210 40% 98%;
     --secondary: 222 47% 11.2%;
     --secondary-foreground: 210 40% 98%;
     --muted: 222 47% 11.2%;
     --muted-foreground: 215 20.2% 65.1%;
-    --accent: 191 67% 53%;
+    --accent: 0 72% 51%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
     --border: 222 47% 11.2%;
     --input: 222 47% 11.2%;
-    --ring: 219 100% 58%;
+    --ring: 201 100% 36%;
   }
 }
 
@@ -63,6 +69,18 @@
 }
 
 .pending-status {
-  background-color: hsl(var(--pending-bg));
-  color: hsl(var(--pending-text));
+  background-color: #FFF9C4;
+  color: #827717;
+}
+
+.sidebar-active-item {
+  background-color: #E3F2FD;
+  color: #0071BC;
+  border-left: 4px solid #0071BC;
+}
+
+.card-footer-gray {
+  border-top: 1px solid #F3F4F6;
+  color: #9CA3AF;
+  font-size: 11px;
 }
