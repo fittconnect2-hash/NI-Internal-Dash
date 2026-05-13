@@ -18,7 +18,9 @@ import {
   Grid2X2, 
   List, 
   ChevronDown,
-  LayoutDashboard
+  LayoutDashboard,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -30,12 +32,15 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
 
+const ITEMS_PER_PAGE = 8
+
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = React.useState("tenants")
   const [tenants, setTenants] = React.useState<Tenant[]>(initialTenants)
   const [searchQuery, setSearchQuery] = React.useState("")
   const [filterStatus, setFilterStatus] = React.useState<string | null>(null)
   const [viewMode, setViewMode] = React.useState<'grid' | 'list'>('grid')
+  const [currentPage, setCurrentPage] = React.useState(1)
   
   const [selectedTenant, setSelectedTenant] = React.useState<Tenant | null>(null)
   const [selectedOutlet, setSelectedOutlet] = React.useState<Outlet | null>(null)
@@ -47,14 +52,29 @@ export default function DashboardPage() {
   const [configuringTenant, setConfiguringTenant] = React.useState<Tenant | null>(null)
   const [viewingTenant, setViewingTenant] = React.useState<Tenant | null>(null)
 
-  const filteredTenants = tenants.filter(t => {
-    const matchesSearch = 
-      t.tenantName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.contactEmail.toLowerCase().includes(searchQuery.toLowerCase())
-    
-    const matchesFilter = !filterStatus || t.configurationStatus === filterStatus
-    return matchesSearch && matchesFilter
-  })
+  // Filter logic
+  const filteredTenants = React.useMemo(() => {
+    return tenants.filter(t => {
+      const matchesSearch = 
+        t.tenantName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        t.contactEmail.toLowerCase().includes(searchQuery.toLowerCase())
+      
+      const matchesFilter = !filterStatus || t.configurationStatus === filterStatus
+      return matchesSearch && matchesFilter
+    })
+  }, [tenants, searchQuery, filterStatus])
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredTenants.length / ITEMS_PER_PAGE)
+  const paginatedTenants = React.useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE
+    return filteredTenants.slice(start, start + ITEMS_PER_PAGE)
+  }, [filteredTenants, currentPage])
+
+  // Reset page when filtering/searching
+  React.useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, filterStatus])
 
   const handleAddTenant = (data: Partial<Tenant>) => {
     if (editingTenant) {
@@ -121,8 +141,8 @@ export default function DashboardPage() {
     }
 
     return (
-      <div className="p-6 md:p-8">
-        <div className="max-w-7xl mx-auto">
+      <div className="p-6 md:p-8 flex flex-col h-full overflow-hidden">
+        <div className="max-w-7xl mx-auto w-full flex-1 flex flex-col min-h-0">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <div>
               <h1 className="text-2xl font-bold text-slate-900">Tenant Management</h1>
@@ -179,22 +199,80 @@ export default function DashboardPage() {
             </DropdownMenu>
           </div>
 
-          <div className={cn(viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4' : 'space-y-3')}>
-            {filteredTenants.map((tenant) => (
-              <TenantCard 
-                key={tenant.id} 
-                tenant={tenant} 
-                viewMode={viewMode} 
-                onEdit={(t) => {
-                  setEditingTenant(t)
-                  setIsFormOpen(true)
-                }}
-                onView={handleViewTenant}
-                onConfigure={handleConfigureTenant}
-                onDelete={handleDeleteTenant}
-              />
-            ))}
+          <div className="flex-1 overflow-y-auto pr-2 scrollbar-hide">
+            <div className={cn(viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-8' : 'space-y-3 pb-8')}>
+              {paginatedTenants.map((tenant) => (
+                <TenantCard 
+                  key={tenant.id} 
+                  tenant={tenant} 
+                  viewMode={viewMode} 
+                  onEdit={(t) => {
+                    setEditingTenant(t)
+                    setIsFormOpen(true)
+                  }}
+                  onView={handleViewTenant}
+                  onConfigure={handleConfigureTenant}
+                  onDelete={handleDeleteTenant}
+                />
+              ))}
+              {filteredTenants.length === 0 && (
+                <div className="col-span-full py-20 text-center">
+                  <p className="text-slate-400 font-medium">No tenants match your search criteria.</p>
+                </div>
+              )}
+            </div>
           </div>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="mt-auto py-4 border-t border-slate-100 flex items-center justify-between">
+              <p className="text-xs text-slate-500 font-medium">
+                Showing <span className="text-slate-900">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to <span className="text-slate-900">{Math.min(currentPage * ITEMS_PER_PAGE, filteredTenants.length)}</span> of <span className="text-slate-900">{filteredTenants.length}</span> results
+              </p>
+              <div className="flex items-center gap-1">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="h-8 px-2"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum = i + 1;
+                  // Show pages around current page if many pages
+                  if (totalPages > 5 && currentPage > 3) {
+                    pageNum = currentPage - 3 + i + 1;
+                    if (pageNum > totalPages) pageNum = totalPages - (4 - i);
+                  }
+                  
+                  return (
+                    <Button
+                      key={pageNum}
+                      variant={currentPage === pageNum ? "default" : "outline"}
+                      size="sm"
+                      className={cn("h-8 w-8 p-0 text-xs font-bold", currentPage === pageNum ? "bg-[#1a73e8]" : "text-slate-600")}
+                      onClick={() => setCurrentPage(pageNum)}
+                    >
+                      {pageNum}
+                    </Button>
+                  );
+                })}
+                
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="h-8 px-2"
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     )
@@ -202,13 +280,13 @@ export default function DashboardPage() {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-background">
+      <div className="flex min-h-screen w-full bg-background overflow-hidden">
         <DashboardSidebar activeTab={activeTab} onTabChange={(tab) => {
           setActiveTab(tab)
           setSelectedTenant(null)
           setSelectedOutlet(null)
         }} />
-        <main className="flex-1 flex flex-col min-w-0">
+        <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
           {renderContent()}
         </main>
       </div>
