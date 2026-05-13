@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 
 interface TenantConfigurationProps {
@@ -133,8 +134,29 @@ export function TenantConfiguration({ tenant, isOpen, onClose, onSave }: TenantC
                   </div>
                 </div>
               )}
+
+              {activeTab === "Commission" && (
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-slate-700">Order Commission Rate (%) <span className="text-red-500">*</span></Label>
+                    <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-slate-700">Order Commission Cap <span className="text-red-500">*</span></Label>
+                    <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-slate-700">Convenience Fee Rate (%) <span className="text-red-500">*</span></Label>
+                    <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-slate-700">Convenience Fee Cap <span className="text-red-500">*</span></Label>
+                    <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
+                  </div>
+                </div>
+              )}
               
-              {activeTab !== "Currency" && (
+              {!["Currency", "Commission"].includes(activeTab) && (
                 <div className="py-20 text-center space-y-2">
                   <h4 className="font-bold text-slate-900">{activeTab} Settings</h4>
                   <p className="text-sm text-slate-500">Configuration options for {activeTab.toLowerCase()} will appear here.</p>
