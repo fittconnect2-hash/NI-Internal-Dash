@@ -45,7 +45,7 @@ interface TenantDetailProps {
 }
 
 export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
-  const [isAddingAdmin, setIsAddingAdmin] = React.useState(false)
+  const [activeTab, setActiveTab] = React.useState("overview")
   
   if (!tenant) return null
 
@@ -66,16 +66,12 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
   ]
 
   const handleClose = () => {
-    setIsAddingAdmin(false)
     onClose()
   }
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <SheetContent side="right" className={cn(
-        "p-0 border-l border-slate-200 bg-[#f8f9fc] transition-all duration-300",
-        isAddingAdmin ? "sm:max-w-[1200px]" : "sm:max-w-[700px]"
-      )}>
+      <SheetContent side="right" className="p-0 border-l border-slate-200 bg-[#f8f9fc] sm:max-w-[1200px] w-full transition-all duration-300">
         <div className="flex flex-col h-full">
           <SheetHeader className="p-6 bg-white border-b border-slate-200 relative">
             <div className="flex items-center gap-4">
@@ -103,7 +99,7 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
             </div>
           </SheetHeader>
 
-          <Tabs defaultValue="overview" className="flex-1 flex flex-col min-h-0">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
             <div className="bg-white px-6 border-b border-slate-200 flex-shrink-0">
               <TabsList className="bg-transparent h-12 p-0 gap-8 justify-start">
                 <TabsTrigger 
@@ -123,156 +119,128 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
 
             <div className="flex-1 overflow-hidden">
               <TabsContent value="overview" className="m-0 h-full overflow-y-auto p-6 space-y-6">
-                <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-                  <div className="flex items-center gap-2 mb-6">
-                    <div className="h-5 w-5 rounded bg-slate-50 border border-slate-100 flex items-center justify-center">
-                      <User className="h-3 w-3 text-slate-400" />
+                <div className="max-w-4xl mx-auto">
+                  <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                    <div className="flex items-center gap-2 mb-6">
+                      <div className="h-5 w-5 rounded bg-slate-50 border border-slate-100 flex items-center justify-center">
+                        <User className="h-3 w-3 text-slate-400" />
+                      </div>
+                      <h3 className="font-bold text-slate-900">Contact Information</h3>
                     </div>
-                    <h3 className="font-bold text-slate-900">Contact Information</h3>
-                  </div>
 
-                  <div className="grid grid-cols-2 gap-y-6 gap-x-12">
-                    <div>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Company</p>
-                      <p className="text-sm font-semibold text-slate-900">{tenant.tenantName}</p>
+                    <div className="grid grid-cols-2 gap-y-6 gap-x-12">
+                      <div>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Company</p>
+                        <p className="text-sm font-semibold text-slate-900">{tenant.tenantName}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Business Type</p>
+                        <p className="text-sm font-semibold text-slate-900">{tenant.businessType || "Unknown"}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Contact Person</p>
+                        <p className="text-sm font-semibold text-slate-900">{tenant.contactName || tenant.tenantName}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Email</p>
+                        <p className="text-sm font-semibold text-slate-900 text-[#1a73e8]">{tenant.contactEmail}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Phone</p>
+                        <p className="text-sm font-semibold text-slate-900">{tenant.contactPhone}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Address</p>
+                        <p className="text-sm font-semibold text-slate-900">
+                          {tenant.addressLine1 ? `${tenant.addressLine1}, ${tenant.city}` : "N/A"}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Business Type</p>
-                      <p className="text-sm font-semibold text-slate-900">{tenant.businessType || "Unknown"}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Contact Person</p>
-                      <p className="text-sm font-semibold text-slate-900">{tenant.contactName || tenant.tenantName}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Email</p>
-                      <p className="text-sm font-semibold text-slate-900 text-[#1a73e8]">{tenant.contactEmail}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Phone</p>
-                      <p className="text-sm font-semibold text-slate-900">{tenant.contactPhone}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Address</p>
-                      <p className="text-sm font-semibold text-slate-900">
-                        {tenant.addressLine1 ? `${tenant.addressLine1}, ${tenant.city}` : "N/A"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-                  <div className="flex items-center gap-2 mb-6">
-                    <div className="h-5 w-5 rounded bg-slate-50 border border-slate-100 flex items-center justify-center">
-                      <Settings className="h-3 w-3 text-slate-400" />
-                    </div>
-                    <h3 className="font-bold text-slate-900">Configuration</h3>
-                  </div>
-                  
-                  <div className="py-12 flex items-center justify-center">
-                    <p className="text-sm text-slate-400 font-medium italic">
-                      Configuration not set for this tenant.
-                    </p>
                   </div>
                 </div>
               </TabsContent>
 
               <TabsContent value="admins" className="m-0 h-full flex flex-col">
-                <div className="flex items-center justify-between p-6 flex-shrink-0">
-                  <h3 className="text-lg font-bold text-slate-900">
-                    {isAddingAdmin ? "Add New Tenant Admin" : "Manage Personnel"}
-                  </h3>
-                  {!isAddingAdmin && (
-                    <Button 
-                      size="sm" 
-                      className="bg-[#1a73e8] hover:bg-[#1557b0] text-white gap-2 h-10 px-4 font-bold rounded-lg shadow-sm"
-                      onClick={() => setIsAddingAdmin(true)}
-                    >
-                      <UserPlus className="h-4 w-4" />
-                      Add Admin
-                    </Button>
-                  )}
-                </div>
-
-                <div className="flex-1 flex min-h-0 p-6 pt-0 gap-6 overflow-hidden">
-                  {/* Form Section */}
-                  {isAddingAdmin && (
-                    <div className="flex-1 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col min-h-0 animate-in slide-in-from-left duration-300 overflow-hidden">
-                      <ScrollArea className="flex-1">
-                        <div className="p-8 space-y-8">
-                          <div className="grid grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                              <Label className="text-sm font-semibold text-slate-700">First Name <span className="text-red-500">*</span></Label>
-                              <Input placeholder="First name" className="h-11 border-slate-200 bg-slate-50/30" />
-                            </div>
-                            <div className="space-y-2">
-                              <Label className="text-sm font-semibold text-slate-700">Last Name <span className="text-red-500">*</span></Label>
-                              <Input placeholder="Last name" className="h-11 border-slate-200 bg-slate-50/30" />
-                            </div>
+                <div className="flex-1 flex min-h-0 p-6 gap-6 overflow-hidden">
+                  {/* Form Section - Left Side, Fixed Width */}
+                  <div className="w-[450px] bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col min-h-0 overflow-hidden">
+                    <div className="p-6 border-b border-slate-50">
+                      <h3 className="text-lg font-bold text-[#1e293b]">Add New Tenant Admin</h3>
+                    </div>
+                    <ScrollArea className="flex-1">
+                      <div className="p-8 space-y-8">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label className="text-sm font-semibold text-slate-700">First Name <span className="text-red-500">*</span></Label>
+                            <Input placeholder="First name" className="h-11 border-slate-200 bg-slate-50/30" />
                           </div>
-
-                          <div className="grid grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                              <Label className="text-sm font-semibold text-slate-700">Username <span className="text-red-500">*</span></Label>
-                              <Input placeholder="Enter username" className="h-11 border-slate-200 bg-slate-50/30" />
-                            </div>
-                            <div className="space-y-2">
-                              <Label className="text-sm font-semibold text-slate-700">Email Address</Label>
-                              <Input type="email" placeholder="Enter email address" className="h-11 border-slate-200 bg-slate-50/30" />
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                              <Label className="text-sm font-semibold text-slate-700">Password <span className="text-red-500">*</span></Label>
-                              <Input type="password" placeholder="Enter password" className="h-11 border-slate-200 bg-slate-50/30" />
-                            </div>
-                            <div className="space-y-2">
-                              <Label className="text-sm font-semibold text-slate-700">Confirm Password <span className="text-red-500">*</span></Label>
-                              <Input type="password" placeholder="Confirm password" className="h-11 border-slate-200 bg-slate-50/30" />
-                            </div>
-                          </div>
-
-                          <div className="space-y-2 max-w-md">
-                            <Label className="text-sm font-semibold text-slate-700">Phone Number <span className="text-red-500">*</span></Label>
-                            <div className="flex gap-2">
-                              <Select defaultValue="+971">
-                                <SelectTrigger className="w-[100px] h-11 border-slate-200 bg-slate-50/30">
-                                  <SelectValue placeholder="+971" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="+971">+971</SelectItem>
-                                  <SelectItem value="+1">+1</SelectItem>
-                                  <SelectItem value="+44">+44</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <Input placeholder="Phone number" className="h-11 flex-1 border-slate-200 bg-slate-50/30" />
-                            </div>
+                          <div className="space-y-2">
+                            <Label className="text-sm font-semibold text-slate-700">Last Name <span className="text-red-500">*</span></Label>
+                            <Input placeholder="Last name" className="h-11 border-slate-200 bg-slate-50/30" />
                           </div>
                         </div>
-                      </ScrollArea>
-                      <div className="p-6 border-t border-slate-100 flex justify-end gap-3 bg-white flex-shrink-0">
-                        <Button variant="outline" className="h-10 px-6 font-bold text-slate-600 border-slate-200" onClick={() => setIsAddingAdmin(false)}>
-                          Cancel
-                        </Button>
-                        <Button className="h-10 px-6 font-bold bg-[#94b8d7] hover:bg-[#83a7c6] text-white border-none">
-                          Add Admin
-                        </Button>
-                      </div>
-                    </div>
-                  )}
 
-                  {/* List Section */}
-                  <div className={cn(
-                    "bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col min-h-0 overflow-hidden",
-                    isAddingAdmin ? "w-[400px]" : "flex-1"
-                  )}>
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label className="text-sm font-semibold text-slate-700">Username <span className="text-red-500">*</span></Label>
+                            <Input placeholder="Enter username" className="h-11 border-slate-200 bg-slate-50/30" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-sm font-semibold text-slate-700">Email Address</Label>
+                            <Input type="email" placeholder="Enter email address" className="h-11 border-slate-200 bg-slate-50/30" />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label className="text-sm font-semibold text-slate-700">Password <span className="text-red-500">*</span></Label>
+                            <Input type="password" placeholder="Enter password" className="h-11 border-slate-200 bg-slate-50/30" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-sm font-semibold text-slate-700">Confirm Password <span className="text-red-500">*</span></Label>
+                            <Input type="password" placeholder="Confirm password" className="h-11 border-slate-200 bg-slate-50/30" />
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label className="text-sm font-semibold text-slate-700">Phone Number <span className="text-red-500">*</span></Label>
+                          <div className="flex gap-2">
+                            <Select defaultValue="+971">
+                              <SelectTrigger className="w-[100px] h-11 border-slate-200 bg-slate-50/30">
+                                <SelectValue placeholder="+971" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="+971">+971</SelectItem>
+                                <SelectItem value="+1">+1</SelectItem>
+                                <SelectItem value="+44">+44</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <Input placeholder="Phone number" className="h-11 flex-1 border-slate-200 bg-slate-50/30" />
+                          </div>
+                        </div>
+                      </div>
+                    </ScrollArea>
+                    <div className="p-6 border-t border-slate-100 flex justify-end gap-3 bg-white flex-shrink-0">
+                      <Button variant="outline" className="h-10 px-6 font-bold text-slate-600 border-slate-200">
+                        Cancel
+                      </Button>
+                      <Button className="h-10 px-6 font-bold bg-[#94b8d7] hover:bg-[#83a7c6] text-white border-none">
+                        Add Admin
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* List Section - Right Side, Much Larger Width */}
+                  <div className="flex-1 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col min-h-0 overflow-hidden">
+                    <div className="p-6 border-b border-slate-50">
+                      <h3 className="text-lg font-bold text-slate-900">Personnel List</h3>
+                    </div>
                     <ScrollArea className="flex-1">
-                      <div className="p-4 space-y-4">
+                      <div className="p-6 grid grid-cols-1 xl:grid-cols-2 gap-4">
                         {mockAdmins.map((admin) => (
                           <div 
                             key={admin.id} 
-                            className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm"
+                            className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm h-fit"
                           >
                             <div className="p-4 flex items-start justify-between border-b border-slate-50">
                               <div className="flex items-center gap-3">
@@ -311,7 +279,7 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                         ))}
 
                         {mockAdmins.length === 0 && (
-                          <div className="text-center py-20">
+                          <div className="col-span-full text-center py-20">
                             <User className="h-10 w-10 text-slate-200 mx-auto mb-3" />
                             <p className="text-sm text-slate-500 font-medium">No tenant admins assigned.</p>
                           </div>
