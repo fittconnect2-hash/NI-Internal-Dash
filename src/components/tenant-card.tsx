@@ -3,25 +3,66 @@
 import { Tenant } from "@/lib/types"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Mail, Phone, Store, Users, ChevronRight, MapPin } from "lucide-react"
+import { Mail, Phone, MapPin, MoreVertical, Eye, Edit2, Settings2, Trash2 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button"
 
 interface TenantCardProps {
   tenant: Tenant;
   viewMode: 'grid' | 'list';
   onEdit: (tenant: Tenant) => void;
-  onViewOutlets: () => void;
+  onViewOutlets: (tenant: Tenant) => void;
+  onConfigure: (tenant: Tenant) => void;
+  onDelete: (id: string) => void;
 }
 
-export function TenantCard({ tenant, viewMode, onEdit, onViewOutlets }: TenantCardProps) {
+export function TenantCard({ tenant, viewMode, onEdit, onViewOutlets, onConfigure, onDelete }: TenantCardProps) {
   const isPending = tenant.configurationStatus === "Configuration pending"
   const initials = tenant.tenantName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
+
+  const ActionsMenu = () => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="h-8 w-8 rounded-full hover:bg-slate-100"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <MoreVertical className="h-4 w-4 text-slate-400" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onViewOutlets(tenant); }}>
+          <Eye className="mr-2 h-4 w-4" /> View Outlets
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEdit(tenant); }}>
+          <Edit2 className="mr-2 h-4 w-4" /> Edit Profile
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onConfigure(tenant); }}>
+          <Settings2 className="mr-2 h-4 w-4" /> Configure
+        </DropdownMenuItem>
+        <DropdownMenuItem 
+          className="text-destructive focus:text-destructive" 
+          onClick={(e) => { e.stopPropagation(); onDelete(tenant.id); }}
+        >
+          <Trash2 className="mr-2 h-4 w-4" /> Delete
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
 
   if (viewMode === 'list') {
     return (
       <Card 
         className="group hover:border-primary/30 transition-all duration-200 border-border bg-white cursor-pointer"
-        onClick={onViewOutlets}
+        onClick={() => onViewOutlets(tenant)}
       >
         <CardContent className="flex items-center p-4 gap-4">
           <div className="h-10 w-10 rounded bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-sm shrink-0">
@@ -51,10 +92,10 @@ export function TenantCard({ tenant, viewMode, onEdit, onViewOutlets }: TenantCa
           </div>
 
           <div className="flex items-center gap-4">
-            <Badge className={cn("rounded px-2 py-0.5 text-[10px] font-bold uppercase", isPending ? "pending-status" : "active-status")}>
-              {tenant.configurationStatus}
+            <Badge className={cn("rounded px-2 py-0.5 text-[10px] font-bold uppercase", isPending ? "bg-amber-100 text-amber-700 border-amber-200" : "bg-green-100 text-green-700 border-green-200")}>
+              {tenant.configurationStatus === "Configuration pending" ? "Pending" : "Active"}
             </Badge>
-            <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-primary transition-colors" />
+            <ActionsMenu />
           </div>
         </CardContent>
       </Card>
@@ -64,16 +105,19 @@ export function TenantCard({ tenant, viewMode, onEdit, onViewOutlets }: TenantCa
   return (
     <Card 
       className="group flex flex-col h-full border-border bg-white hover:shadow-md transition-all duration-200 cursor-pointer"
-      onClick={onViewOutlets}
+      onClick={() => onViewOutlets(tenant)}
     >
       <CardContent className="p-5 flex flex-col h-full">
         <div className="flex justify-between items-start mb-4">
           <div className="h-12 w-12 rounded bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 font-bold text-lg">
             {initials}
           </div>
-          <Badge className={cn("rounded px-2 py-0.5 text-[10px] font-bold uppercase", isPending ? "pending-status" : "active-status")}>
-            {tenant.configurationStatus}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge className={cn("rounded px-2 py-0.5 text-[10px] font-bold uppercase", isPending ? "bg-amber-100 text-amber-700 border-amber-200" : "bg-green-100 text-green-700 border-green-200")}>
+              {tenant.configurationStatus === "Configuration pending" ? "Pending" : "Active"}
+            </Badge>
+            <ActionsMenu />
+          </div>
         </div>
         
         <h3 className="font-bold text-base text-slate-900 mb-1 group-hover:text-primary transition-colors">{tenant.tenantName}</h3>

@@ -4,6 +4,7 @@ import * as React from "react"
 import { DashboardSidebar } from "@/components/dashboard-sidebar"
 import { TenantCard } from "@/components/tenant-card"
 import { TenantForm } from "@/components/tenant-form"
+import { TenantConfiguration } from "@/components/tenant-configuration"
 import { OutletManagement } from "@/components/outlet-management"
 import { UserManagement } from "@/components/user-management"
 import { initialTenants } from "@/lib/mock-data"
@@ -38,7 +39,9 @@ export default function DashboardPage() {
   const [selectedOutlet, setSelectedOutlet] = React.useState<Outlet | null>(null)
   
   const [isFormOpen, setIsFormOpen] = React.useState(false)
+  const [isConfigOpen, setIsConfigOpen] = React.useState(false)
   const [editingTenant, setEditingTenant] = React.useState<Tenant | null>(null)
+  const [configuringTenant, setConfiguringTenant] = React.useState<Tenant | null>(null)
 
   const filteredTenants = tenants.filter(t => {
     const matchesSearch = 
@@ -65,6 +68,15 @@ export default function DashboardPage() {
     }
     setIsFormOpen(false)
     setEditingTenant(null)
+  }
+
+  const handleDeleteTenant = (id: string) => {
+    setTenants(prev => prev.filter(t => t.id !== id))
+  }
+
+  const handleConfigureTenant = (tenant: Tenant) => {
+    setConfiguringTenant(tenant)
+    setIsConfigOpen(true)
   }
 
   const handleTenantClick = (tenant: Tenant) => {
@@ -110,7 +122,7 @@ export default function DashboardPage() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <div>
               <h1 className="text-2xl font-bold text-slate-900">Tenant Management</h1>
-              <p className="text-sm text-slate-500">Manage your global brand network and properties.</p>
+              <p className="text-sm text-slate-500 mt-1">Manage your global brand network and properties.</p>
             </div>
             <div className="flex items-center gap-2">
               <div className="bg-white border border-slate-200 p-1 rounded flex items-center">
@@ -131,7 +143,7 @@ export default function DashboardPage() {
                   <Grid2X2 className="h-4 w-4" />
                 </Button>
               </div>
-              <Button size="sm" className="h-9 px-4 font-semibold" onClick={() => setIsFormOpen(true)}>
+              <Button size="sm" className="h-9 px-4 font-semibold bg-[#94b8d7] hover:bg-[#83a7c6]" onClick={() => setIsFormOpen(true)}>
                 <Plus className="h-4 w-4 mr-2" /> New Tenant
               </Button>
             </div>
@@ -174,6 +186,8 @@ export default function DashboardPage() {
                   setIsFormOpen(true)
                 }}
                 onViewOutlets={() => handleTenantClick(tenant)}
+                onConfigure={handleConfigureTenant}
+                onDelete={handleDeleteTenant}
               />
             ))}
           </div>
@@ -199,6 +213,12 @@ export default function DashboardPage() {
         onClose={() => {setIsFormOpen(false); setEditingTenant(null)}} 
         tenant={editingTenant} 
         onSubmit={handleAddTenant} 
+      />
+      <TenantConfiguration
+        isOpen={isConfigOpen}
+        onClose={() => {setIsConfigOpen(false); setConfiguringTenant(null)}}
+        tenant={configuringTenant}
+        onSave={() => setIsConfigOpen(false)}
       />
     </SidebarProvider>
   )
