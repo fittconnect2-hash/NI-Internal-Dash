@@ -2,7 +2,7 @@
 "use client"
 
 import * as React from "react"
-import { ArrowLeft, Minus, Plus, Calendar } from "lucide-react"
+import { ArrowLeft, Minus, Plus, Calendar as CalendarIcon } from "lucide-react"
 import { Tenant } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import {
@@ -24,6 +24,13 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
+import { 
+  Popover, 
+  PopoverContent, 
+  PopoverTrigger 
+} from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
+import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 
 interface TenantConfigurationProps {
@@ -41,6 +48,9 @@ export function TenantConfiguration({ tenant, isOpen, onClose, onSave }: TenantC
   const [activeTab, setActiveTab] = React.useState("Currency")
   const [tipsEnabled, setTipsEnabled] = React.useState(true)
   const [suggestedTipRates, setSuggestedTipRates] = React.useState([5, 10, 20])
+  
+  const [startDate, setStartDate] = React.useState<Date | undefined>(new Date("2026-05-13"))
+  const [endDate, setEndDate] = React.useState<Date | undefined>(new Date("2027-05-13"))
 
   const handleAddTipRate = () => {
     setSuggestedTipRates([...suggestedTipRates, 0])
@@ -240,23 +250,53 @@ export function TenantConfiguration({ tenant, isOpen, onClose, onSave }: TenantC
                 <div className="space-y-6">
                   <div className="space-y-2">
                     <Label className="text-sm font-semibold text-slate-700">Contract Start Date</Label>
-                    <div className="relative">
-                      <Input 
-                        defaultValue="13/05/2026" 
-                        className="h-11 bg-white border-slate-200 pr-10" 
-                      />
-                      <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
-                    </div>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-full h-11 justify-between text-left font-normal bg-white border-slate-200",
+                            !startDate && "text-muted-foreground"
+                          )}
+                        >
+                          {startDate ? format(startDate, "PPP") : <span>Pick a date</span>}
+                          <CalendarIcon className="h-4 w-4 text-slate-400" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={startDate}
+                          onSelect={setStartDate}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </div>
                   <div className="space-y-2">
                     <Label className="text-sm font-semibold text-slate-700">Contract End Date</Label>
-                    <div className="relative">
-                      <Input 
-                        defaultValue="13/05/2027" 
-                        className="h-11 bg-white border-slate-200 pr-10" 
-                      />
-                      <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
-                    </div>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-full h-11 justify-between text-left font-normal bg-white border-slate-200",
+                            !endDate && "text-muted-foreground"
+                          )}
+                        >
+                          {endDate ? format(endDate, "PPP") : <span>Pick a date</span>}
+                          <CalendarIcon className="h-4 w-4 text-slate-400" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={endDate}
+                          onSelect={setEndDate}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </div>
                 </div>
               )}
