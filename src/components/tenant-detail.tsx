@@ -39,6 +39,13 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu"
 
 interface TenantDetailProps {
   tenant: Tenant | null;
@@ -238,7 +245,7 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
               <TabsContent value="admins" className="m-0 h-full flex flex-col">
                 <div className="flex-1 flex min-h-0 p-8 gap-8 overflow-hidden bg-slate-50/50">
                   {/* Persistent Form Section */}
-                  <div className="w-[450px] bg-white rounded-2xl border border-slate-200 shadow-xl flex flex-col min-h-0 overflow-hidden ring-1 ring-slate-100">
+                  <div className="w-[450px] bg-white rounded-2xl border border-slate-200 shadow-xl flex flex-col min-h-0 overflow-hidden ring-1 ring-slate-100 flex-shrink-0">
                     <div className="p-6 border-b border-slate-50 flex items-center gap-3">
                       <div className="h-8 w-8 rounded-full bg-[#1a73e8]/10 flex items-center justify-center">
                         <UserPlus className="h-4 w-4 text-[#1a73e8]" />
