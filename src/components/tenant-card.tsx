@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Mail, Phone, MoreVertical, Store, Users, ExternalLink } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { AIStatusAssistant } from "./ai-status-assistant"
 
 interface TenantCardProps {
   tenant: Tenant;
@@ -57,7 +56,6 @@ export function TenantCard({ tenant, viewMode, onEdit, onViewOutlets }: TenantCa
             </div>
           </div>
           <div className="flex items-center gap-4 justify-end ml-auto">
-            <AIStatusAssistant tenant={tenant} />
             <Badge 
               className={cn(
                 "rounded-md px-2.5 py-1 text-[10px] font-bold border-none shadow-none uppercase tracking-wider",
@@ -143,7 +141,6 @@ export function TenantCard({ tenant, viewMode, onEdit, onViewOutlets }: TenantCa
               {tenant.configurationStatus}
             </Badge>
             <div className="flex gap-2">
-              <AIStatusAssistant tenant={tenant} />
               <Button variant="ghost" size="sm" className="text-[10px] font-bold text-[#0071BC] gap-1 px-2" onClick={onViewOutlets}>
                 VIEW OUTLETS <ExternalLink className="h-3 w-3" />
               </Button>
