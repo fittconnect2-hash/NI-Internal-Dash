@@ -268,7 +268,10 @@ export function DashboardOverview() {
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <Card className="border-slate-200 shadow-sm p-8">
-                <CardTitle className="text-lg font-black text-slate-900 mb-6">Network Distribution</CardTitle>
+                <div className="mb-6">
+                  <h3 className="text-lg font-black text-slate-900 tracking-tight leading-none">Top Regional Hubs</h3>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">Absolute outlet count by city</p>
+                </div>
                 <div className="h-[300px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart layout="vertical" data={networkDistData} margin={{ left: 20, right: 30 }}>
@@ -295,15 +298,26 @@ export function DashboardOverview() {
                 </div>
               </Card>
               <Card className="border-slate-200 shadow-sm p-8">
-                <CardTitle className="text-lg font-black text-slate-900 mb-6">Outlet Growth</CardTitle>
+                <div className="mb-6">
+                  <h3 className="text-lg font-black text-slate-900 tracking-tight leading-none">Market Expansion Status</h3>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">Progress toward 2024 regional targets</p>
+                </div>
                 <div className="space-y-6">
-                  {['UAE', 'USA', 'UK', 'Others'].map((region, i) => (
+                  {[
+                    { country: 'UAE', target: 100, current: 80 },
+                    { country: 'USA', target: 80, current: 65 },
+                    { country: 'UK', target: 70, current: 50 },
+                    { country: 'Others', target: 50, current: 35 }
+                  ].map((region, i) => (
                     <div key={i} className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-extrabold text-slate-700">{region}</span>
-                        <span className="text-sm font-black text-slate-900">{80 - i * 15} Outlets</span>
+                        <span className="text-sm font-extrabold text-slate-700">{region.country}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-black text-slate-900">{region.current} Outlets</span>
+                          <span className="text-[10px] font-bold text-slate-400 uppercase">Target: {region.target}</span>
+                        </div>
                       </div>
-                      <Progress value={80 - i * 15} className="h-2 bg-slate-100" />
+                      <Progress value={(region.current / region.target) * 100} className="h-2 bg-slate-100" />
                     </div>
                   ))}
                 </div>
