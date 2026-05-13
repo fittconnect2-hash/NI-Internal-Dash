@@ -123,6 +123,25 @@ export const initialUsers: User[] = [
     role: 'Admin',
     status: 'Active',
     lastActive: '2024-05-21 14:30'
+  },
+  {
+    id: 'u2',
+    tenantId: '1',
+    outletId: 'o2',
+    fullName: 'Sara Ahmed',
+    email: 'sara@grandhyatt.com',
+    role: 'Manager',
+    status: 'Active',
+    lastActive: '2024-05-21 15:45'
+  },
+  {
+    id: 'u3',
+    tenantId: '1',
+    fullName: 'Global Admin',
+    email: 'global@grandhyatt.com',
+    role: 'Admin',
+    status: 'Active',
+    lastActive: '2024-05-21 12:00'
   }
 ];
 

@@ -6,7 +6,7 @@ import {
   MoreHorizontal, 
   ChevronRight, 
   Building2, 
-  Globe, 
+  Store, 
   ChevronsUpDown,
   FilterX,
   ArrowLeft,
@@ -29,8 +29,8 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
-import { User, Tenant } from "@/lib/types"
-import { initialUsers } from "@/lib/mock-data"
+import { User, Tenant, Outlet } from "@/lib/types"
+import { initialUsers, initialOutlets } from "@/lib/mock-data"
 import { Badge } from "@/components/ui/badge"
 import { 
   Select, 
@@ -59,11 +59,18 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
   const [userFilter, setUserFilter] = React.useState("")
   const [statusFilter, setStatusFilter] = React.useState<string | null>(null)
   const [roleFilter, setRoleFilter] = React.useState<string | null>(null)
+  const [outletFilter, setOutletFilter] = React.useState<string | null>(null)
+
+  // Filter outlets by current tenant
+  const tenantOutlets = React.useMemo(() => {
+    return initialOutlets.filter(o => !tenant || o.tenantId === tenant.id)
+  }, [tenant])
 
   const handleClearFilters = () => {
     setUserFilter("")
     setStatusFilter(null)
     setRoleFilter(null)
+    setOutletFilter(null)
   }
 
   const filteredUsers = users.filter(u => {
@@ -73,8 +80,14 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
                        u.email.toLowerCase().includes(userFilter.toLowerCase())
     const matchesStatus = !statusFilter || u.status === statusFilter
     const matchesRole = !roleFilter || u.role === roleFilter
-    return matchesTenant && matchesUser && matchesStatus && matchesRole
+    const matchesOutlet = !outletFilter || u.outletId === outletFilter
+    return matchesTenant && matchesUser && matchesStatus && matchesRole && matchesOutlet
   })
+
+  const getOutletName = (outletId?: string) => {
+    if (!outletId) return "Global / Unassigned"
+    return initialOutlets.find(o => o.id === outletId)?.name || "Unknown Outlet"
+  }
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -96,7 +109,7 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
                 <ChevronRight className="h-2.5 w-2.5 opacity-50" />
                 <span className="text-slate-400">Users</span>
               </div>
-              <SheetTitle className="text-2xl font-extrabold text-[#1e293b] tracking-tight">
+              <SheetTitle className="text-2xl font-black text-[#1e293b] tracking-tight">
                 User Management
               </SheetTitle>
             </div>
@@ -107,7 +120,7 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
         <div className="flex-1 flex flex-col min-h-0 bg-[#f8f9fc] p-6">
           {/* Smart Filter Row */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm mb-6 p-5">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-6 items-end">
               <div className="space-y-2.5">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Search Users</label>
                 <div className="relative">
@@ -122,8 +135,23 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
               </div>
               
               <div className="space-y-2.5">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Assigned Outlet</label>
+                <Select onValueChange={(v) => setOutletFilter(v === 'all' ? null : v)} value={outletFilter || 'all'}>
+                  <SelectTrigger className="h-11 bg-white border-slate-200 text-sm">
+                    <SelectValue placeholder="All Outlets" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Outlets</SelectItem>
+                    {tenantOutlets.map(outlet => (
+                      <SelectItem key={outlet.id} value={outlet.id}>{outlet.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2.5">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Access Role</label>
-                <Select onValueChange={setRoleFilter} value={roleFilter || 'all'}>
+                <Select onValueChange={(v) => setRoleFilter(v === 'all' ? null : v)} value={roleFilter || 'all'}>
                   <SelectTrigger className="h-11 bg-white border-slate-200 text-sm">
                     <SelectValue placeholder="All Roles" />
                   </SelectTrigger>
@@ -138,7 +166,7 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
 
               <div className="space-y-2.5">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Activity Status</label>
-                <Select onValueChange={setStatusFilter} value={statusFilter || 'all'}>
+                <Select onValueChange={(v) => setStatusFilter(v === 'all' ? null : v)} value={statusFilter || 'all'}>
                   <SelectTrigger className="h-11 bg-white border-slate-200 text-sm">
                     <SelectValue placeholder="All Statuses" />
                   </SelectTrigger>
@@ -175,6 +203,9 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
                       Contact Details
                     </TableHead>
                     <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">
+                      Assigned Outlet
+                    </TableHead>
+                    <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">
                       Role & Permissions
                     </TableHead>
                     <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest text-center">
@@ -196,6 +227,12 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
                       <TableCell className="px-4">
                         <div className="text-[14px] text-slate-700 font-bold leading-tight mb-0.5">{user.email}</div>
                         <div className="text-[12px] text-slate-400 font-medium">+971 52 165 0458</div>
+                      </TableCell>
+                      <TableCell className="px-4">
+                        <div className="flex items-center gap-2">
+                          <Store className="h-3.5 w-3.5 text-slate-300" />
+                          <span className="text-[14px] text-slate-600 font-bold">{getOutletName(user.outletId)}</span>
+                        </div>
                       </TableCell>
                       <TableCell className="px-4">
                         <div className="flex flex-col gap-2">
