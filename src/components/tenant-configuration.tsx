@@ -2,7 +2,7 @@
 "use client"
 
 import * as React from "react"
-import { ArrowLeft, Minus, Plus } from "lucide-react"
+import { ArrowLeft, Minus, Plus, Calendar } from "lucide-react"
 import { Tenant } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import {
@@ -90,6 +90,7 @@ export function TenantConfiguration({ tenant, isOpen, onClose, onSave }: TenantC
                     variant={activeTab === tab ? "default" : "ghost"}
                     onClick={() => setActiveTab(tab)}
                     className={cn(
+                      "text-sm font-medium",
                       activeTab === tab 
                         ? "bg-white text-slate-900 border border-slate-200 shadow-sm hover:bg-white" 
                         : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
@@ -234,8 +235,33 @@ export function TenantConfiguration({ tenant, isOpen, onClose, onSave }: TenantC
                   </div>
                 </div>
               )}
+
+              {activeTab === "Contract" && (
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-slate-700">Contract Start Date</Label>
+                    <div className="relative">
+                      <Input 
+                        defaultValue="13/05/2026" 
+                        className="h-11 bg-white border-slate-200 pr-10" 
+                      />
+                      <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-slate-700">Contract End Date</Label>
+                    <div className="relative">
+                      <Input 
+                        defaultValue="13/05/2027" 
+                        className="h-11 bg-white border-slate-200 pr-10" 
+                      />
+                      <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                    </div>
+                  </div>
+                </div>
+              )}
               
-              {!["Currency", "Commission", "Tips"].includes(activeTab) && (
+              {!["Currency", "Commission", "Tips", "Contract"].includes(activeTab) && (
                 <div className="py-20 text-center space-y-2">
                   <h4 className="font-bold text-slate-900">{activeTab} Settings</h4>
                   <p className="text-sm text-slate-500">Configuration options for {activeTab.toLowerCase()} will appear here.</p>
