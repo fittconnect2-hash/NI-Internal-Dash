@@ -56,10 +56,11 @@ function generateMockTenants(count: number): Tenant[] {
 
   for (let i = 0; i < count; i++) {
     const id = (i + 3).toString();
-    const name = `${names[i % names.length]} ${i > names.length ? (Math.floor(i / names.length) + 1) : ''}`.trim();
+    const name = `${names[i % names.length]} ${i >= names.length ? (Math.floor(i / names.length) + 1) : ''}`.trim();
     const type = businessTypes[i % businessTypes.length];
     const status = statusOptions[i % statusOptions.length];
     
+    // Using deterministic calculations based on index i to avoid hydration mismatches
     tenants.push({
       id,
       tenantName: name,
@@ -75,8 +76,8 @@ function generateMockTenants(count: number): Tenant[] {
       contactPhone: `+971 50 ${1000000 + i}`,
       lastLoginDate: '2024-05-20',
       isPaymentGatewayConfigured: status === 'Active',
-      numberOfOutlets: Math.floor(Math.random() * 5) + 1,
-      numberOfUsers: Math.floor(Math.random() * 20) + 2,
+      numberOfOutlets: (i % 5) + 1, // Deterministic
+      numberOfUsers: (i % 15) + 3,  // Deterministic
       merchantId: status === 'Active' ? `M-${10000 + i}` : undefined,
     });
   }
