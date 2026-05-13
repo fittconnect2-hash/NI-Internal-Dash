@@ -8,6 +8,7 @@ import { TenantConfiguration } from "@/components/tenant-configuration"
 import { TenantDetail } from "@/components/tenant-detail"
 import { OutletManagement } from "@/components/outlet-management"
 import { UserManagement } from "@/components/user-management"
+import { DashboardOverview } from "@/components/dashboard-overview"
 import { initialTenants } from "@/lib/mock-data"
 import { Tenant, Outlet } from "@/lib/types"
 import { SidebarProvider } from "@/components/ui/sidebar"
@@ -34,7 +35,7 @@ import { cn } from "@/lib/utils"
 const ITEMS_PER_PAGE = 8
 
 export default function DashboardPage() {
-  const [activeTab, setActiveTab] = React.useState("tenants")
+  const [activeTab, setActiveTab] = React.useState("dashboard")
   const [tenants, setTenants] = React.useState<Tenant[]>(initialTenants)
   const [searchQuery, setSearchQuery] = React.useState("")
   const [filterStatus, setFilterStatus] = React.useState<string | null>(null)
@@ -120,152 +121,156 @@ export default function DashboardPage() {
 
   const renderContent = () => {
     if (activeTab === 'dashboard') {
+      return <DashboardOverview />
+    }
+
+    if (activeTab === 'tenants') {
       return (
-        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-6">
-          <div className="h-12 w-12 bg-primary/10 rounded flex items-center justify-center mb-4">
-            <LayoutDashboard className="h-6 w-6 text-primary" />
+        <div className="p-6 md:p-8 flex flex-col h-full overflow-hidden bg-[#f8f9fc]">
+          <div className="max-w-7xl mx-auto w-full flex-1 flex flex-col min-h-0">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+              <div>
+                <h1 className="text-3xl font-black text-slate-900 tracking-tight">Tenant Management</h1>
+                <p className="text-sm text-slate-500 mt-1">Manage your global brand network and properties.</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="bg-white border border-slate-200 p-1 rounded flex items-center">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className={cn("h-8 w-8 p-0", viewMode === 'list' && "bg-slate-100")} 
+                    onClick={() => setViewMode('list')}
+                  >
+                    <List className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className={cn("h-8 w-8 p-0", viewMode === 'grid' && "bg-slate-100")} 
+                    onClick={() => setViewMode('grid')}
+                  >
+                    <Grid2X2 className="h-4 w-4" />
+                  </Button>
+                </div>
+                <Button size="sm" className="h-10 px-6 font-black bg-[#1a73e8] hover:bg-[#1557b0] shadow-lg shadow-[#1a73e8]/20" onClick={() => setIsFormOpen(true)}>
+                  <Plus className="h-4 w-4 mr-2" /> New Tenant
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex flex-col md:flex-row gap-3 mb-6">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Input 
+                  placeholder="Search by brand or email..." 
+                  className="pl-10 h-11 text-sm bg-white border-slate-200"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="h-11 px-5 text-sm font-bold border-slate-200 text-slate-600">
+                    {filterStatus || "Status: All"}
+                    <ChevronDown className="h-4 w-4 ml-2 opacity-50" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem onClick={() => setFilterStatus(null)}>All Statuses</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterStatus('Active')}>Active</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterStatus('Configuration pending')}>Pending</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterStatus('Inactive')}>Inactive</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            <div className="flex-1 overflow-y-auto pr-2 scrollbar-hide">
+              <div className={cn(viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-8' : 'space-y-3 pb-8')}>
+                {paginatedTenants.map((tenant) => (
+                  <TenantCard 
+                    key={tenant.id} 
+                    tenant={tenant} 
+                    viewMode={viewMode} 
+                    onEdit={(t) => {
+                      setEditingTenant(t)
+                      setIsFormOpen(true)
+                    }}
+                    onView={handleViewTenant}
+                    onConfigure={handleConfigureTenant}
+                    onDelete={handleDeleteTenant}
+                    onOutletsClick={handleOutletsNavigation}
+                    onUsersClick={handleUsersNavigation}
+                  />
+                ))}
+                {filteredTenants.length === 0 && (
+                  <div className="col-span-full py-20 text-center">
+                    <p className="text-slate-400 font-bold uppercase tracking-widest">No tenants match your search criteria.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="mt-auto py-6 border-t border-slate-100 flex items-center justify-between">
+                <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">
+                  Showing <span className="text-slate-900">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to <span className="text-slate-900">{Math.min(currentPage * ITEMS_PER_PAGE, filteredTenants.length)}</span> of <span className="text-slate-900">{filteredTenants.length}</span> results
+                </p>
+                <div className="flex items-center gap-1">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="h-8 px-2 border-slate-200"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum = i + 1;
+                    if (totalPages > 5 && currentPage > 3) {
+                      pageNum = currentPage - 2 + i;
+                      if (pageNum > totalPages) pageNum = totalPages - (4 - i);
+                    }
+                    
+                    return (
+                      <Button
+                        key={pageNum}
+                        variant={currentPage === pageNum ? "default" : "outline"}
+                        size="sm"
+                        className={cn("h-8 w-8 p-0 text-[11px] font-black border-slate-200", currentPage === pageNum ? "bg-slate-900 border-slate-900" : "text-slate-500")}
+                        onClick={() => setCurrentPage(pageNum)}
+                      >
+                        {pageNum}
+                      </Button>
+                    );
+                  })}
+                  
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="h-8 px-2 border-slate-200"
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
-          <h2 className="text-xl font-bold text-slate-900 mb-1">Network Dashboard</h2>
-          <p className="text-sm text-slate-500">Welcome to the central command center.</p>
         </div>
       )
     }
 
     return (
-      <div className="p-6 md:p-8 flex flex-col h-full overflow-hidden bg-[#f8f9fc]">
-        <div className="max-w-7xl mx-auto w-full flex-1 flex flex-col min-h-0">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900">Tenant Management</h1>
-              <p className="text-sm text-slate-500 mt-1">Manage your global brand network and properties.</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="bg-white border border-slate-200 p-1 rounded flex items-center">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className={cn("h-8 w-8 p-0", viewMode === 'list' && "bg-slate-100")} 
-                  onClick={() => setViewMode('list')}
-                >
-                  <List className="h-4 w-4" />
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className={cn("h-8 w-8 p-0", viewMode === 'grid' && "bg-slate-100")} 
-                  onClick={() => setViewMode('grid')}
-                >
-                  <Grid2X2 className="h-4 w-4" />
-                </Button>
-              </div>
-              <Button size="sm" className="h-9 px-4 font-semibold bg-[#94b8d7] hover:bg-[#83a7c6]" onClick={() => setIsFormOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" /> New Tenant
-              </Button>
-            </div>
-          </div>
-
-          <div className="flex flex-col md:flex-row gap-3 mb-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <Input 
-                placeholder="Search by brand or email..." 
-                className="pl-10 h-10 text-sm"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="h-10 text-sm font-medium">
-                  {filterStatus || "Status: All"}
-                  <ChevronDown className="h-4 w-4 ml-2 opacity-50" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={() => setFilterStatus(null)}>All Statuses</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setFilterStatus('Active')}>Active</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setFilterStatus('Configuration pending')}>Pending</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setFilterStatus('Inactive')}>Inactive</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
-          <div className="flex-1 overflow-y-auto pr-2 scrollbar-hide">
-            <div className={cn(viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-8' : 'space-y-3 pb-8')}>
-              {paginatedTenants.map((tenant) => (
-                <TenantCard 
-                  key={tenant.id} 
-                  tenant={tenant} 
-                  viewMode={viewMode} 
-                  onEdit={(t) => {
-                    setEditingTenant(t)
-                    setIsFormOpen(true)
-                  }}
-                  onView={handleViewTenant}
-                  onConfigure={handleConfigureTenant}
-                  onDelete={handleDeleteTenant}
-                  onOutletsClick={handleOutletsNavigation}
-                  onUsersClick={handleUsersNavigation}
-                />
-              ))}
-              {filteredTenants.length === 0 && (
-                <div className="col-span-full py-20 text-center">
-                  <p className="text-slate-400 font-medium">No tenants match your search criteria.</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Pagination Controls */}
-          {totalPages > 1 && (
-            <div className="mt-auto py-4 border-t border-slate-100 flex items-center justify-between">
-              <p className="text-xs text-slate-500 font-medium">
-                Showing <span className="text-slate-900">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to <span className="text-slate-900">{Math.min(currentPage * ITEMS_PER_PAGE, filteredTenants.length)}</span> of <span className="text-slate-900">{filteredTenants.length}</span> results
-              </p>
-              <div className="flex items-center gap-1">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="h-8 px-2"
-                  disabled={currentPage === 1}
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  let pageNum = i + 1;
-                  if (totalPages > 5 && currentPage > 3) {
-                    pageNum = currentPage - 2 + i;
-                    if (pageNum > totalPages) pageNum = totalPages - (4 - i);
-                  }
-                  
-                  return (
-                    <Button
-                      key={pageNum}
-                      variant={currentPage === pageNum ? "default" : "outline"}
-                      size="sm"
-                      className={cn("h-8 w-8 p-0 text-xs font-bold", currentPage === pageNum ? "bg-[#1a73e8]" : "text-slate-600")}
-                      onClick={() => setCurrentPage(pageNum)}
-                    >
-                      {pageNum}
-                    </Button>
-                  );
-                })}
-                
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="h-8 px-2"
-                  disabled={currentPage === totalPages}
-                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          )}
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-6">
+        <div className="h-16 w-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-4">
+          <LayoutDashboard className="h-8 w-8 text-primary" />
         </div>
+        <h2 className="text-2xl font-black text-slate-900 mb-1 tracking-tight">Access Restricted</h2>
+        <p className="text-sm text-slate-500">This feature is currently under active development.</p>
       </div>
     )
   }

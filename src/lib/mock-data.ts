@@ -60,7 +60,6 @@ function generateMockTenants(count: number): Tenant[] {
     const type = businessTypes[i % businessTypes.length];
     const status = statusOptions[i % statusOptions.length];
     
-    // Using deterministic calculations based on index i to avoid hydration mismatches
     tenants.push({
       id,
       tenantName: name,
@@ -76,8 +75,8 @@ function generateMockTenants(count: number): Tenant[] {
       contactPhone: `+971 50 ${1000000 + i}`,
       lastLoginDate: '2024-05-20',
       isPaymentGatewayConfigured: status === 'Active',
-      numberOfOutlets: (i % 5) + 1, // Deterministic
-      numberOfUsers: (i % 15) + 3,  // Deterministic
+      numberOfOutlets: (i % 5) + 1,
+      numberOfUsers: (i % 15) + 3,
       merchantId: status === 'Active' ? `M-${10000 + i}` : undefined,
     });
   }
@@ -125,4 +124,30 @@ export const initialUsers: User[] = [
     status: 'Active',
     lastActive: '2024-05-21 14:30'
   }
+];
+
+export const deliveryPerformance = [
+  { time: '6am', selected: 24, previous: 20 },
+  { time: '8am', selected: 26, previous: 22 },
+  { time: '10am', selected: 28, previous: 24 },
+  { time: '12pm', selected: 32, previous: 28 },
+  { time: '2pm', selected: 36, previous: 30 },
+  { time: '4pm', selected: 34, previous: 32 },
+  { time: '6pm', selected: 30, previous: 28 },
+  { time: '8pm', selected: 28, previous: 26 },
+];
+
+export const topRestaurants = [
+  { name: 'Al Fanar Restaurant', location: 'Dubai Creek • Traditional', orders: 184, revenue: 'AED 12,340', progress: 85 },
+  { name: 'Pizzeria Napoli', location: 'JBR • Italian', orders: 157, revenue: 'AED 9,820', progress: 70 },
+  { name: 'Noodle House', location: 'DIFC • Asian', orders: 143, revenue: 'AED 8,150', progress: 65 },
+  { name: 'The Burger Joint', location: 'Marina • American', orders: 121, revenue: 'AED 6,900', progress: 55 },
+];
+
+export const liveOrders = [
+  { id: '#48821', customer: 'Khalid M.', restaurant: 'Al Fanar', status: 'Delivered', amount: 'AED 94' },
+  { id: '#48820', customer: 'Sara J.', restaurant: 'Noodle House', status: 'On the way', amount: 'AED 67' },
+  { id: '#48819', customer: 'Ahmed K.', restaurant: 'Pizzeria Napoli', status: 'Preparing', amount: 'AED 112' },
+  { id: '#48818', customer: 'Layla K.', restaurant: 'Grains Bowl', status: 'Delivered', amount: 'AED 55' },
+  { id: '#48817', customer: 'Omar H.', restaurant: 'Bedouin Grill', status: 'Cancelled', amount: 'AED 88' },
 ];
