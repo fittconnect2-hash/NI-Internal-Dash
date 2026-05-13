@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -113,6 +112,11 @@ export default function DashboardPage() {
     setActiveTab('users')
   }
 
+  const handleOutletsNavigation = (tenant: Tenant) => {
+    setSelectedTenant(tenant)
+    setActiveTab('outlets')
+  }
+
   const resetSelection = () => {
     setSelectedTenant(null)
     setSelectedOutlet(null)
@@ -213,6 +217,7 @@ export default function DashboardPage() {
                   onView={handleViewTenant}
                   onConfigure={handleConfigureTenant}
                   onDelete={handleDeleteTenant}
+                  onOutletsClick={handleOutletsNavigation}
                 />
               ))}
               {filteredTenants.length === 0 && (

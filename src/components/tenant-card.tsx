@@ -1,4 +1,3 @@
-
 "use client"
 
 import { Tenant } from "@/lib/types"
@@ -22,9 +21,10 @@ interface TenantCardProps {
   onView: (tenant: Tenant) => void;
   onConfigure: (tenant: Tenant) => void;
   onDelete: (id: string) => void;
+  onOutletsClick: (tenant: Tenant) => void;
 }
 
-export function TenantCard({ tenant, viewMode, onEdit, onView, onConfigure, onDelete }: TenantCardProps) {
+export function TenantCard({ tenant, viewMode, onEdit, onView, onConfigure, onDelete, onOutletsClick }: TenantCardProps) {
   const isPending = tenant.configurationStatus === "Configuration pending"
   const initials = tenant.tenantName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
 
@@ -96,7 +96,10 @@ export function TenantCard({ tenant, viewMode, onEdit, onView, onConfigure, onDe
           </div>
           
           <div className="flex gap-8 items-center px-6 border-x border-slate-100">
-            <div className="flex flex-col items-center">
+            <div 
+              className="flex flex-col items-center hover:bg-slate-50 p-2 rounded transition-colors cursor-pointer"
+              onClick={(e) => { e.stopPropagation(); onOutletsClick(tenant); }}
+            >
               <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wide">Outlets</span>
               <span className="text-sm font-bold text-slate-900">{tenant.numberOfOutlets}</span>
             </div>
@@ -153,7 +156,10 @@ export function TenantCard({ tenant, viewMode, onEdit, onView, onConfigure, onDe
         </div>
 
         <div className="grid grid-cols-2 gap-2 mt-auto">
-          <div className="p-3 bg-slate-50 rounded border border-slate-100 flex flex-col items-center group/count hover:bg-slate-100 transition-colors">
+          <div 
+            className="p-3 bg-slate-50 rounded border border-slate-100 flex flex-col items-center group/count hover:bg-slate-100 transition-colors cursor-pointer"
+            onClick={(e) => { e.stopPropagation(); onOutletsClick(tenant); }}
+          >
             <span className="text-[9px] text-slate-400 font-bold uppercase mb-1">Outlets</span>
             <span className="text-sm font-bold text-slate-900">{tenant.numberOfOutlets}</span>
           </div>
