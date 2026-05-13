@@ -4,7 +4,7 @@ import { Tenant } from "@/lib/types"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Mail, Phone, MoreVertical } from "lucide-react"
+import { Mail, Phone, MoreVertical, Store, Users } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface TenantCardProps {
@@ -29,14 +29,32 @@ export function TenantCard({ tenant, viewMode, onEdit }: TenantCardProps) {
             <p className="text-xs text-slate-400 font-medium">Hospitality</p>
           </div>
           <div className="flex gap-8 items-center px-4">
-            <span className="flex items-center text-xs text-slate-500 gap-2 font-medium">
-              <Mail className="h-4 w-4 opacity-40" /> {tenant.contactEmail}
-            </span>
-            <span className="flex items-center text-xs text-slate-500 gap-2 font-medium">
-              <Phone className="h-4 w-4 opacity-40" /> {tenant.contactPhone}
-            </span>
+            <div className="flex flex-col gap-1">
+              <span className="flex items-center text-xs text-slate-500 gap-2 font-medium">
+                <Mail className="h-3.5 w-3.5 opacity-40" /> {tenant.contactEmail}
+              </span>
+              <span className="flex items-center text-xs text-slate-500 gap-2 font-medium">
+                <Phone className="h-3.5 w-3.5 opacity-40" /> {tenant.contactPhone}
+              </span>
+            </div>
           </div>
-          <div className="flex items-center gap-6 justify-end">
+          <div className="flex gap-8 items-center px-4 border-l border-slate-100 h-10">
+            <div className="flex items-center gap-2">
+              <Store className="h-4 w-4 text-slate-300" />
+              <div className="flex flex-col">
+                <span className="text-[10px] text-slate-400 font-bold leading-none">OUTLETS</span>
+                <span className="text-xs font-bold text-slate-700">{tenant.numberOfOutlets}</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4 text-slate-300" />
+              <div className="flex flex-col">
+                <span className="text-[10px] text-slate-400 font-bold leading-none">USERS</span>
+                <span className="text-xs font-bold text-slate-700">{tenant.numberOfUsers}</span>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-6 justify-end ml-auto">
             <Badge 
               className={cn(
                 "rounded-md px-2.5 py-1 text-[10px] font-bold border-none shadow-none uppercase tracking-wider",
@@ -88,6 +106,27 @@ export function TenantCard({ tenant, viewMode, onEdit }: TenantCardProps) {
             </div>
           </div>
 
+          <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-50 mb-6">
+            <div className="flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-lg bg-slate-50 flex items-center justify-center">
+                <Store className="h-4 w-4 text-slate-400" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[10px] text-slate-400 font-bold leading-none tracking-wider">OUTLETS</span>
+                <span className="text-sm font-bold text-slate-700">{tenant.numberOfOutlets}</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-lg bg-slate-50 flex items-center justify-center">
+                <Users className="h-4 w-4 text-slate-400" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[10px] text-slate-400 font-bold leading-none tracking-wider">USERS</span>
+                <span className="text-sm font-bold text-slate-700">{tenant.numberOfUsers}</span>
+              </div>
+            </div>
+          </div>
+
           <Badge 
             className={cn(
               "rounded-md px-2.5 py-1 text-[10px] font-bold border-none shadow-none uppercase tracking-wider mb-2",
@@ -99,8 +138,8 @@ export function TenantCard({ tenant, viewMode, onEdit }: TenantCardProps) {
         </div>
 
         {/* Footer */}
-        <div className="mt-auto px-6 py-4 card-footer-gray bg-white">
-          <p className="text-slate-400 font-medium">Tenant since May 13, 2026</p>
+        <div className="mt-auto px-6 py-4 card-footer-gray bg-white border-t border-slate-50">
+          <p className="text-slate-400 font-medium italic">Managed since 2024</p>
         </div>
       </CardContent>
     </Card>
