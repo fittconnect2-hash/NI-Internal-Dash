@@ -31,7 +31,8 @@ import {
   AreaChart,
   Area,
   LineChart,
-  Line
+  Line,
+  Cell
 } from "recharts"
 import { 
   servingPerformance, 
@@ -65,6 +66,14 @@ const orderVolumeData = [
   { hour: '6pm', current: 280, previous: 250 },
   { hour: '7pm', current: 320, previous: 290 },
   { hour: '8pm', current: 290, previous: 310 },
+];
+
+const networkDistData = [
+  { region: 'Dubai', outlets: 84, color: '#1a73e8' },
+  { region: 'Abu Dhabi', outlets: 52, color: '#3b82f6' },
+  { region: 'New York', outlets: 41, color: '#e91e63' },
+  { region: 'London', outlets: 38, color: '#f43f5e' },
+  { region: 'California', outlets: 32, color: '#f59e0b' },
 ];
 
 type DashboardTab = 'revenue' | 'orders' | 'restaurants' | 'serving';
@@ -260,11 +269,29 @@ export function DashboardOverview() {
              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <Card className="border-slate-200 shadow-sm p-8">
                 <CardTitle className="text-lg font-black text-slate-900 mb-6">Network Distribution</CardTitle>
-                <div className="h-[300px] w-full bg-slate-50 rounded-2xl flex items-center justify-center border border-dashed border-slate-200">
-                  <div className="text-center">
-                    <Store className="h-10 w-10 text-slate-300 mx-auto mb-2" />
-                    <p className="text-sm font-bold text-slate-400">Map Visualization Placeholder</p>
-                  </div>
+                <div className="h-[300px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart layout="vertical" data={networkDistData} margin={{ left: 20, right: 30 }}>
+                      <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
+                      <XAxis type="number" hide />
+                      <YAxis 
+                        dataKey="region" 
+                        type="category" 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fill: '#475569', fontSize: 12, fontWeight: 700 }}
+                      />
+                      <Tooltip 
+                        cursor={{ fill: '#f8f9fc' }}
+                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
+                      />
+                      <Bar dataKey="outlets" radius={[0, 4, 4, 0]} barSize={24}>
+                        {networkDistData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
               </Card>
               <Card className="border-slate-200 shadow-sm p-8">
