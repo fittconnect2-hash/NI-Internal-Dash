@@ -19,13 +19,12 @@ interface TenantCardProps {
   tenant: Tenant;
   viewMode: 'grid' | 'list';
   onEdit: (tenant: Tenant) => void;
-  onViewOutlets: (tenant: Tenant) => void;
   onView: (tenant: Tenant) => void;
   onConfigure: (tenant: Tenant) => void;
   onDelete: (id: string) => void;
 }
 
-export function TenantCard({ tenant, viewMode, onEdit, onViewOutlets, onView, onConfigure, onDelete }: TenantCardProps) {
+export function TenantCard({ tenant, viewMode, onEdit, onView, onConfigure, onDelete }: TenantCardProps) {
   const isPending = tenant.configurationStatus === "Configuration pending"
   const initials = tenant.tenantName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
 
@@ -77,7 +76,7 @@ export function TenantCard({ tenant, viewMode, onEdit, onViewOutlets, onView, on
     return (
       <Card 
         className="group hover:border-primary/30 transition-all duration-200 border-border bg-white cursor-pointer"
-        onClick={() => onViewOutlets(tenant)}
+        onClick={() => onView(tenant)}
       >
         <CardContent className="flex items-center p-4 gap-4">
           <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-sm shrink-0 relative">
@@ -121,7 +120,7 @@ export function TenantCard({ tenant, viewMode, onEdit, onViewOutlets, onView, on
   return (
     <Card 
       className="group flex flex-col h-full border-border bg-white hover:shadow-md transition-all duration-200 cursor-pointer"
-      onClick={() => onViewOutlets(tenant)}
+      onClick={() => onView(tenant)}
     >
       <CardContent className="p-5 flex flex-col h-full">
         <div className="flex justify-between items-start mb-4">

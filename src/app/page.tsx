@@ -88,11 +88,6 @@ export default function DashboardPage() {
     setIsDetailOpen(true)
   }
 
-  const handleTenantClick = (tenant: Tenant) => {
-    setSelectedTenant(tenant)
-    setActiveTab('outlets')
-  }
-
   const handleOutletClick = (outlet: Outlet) => {
     setSelectedOutlet(outlet)
     setActiveTab('users')
@@ -194,7 +189,6 @@ export default function DashboardPage() {
                   setEditingTenant(t)
                   setIsFormOpen(true)
                 }}
-                onViewOutlets={() => handleTenantClick(tenant)}
                 onView={handleViewTenant}
                 onConfigure={handleConfigureTenant}
                 onDelete={handleDeleteTenant}
