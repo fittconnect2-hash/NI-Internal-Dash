@@ -346,8 +346,21 @@ export function TenantConfiguration({ tenant, isOpen, onClose, onSave }: TenantC
                   </div>
                 </div>
               )}
+
+              {activeTab === "Penalties" && (
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-slate-700">No-Show Fee Rate (%)</Label>
+                    <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-slate-700">Cancellation Fee Rate (%)</Label>
+                    <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
+                  </div>
+                </div>
+              )}
               
-              {!["Currency", "Commission", "Tips", "Contract", "Payouts", "Fees"].includes(activeTab) && (
+              {!["Currency", "Commission", "Tips", "Contract", "Payouts", "Fees", "Penalties"].includes(activeTab) && (
                 <div className="py-20 text-center space-y-2">
                   <h4 className="font-bold text-slate-900">{activeTab} Settings</h4>
                   <p className="text-sm text-slate-500">Configuration options for {activeTab.toLowerCase()} will appear here.</p>
