@@ -115,6 +115,7 @@ export default function DashboardPage() {
     return (
       <div className="p-8">
         <div className="max-w-7xl mx-auto">
+          {/* Dashboard Header Icons */}
           <div className="flex items-center gap-4 mb-8">
             <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl bg-white border-slate-200">
               <ArrowLeft className="h-5 w-5 text-slate-400" />
@@ -177,7 +178,7 @@ export default function DashboardPage() {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
               <Input 
                 placeholder="Search tenants by name, email or phone number" 
-                className="pl-12 h-14 bg-white border-slate-200 rounded-xl w-full text-base"
+                className="pl-12 h-14 bg-white border-slate-200 rounded-xl w-full text-base focus-visible:ring-primary/20"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -185,7 +186,7 @@ export default function DashboardPage() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="h-14 px-6 rounded-xl bg-white border-slate-200 text-slate-500 justify-between min-w-[200px] text-base">
-                  <span>Filter by Status</span>
+                  <span>{filterStatus || "Filter by Status"}</span>
                   <ChevronDown className="h-5 w-5 ml-2 opacity-40" />
                 </Button>
               </DropdownMenuTrigger>
