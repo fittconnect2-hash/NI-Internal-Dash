@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -47,9 +48,12 @@ export default function DashboardPage() {
   const [isFormOpen, setIsFormOpen] = React.useState(false)
   const [isConfigOpen, setIsConfigOpen] = React.useState(false)
   const [isDetailOpen, setIsDetailOpen] = React.useState(false)
+  const [isOutletsDrawerOpen, setIsOutletsDrawerOpen] = React.useState(false)
+  
   const [editingTenant, setEditingTenant] = React.useState<Tenant | null>(null)
   const [configuringTenant, setConfiguringTenant] = React.useState<Tenant | null>(null)
   const [viewingTenant, setViewingTenant] = React.useState<Tenant | null>(null)
+  const [outletsTenant, setOutletsTenant] = React.useState<Tenant | null>(null)
 
   // Filter logic
   const filteredTenants = React.useMemo(() => {
@@ -109,18 +113,15 @@ export default function DashboardPage() {
 
   const handleOutletClick = (outlet: Outlet) => {
     setSelectedOutlet(outlet)
+    // For Personnel view, we can swap the main content or use another drawer
+    // In this app, we'll navigate to users tab
     setActiveTab('users')
+    setIsOutletsDrawerOpen(false)
   }
 
   const handleOutletsNavigation = (tenant: Tenant) => {
-    setSelectedTenant(tenant)
-    setActiveTab('outlets')
-  }
-
-  const resetSelection = () => {
-    setSelectedTenant(null)
-    setSelectedOutlet(null)
-    setActiveTab('tenants')
+    setOutletsTenant(tenant)
+    setIsOutletsDrawerOpen(true)
   }
 
   const renderContent = () => {
@@ -137,15 +138,15 @@ export default function DashboardPage() {
     }
 
     if (activeTab === 'users' || selectedOutlet) {
-      return <UserManagement tenant={selectedTenant} outlet={selectedOutlet} onBack={() => selectedOutlet ? setSelectedOutlet(null) : resetSelection()} />
+      return <UserManagement tenant={selectedTenant} outlet={selectedOutlet} onBack={() => selectedOutlet ? setSelectedOutlet(null) : setActiveTab('tenants')} />
     }
 
-    if (activeTab === 'outlets' || selectedTenant) {
-      return <OutletManagement tenant={selectedTenant} onBack={() => selectedTenant ? setSelectedTenant(null) : resetSelection()} onViewUsers={handleOutletClick} />
+    if (activeTab === 'outlets') {
+      return <OutletManagement tenant={null} isOpen={true} onClose={() => setActiveTab('tenants')} onViewUsers={handleOutletClick} />
     }
 
     return (
-      <div className="p-6 md:p-8 flex flex-col h-full overflow-hidden">
+      <div className="p-6 md:p-8 flex flex-col h-full overflow-hidden bg-[#f8f9fc]">
         <div className="max-w-7xl mx-auto w-full flex-1 flex flex-col min-h-0">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <div>
@@ -247,9 +248,8 @@ export default function DashboardPage() {
                 
                 {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                   let pageNum = i + 1;
-                  // Show pages around current page if many pages
                   if (totalPages > 5 && currentPage > 3) {
-                    pageNum = currentPage - 3 + i + 1;
+                    pageNum = currentPage - 2 + i;
                     if (pageNum > totalPages) pageNum = totalPages - (4 - i);
                   }
                   
@@ -311,6 +311,12 @@ export default function DashboardPage() {
         isOpen={isDetailOpen}
         onClose={() => {setIsDetailOpen(false); setViewingTenant(null)}}
         tenant={viewingTenant}
+      />
+      <OutletManagement
+        tenant={outletsTenant}
+        isOpen={isOutletsDrawerOpen}
+        onClose={() => {setIsOutletsDrawerOpen(false); setOutletsTenant(null)}}
+        onViewUsers={handleOutletClick}
       />
     </SidebarProvider>
   )
