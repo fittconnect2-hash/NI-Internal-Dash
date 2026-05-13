@@ -3,7 +3,7 @@
 import { Tenant } from "@/lib/types"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Mail, Phone, MapPin, MoreVertical, Eye, Edit2, Settings2, Trash2, LayoutGrid, Users } from "lucide-react"
+import { Mail, Phone, MapPin, MoreVertical, Eye, Edit2, Settings2, Trash2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
   DropdownMenu,
@@ -42,9 +42,6 @@ export function TenantCard({ tenant, viewMode, onEdit, onViewOutlets, onView, on
       <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onView(tenant); }}>
           <Eye className="mr-2 h-4 w-4" /> View Detail
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onViewOutlets(tenant); }}>
-          <LayoutGrid className="mr-2 h-4 w-4" /> View Outlets
         </DropdownMenuItem>
         <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEdit(tenant); }}>
           <Edit2 className="mr-2 h-4 w-4" /> Edit Profile
