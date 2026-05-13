@@ -277,7 +277,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <SidebarProvider style={{ "--sidebar-width": "4rem" } as React.CSSProperties}>
+    <SidebarProvider>
       <div className="flex min-h-screen w-full bg-background overflow-hidden">
         <DashboardSidebar activeTab={activeTab} onTabChange={(tab) => {
           setActiveTab(tab)
