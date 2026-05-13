@@ -1,11 +1,9 @@
-
 "use client"
 
 import { Tenant } from "@/lib/types"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Mail, Phone, MoreVertical, Store, Users, ExternalLink, ChevronRight } from "lucide-react"
+import { Mail, Phone, Store, Users, ChevronRight, MapPin } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface TenantCardProps {
@@ -22,47 +20,41 @@ export function TenantCard({ tenant, viewMode, onEdit, onViewOutlets }: TenantCa
   if (viewMode === 'list') {
     return (
       <Card 
-        className="group hover:shadow-xl hover:translate-x-1 transition-all duration-300 border border-slate-100 bg-white rounded-2xl overflow-hidden cursor-pointer"
+        className="group hover:border-primary/30 transition-all duration-200 border-border bg-white cursor-pointer"
         onClick={onViewOutlets}
       >
-        <CardContent className="flex items-center p-6 gap-6">
-          <div className="h-14 w-14 rounded-2xl bg-slate-50 group-hover:bg-[#E3F2FD] flex items-center justify-center text-slate-300 group-hover:text-[#0071BC] font-black text-lg shrink-0 border border-slate-100/50 transition-colors">
+        <CardContent className="flex items-center p-4 gap-4">
+          <div className="h-10 w-10 rounded bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-sm shrink-0">
             {initials}
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-black text-lg text-slate-900 leading-none mb-2">{tenant.tenantName}</h3>
-            <div className="flex items-center gap-3">
-              <span className="flex items-center text-xs text-slate-400 gap-1.5 font-bold uppercase tracking-wider">
-                <Mail className="h-3 w-3 opacity-40" /> {tenant.contactEmail}
+            <h3 className="font-semibold text-sm text-slate-900 truncate">{tenant.tenantName}</h3>
+            <div className="flex items-center gap-3 mt-1">
+              <span className="flex items-center text-xs text-slate-500 gap-1 truncate max-w-[150px]">
+                <Mail className="h-3 w-3" /> {tenant.contactEmail}
               </span>
-              <div className="h-1 w-1 rounded-full bg-slate-200" />
-              <span className="flex items-center text-xs text-slate-400 gap-1.5 font-bold uppercase tracking-wider">
-                <Phone className="h-3 w-3 opacity-40" /> {tenant.contactPhone}
+              <span className="flex items-center text-xs text-slate-500 gap-1">
+                <Phone className="h-3 w-3" /> {tenant.contactPhone}
               </span>
             </div>
           </div>
           
-          <div className="flex gap-12 items-center px-8 border-x border-slate-100 h-12">
+          <div className="flex gap-8 items-center px-6 border-x border-slate-100">
             <div className="flex flex-col items-center">
-              <span className="text-[10px] text-slate-300 font-black tracking-[0.2em] mb-1">OUTLETS</span>
-              <span className="text-xl font-black text-[#0071BC]">{tenant.numberOfOutlets}</span>
+              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wide">Outlets</span>
+              <span className="text-sm font-bold text-slate-900">{tenant.numberOfOutlets}</span>
             </div>
             <div className="flex flex-col items-center">
-              <span className="text-[10px] text-slate-300 font-black tracking-[0.2em] mb-1">STAFF</span>
-              <span className="text-xl font-black text-slate-900">{tenant.numberOfUsers}</span>
+              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wide">Users</span>
+              <span className="text-sm font-bold text-slate-900">{tenant.numberOfUsers}</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-6 justify-end ml-8">
-            <Badge 
-              className={cn(
-                "rounded-lg px-4 py-2 text-[10px] font-black border-none shadow-none uppercase tracking-[0.15em]",
-                isPending ? "pending-status" : "bg-green-50 text-green-600 border border-green-100"
-              )}
-            >
+          <div className="flex items-center gap-4">
+            <Badge className={cn("rounded px-2 py-0.5 text-[10px] font-bold uppercase", isPending ? "pending-status" : "active-status")}>
               {tenant.configurationStatus}
             </Badge>
-            <ChevronRight className="h-5 w-5 text-slate-200 group-hover:text-[#0071BC] transition-colors" />
+            <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-primary transition-colors" />
           </div>
         </CardContent>
       </Card>
@@ -71,74 +63,43 @@ export function TenantCard({ tenant, viewMode, onEdit, onViewOutlets }: TenantCa
 
   return (
     <Card 
-      className="group flex flex-col h-full border border-slate-100 bg-white rounded-[32px] overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 cursor-pointer"
+      className="group flex flex-col h-full border-border bg-white hover:shadow-md transition-all duration-200 cursor-pointer"
       onClick={onViewOutlets}
     >
-      <CardContent className="p-0 flex flex-col h-full">
-        <div className="p-8 pb-6">
-          <div className="flex justify-between items-start mb-8">
-            <div className="h-16 w-16 rounded-[24px] bg-slate-50 group-hover:bg-[#E3F2FD] flex items-center justify-center text-slate-300 group-hover:text-[#0071BC] font-black text-xl border border-slate-100 transition-colors">
-              {initials}
-            </div>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-10 w-10 -mr-2 text-slate-200 hover:text-slate-900 rounded-full" 
-              onClick={(e) => { e.stopPropagation(); onEdit(tenant); }}
-            >
-              <MoreVertical className="h-5 w-5" />
-            </Button>
+      <CardContent className="p-5 flex flex-col h-full">
+        <div className="flex justify-between items-start mb-4">
+          <div className="h-12 w-12 rounded bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 font-bold text-lg">
+            {initials}
           </div>
-          
-          <h3 className="font-black text-2xl text-[#121A26] leading-tight mb-2 group-hover:text-[#0071BC] transition-colors">{tenant.tenantName}</h3>
-          <div className="flex items-center gap-2 mb-8">
-            <div className="h-2 w-2 rounded-full bg-green-500" />
-            <span className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">HOSPITALITY BRAND</span>
-          </div>
+          <Badge className={cn("rounded px-2 py-0.5 text-[10px] font-bold uppercase", isPending ? "pending-status" : "active-status")}>
+            {tenant.configurationStatus}
+          </Badge>
+        </div>
+        
+        <h3 className="font-bold text-base text-slate-900 mb-1 group-hover:text-primary transition-colors">{tenant.tenantName}</h3>
+        <p className="text-xs text-slate-500 flex items-center gap-1 mb-4">
+          <MapPin className="h-3 w-3" /> Hospitality Partner
+        </p>
 
-          <div className="space-y-4 mb-10">
-            <div className="flex items-center text-xs text-slate-500 gap-4 font-bold uppercase tracking-widest">
-              <Mail className="h-4 w-4 text-slate-200 shrink-0" />
-              <span className="truncate">{tenant.contactEmail}</span>
-            </div>
-            <div className="flex items-center text-xs text-slate-500 gap-4 font-bold uppercase tracking-widest">
-              <Phone className="h-4 w-4 text-slate-200 shrink-0" />
-              <span>{tenant.contactPhone}</span>
-            </div>
+        <div className="space-y-2 mb-6">
+          <div className="flex items-center text-xs text-slate-600 gap-2">
+            <Mail className="h-3.5 w-3.5 opacity-50 shrink-0" />
+            <span className="truncate">{tenant.contactEmail}</span>
           </div>
-
-          <div className="grid grid-cols-2 gap-4 p-2 bg-slate-50/50 rounded-2xl mb-8">
-            <div className="flex flex-col items-center py-4 bg-white rounded-xl shadow-sm border border-slate-100">
-              <span className="text-[9px] text-slate-400 font-black tracking-[0.2em] mb-1">OUTLETS</span>
-              <span className="text-2xl font-black text-[#0071BC]">{tenant.numberOfOutlets}</span>
-            </div>
-            <div className="flex flex-col items-center py-4 bg-white rounded-xl shadow-sm border border-slate-100">
-              <span className="text-[9px] text-slate-400 font-black tracking-[0.2em] mb-1">USERS</span>
-              <span className="text-2xl font-black text-slate-900">{tenant.numberOfUsers}</span>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <Badge 
-              className={cn(
-                "rounded-lg px-4 py-2 text-[10px] font-black border-none shadow-none uppercase tracking-[0.15em]",
-                isPending ? "pending-status" : "bg-green-50 text-green-600 border border-green-100"
-              )}
-            >
-              {tenant.configurationStatus}
-            </Badge>
-            <div className="flex items-center gap-2 text-[10px] font-black text-[#0071BC] uppercase tracking-widest group-hover:translate-x-1 transition-transform">
-              EXPLORE <ChevronRight className="h-4 w-4" />
-            </div>
+          <div className="flex items-center text-xs text-slate-600 gap-2">
+            <Phone className="h-3.5 w-3.5 opacity-50 shrink-0" />
+            <span>{tenant.contactPhone}</span>
           </div>
         </div>
 
-        <div className="mt-auto px-8 py-5 bg-slate-50/30 border-t border-slate-50 flex items-center justify-between">
-          <span className="text-[10px] text-slate-400 font-bold italic">Active since 2024</span>
-          <div className="flex -space-x-2">
-            {[1,2,3].map(i => (
-              <div key={i} className="h-6 w-6 rounded-full border-2 border-white bg-slate-200" />
-            ))}
+        <div className="grid grid-cols-2 gap-2 mt-auto">
+          <div className="p-3 bg-slate-50 rounded border border-slate-100 flex flex-col items-center">
+            <span className="text-[9px] text-slate-400 font-bold uppercase mb-1">Outlets</span>
+            <span className="text-sm font-bold text-slate-900">{tenant.numberOfOutlets}</span>
+          </div>
+          <div className="p-3 bg-slate-50 rounded border border-slate-100 flex flex-col items-center">
+            <span className="text-[9px] text-slate-400 font-bold uppercase mb-1">Users</span>
+            <span className="text-sm font-bold text-slate-900">{tenant.numberOfUsers}</span>
           </div>
         </div>
       </CardContent>
