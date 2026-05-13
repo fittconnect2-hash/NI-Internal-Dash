@@ -3,7 +3,7 @@
 import { Tenant } from "@/lib/types"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Mail, Phone, MapPin, MoreVertical, Eye, Edit2, Settings2, Trash2 } from "lucide-react"
+import { Mail, Phone, MapPin, MoreVertical, Eye, Edit2, Settings2, Trash2, LayoutGrid, Users } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
   DropdownMenu,
@@ -18,11 +18,12 @@ interface TenantCardProps {
   viewMode: 'grid' | 'list';
   onEdit: (tenant: Tenant) => void;
   onViewOutlets: (tenant: Tenant) => void;
+  onView: (tenant: Tenant) => void;
   onConfigure: (tenant: Tenant) => void;
   onDelete: (id: string) => void;
 }
 
-export function TenantCard({ tenant, viewMode, onEdit, onViewOutlets, onConfigure, onDelete }: TenantCardProps) {
+export function TenantCard({ tenant, viewMode, onEdit, onViewOutlets, onView, onConfigure, onDelete }: TenantCardProps) {
   const isPending = tenant.configurationStatus === "Configuration pending"
   const initials = tenant.tenantName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
 
@@ -39,8 +40,11 @@ export function TenantCard({ tenant, viewMode, onEdit, onViewOutlets, onConfigur
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onView(tenant); }}>
+          <Eye className="mr-2 h-4 w-4" /> View Detail
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onViewOutlets(tenant); }}>
-          <Eye className="mr-2 h-4 w-4" /> View Outlets
+          <LayoutGrid className="mr-2 h-4 w-4" /> View Outlets
         </DropdownMenuItem>
         <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEdit(tenant); }}>
           <Edit2 className="mr-2 h-4 w-4" /> Edit Profile
@@ -137,11 +141,11 @@ export function TenantCard({ tenant, viewMode, onEdit, onViewOutlets, onConfigur
         </div>
 
         <div className="grid grid-cols-2 gap-2 mt-auto">
-          <div className="p-3 bg-slate-50 rounded border border-slate-100 flex flex-col items-center">
+          <div className="p-3 bg-slate-50 rounded border border-slate-100 flex flex-col items-center group/count hover:bg-slate-100 transition-colors">
             <span className="text-[9px] text-slate-400 font-bold uppercase mb-1">Outlets</span>
             <span className="text-sm font-bold text-slate-900">{tenant.numberOfOutlets}</span>
           </div>
-          <div className="p-3 bg-slate-50 rounded border border-slate-100 flex flex-col items-center">
+          <div className="p-3 bg-slate-50 rounded border border-slate-100 flex flex-col items-center group/count hover:bg-slate-100 transition-colors">
             <span className="text-[9px] text-slate-400 font-bold uppercase mb-1">Users</span>
             <span className="text-sm font-bold text-slate-900">{tenant.numberOfUsers}</span>
           </div>

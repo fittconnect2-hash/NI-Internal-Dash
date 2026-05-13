@@ -5,6 +5,7 @@ import { DashboardSidebar } from "@/components/dashboard-sidebar"
 import { TenantCard } from "@/components/tenant-card"
 import { TenantForm } from "@/components/tenant-form"
 import { TenantConfiguration } from "@/components/tenant-configuration"
+import { TenantDetail } from "@/components/tenant-detail"
 import { OutletManagement } from "@/components/outlet-management"
 import { UserManagement } from "@/components/user-management"
 import { initialTenants } from "@/lib/mock-data"
@@ -40,8 +41,10 @@ export default function DashboardPage() {
   
   const [isFormOpen, setIsFormOpen] = React.useState(false)
   const [isConfigOpen, setIsConfigOpen] = React.useState(false)
+  const [isDetailOpen, setIsDetailOpen] = React.useState(false)
   const [editingTenant, setEditingTenant] = React.useState<Tenant | null>(null)
   const [configuringTenant, setConfiguringTenant] = React.useState<Tenant | null>(null)
+  const [viewingTenant, setViewingTenant] = React.useState<Tenant | null>(null)
 
   const filteredTenants = tenants.filter(t => {
     const matchesSearch = 
@@ -77,6 +80,11 @@ export default function DashboardPage() {
   const handleConfigureTenant = (tenant: Tenant) => {
     setConfiguringTenant(tenant)
     setIsConfigOpen(true)
+  }
+
+  const handleViewTenant = (tenant: Tenant) => {
+    setViewingTenant(tenant)
+    setIsDetailOpen(true)
   }
 
   const handleTenantClick = (tenant: Tenant) => {
@@ -186,6 +194,7 @@ export default function DashboardPage() {
                   setIsFormOpen(true)
                 }}
                 onViewOutlets={() => handleTenantClick(tenant)}
+                onView={handleViewTenant}
                 onConfigure={handleConfigureTenant}
                 onDelete={handleDeleteTenant}
               />
@@ -219,6 +228,11 @@ export default function DashboardPage() {
         onClose={() => {setIsConfigOpen(false); setConfiguringTenant(null)}}
         tenant={configuringTenant}
         onSave={() => setIsConfigOpen(false)}
+      />
+      <TenantDetail
+        isOpen={isDetailOpen}
+        onClose={() => {setIsDetailOpen(false); setViewingTenant(null)}}
+        tenant={viewingTenant}
       />
     </SidebarProvider>
   )
