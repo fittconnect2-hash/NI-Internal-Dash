@@ -2,7 +2,7 @@
 "use client"
 
 import * as React from "react"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Minus, Plus } from "lucide-react"
 import { Tenant } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import {
@@ -23,6 +23,7 @@ import {
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
+import { Switch } from "@/components/ui/switch"
 import { cn } from "@/lib/utils"
 
 interface TenantConfigurationProps {
@@ -38,6 +39,22 @@ const configTabs = [
 
 export function TenantConfiguration({ tenant, isOpen, onClose, onSave }: TenantConfigurationProps) {
   const [activeTab, setActiveTab] = React.useState("Currency")
+  const [tipsEnabled, setTipsEnabled] = React.useState(true)
+  const [suggestedTipRates, setSuggestedTipRates] = React.useState([5, 10, 20])
+
+  const handleAddTipRate = () => {
+    setSuggestedTipRates([...suggestedTipRates, 0])
+  }
+
+  const handleRemoveTipRate = (index: number) => {
+    setSuggestedTipRates(suggestedTipRates.filter((_, i) => i !== index))
+  }
+
+  const handleTipRateChange = (index: number, value: string) => {
+    const newRates = [...suggestedTipRates]
+    newRates[index] = parseFloat(value) || 0
+    setSuggestedTipRates(newRates)
+  }
 
   if (!tenant) return null
 
@@ -155,8 +172,70 @@ export function TenantConfiguration({ tenant, isOpen, onClose, onSave }: TenantC
                   </div>
                 </div>
               )}
+
+              {activeTab === "Tips" && (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-end gap-2 mb-2">
+                    <Label htmlFor="enable-tips" className="text-sm font-medium text-slate-500">Enable tips</Label>
+                    <Switch 
+                      id="enable-tips" 
+                      checked={tipsEnabled} 
+                      onCheckedChange={setTipsEnabled}
+                    />
+                  </div>
+
+                  <div className={cn("space-y-6 transition-opacity", !tipsEnabled && "opacity-50 pointer-events-none")}>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold text-slate-700">Tip Commission Rate (%) <span className="text-red-500">*</span></Label>
+                      <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold text-slate-700">Tip Commission Cap <span className="text-red-500">*</span></Label>
+                      <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold text-slate-700">Maximum Tip Rate (%)</Label>
+                      <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
+                    </div>
+
+                    <div className="space-y-3">
+                      <Label className="text-sm font-semibold text-slate-700">Suggested Tip Rates (%)</Label>
+                      <div className="space-y-3">
+                        {suggestedTipRates.map((rate, index) => (
+                          <div key={index} className="flex gap-3">
+                            <Input 
+                              type="number"
+                              value={rate} 
+                              onChange={(e) => handleTipRateChange(index, e.target.value)}
+                              className="h-11 bg-white border-slate-200" 
+                            />
+                            <Button 
+                              variant="outline" 
+                              size="icon" 
+                              className="h-11 w-11 shrink-0 border-slate-200 text-slate-400 hover:text-slate-600 bg-white"
+                              onClick={() => handleRemoveTipRate(index)}
+                            >
+                              <Minus className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="mt-2 text-slate-600 border-slate-200 bg-white hover:bg-slate-50 font-medium"
+                        onClick={handleAddTipRate}
+                      >
+                        + Add Rate
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
               
-              {!["Currency", "Commission"].includes(activeTab) && (
+              {!["Currency", "Commission", "Tips"].includes(activeTab) && (
                 <div className="py-20 text-center space-y-2">
                   <h4 className="font-bold text-slate-900">{activeTab} Settings</h4>
                   <p className="text-sm text-slate-500">Configuration options for {activeTab.toLowerCase()} will appear here.</p>
