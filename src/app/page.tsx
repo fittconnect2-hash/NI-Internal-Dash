@@ -10,6 +10,7 @@ import { TenantDetail } from "@/components/tenant-detail"
 import { OutletManagement } from "@/components/outlet-management"
 import { UserManagement } from "@/components/user-management"
 import { DashboardOverview } from "@/components/dashboard-overview"
+import { OutletListView } from "@/components/outlet-list-view"
 import { initialTenants } from "@/lib/mock-data"
 import { Tenant, Outlet } from "@/lib/types"
 import { SidebarProvider } from "@/components/ui/sidebar"
@@ -123,6 +124,19 @@ export default function DashboardPage() {
   const renderContent = () => {
     if (activeTab === 'dashboard') {
       return <DashboardOverview />
+    }
+
+    if (activeTab === 'outlets') {
+      return (
+        <OutletListView 
+          onViewUsers={(outlet) => {
+            // Logic to bridge to users filtered by this outlet
+            const owner = tenants.find(t => t.id === outlet.tenantId)
+            setSelectedTenant(owner || null)
+            setIsUsersDrawerOpen(true)
+          }}
+        />
+      )
     }
 
     if (activeTab === 'tenants') {
