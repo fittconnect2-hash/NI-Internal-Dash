@@ -15,7 +15,11 @@ import {
   Briefcase,
   MapPin,
   CalendarDays,
-  ShieldCheck
+  ShieldCheck,
+  MailIcon,
+  PhoneIcon,
+  MapPinIcon,
+  Settings2
 } from "lucide-react"
 import { Tenant } from "@/lib/types"
 import { Button } from "@/components/ui/button"
@@ -71,7 +75,7 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
       email: "risiidhan@kptac.com",
       phone: "+971 54 457 1754",
       status: "Active",
-      role: "Organization Admin"
+      role: "Partner Admin"
     },
     {
       id: "a2",
@@ -148,97 +152,76 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
 
             <div className="flex-1 overflow-hidden">
               <TabsContent value="overview" className="m-0 h-full overflow-y-auto p-8 space-y-8">
-                <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-                  {/* Company Profile Section */}
-                  <div className="lg:col-span-2 space-y-8">
-                    <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
-                      <div className="flex items-center gap-3 mb-8">
-                        <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center">
-                          <Building2 className="h-4 w-4 text-[#1a73e8]" />
-                        </div>
-                        <h3 className="font-extrabold text-slate-900 tracking-tight">Business Profile</h3>
+                <div className="max-w-5xl mx-auto space-y-8">
+                  {/* Tenant Profile Card */}
+                  <div className="bg-white rounded-2xl border border-slate-200 p-10 shadow-sm">
+                    <div className="flex items-center gap-3 mb-10">
+                      <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center">
+                        <Building2 className="h-4 w-4 text-[#1a73e8]" />
                       </div>
-
-                      <div className="grid grid-cols-2 gap-y-10 gap-x-12">
-                        <div className="space-y-1.5">
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Official Name</p>
-                          <p className="text-sm font-extrabold text-slate-900">{tenant.tenantName}</p>
-                        </div>
-                        <div className="space-y-1.5">
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Industry Category</p>
-                          <p className="text-sm font-extrabold text-slate-900">{tenant.businessType || "Hospitality"}</p>
-                        </div>
-                        <div className="space-y-1.5">
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Headquarters</p>
-                          <p className="text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
-                            <MapPin className="h-3.5 w-3.5 text-slate-300" />
-                            {tenant.city}, {tenant.country}
-                          </p>
-                        </div>
-                        <div className="space-y-1.5">
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Merchant Identification</p>
-                          <p className="text-sm font-extrabold text-[#1a73e8]">{tenant.merchantId || "M-PENDING"}</p>
-                        </div>
-                      </div>
+                      <h3 className="font-extrabold text-slate-900 tracking-tight text-lg">Tenant Overview</h3>
                     </div>
 
-                    <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
-                      <div className="flex items-center gap-3 mb-8">
-                        <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center">
-                          <User className="h-4 w-4 text-[#1a73e8]" />
-                        </div>
-                        <h3 className="font-extrabold text-slate-900 tracking-tight">Primary Contact</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-16">
+                      <div className="space-y-2">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Company</p>
+                        <p className="text-[15px] font-extrabold text-slate-900">{tenant.tenantName}</p>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Contact Person</p>
+                        <p className="text-[15px] font-extrabold text-slate-900">{tenant.contactName || "N/A"}</p>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-y-10 gap-x-12">
-                        <div className="space-y-1.5">
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Authorized Person</p>
-                          <p className="text-sm font-extrabold text-slate-900">{tenant.contactName || tenant.tenantName}</p>
-                        </div>
-                        <div className="space-y-1.5">
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Email Channel</p>
-                          <p className="text-sm font-extrabold text-[#1a73e8] flex items-center gap-1.5 truncate">
-                            <Mail className="h-3.5 w-3.5 text-slate-300" />
-                            {tenant.contactEmail}
-                          </p>
-                        </div>
-                        <div className="space-y-1.5">
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Direct Phone</p>
-                          <p className="text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
-                            <Phone className="h-3.5 w-3.5 text-slate-300" />
-                            {tenant.contactPhone}
-                          </p>
-                        </div>
-                        <div className="space-y-1.5">
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Mailing Address</p>
-                          <p className="text-sm font-extrabold text-slate-900 leading-relaxed">
+                      <div className="space-y-2">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Phone</p>
+                        <p className="text-[15px] font-extrabold text-slate-900 flex items-center gap-2">
+                          <PhoneIcon className="h-3.5 w-3.5 text-slate-300" />
+                          {tenant.contactPhone}
+                        </p>
+                      </div>
+
+                      <div className="space-y-2 lg:col-span-1">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Address</p>
+                        <p className="text-[15px] font-extrabold text-slate-900 flex items-start gap-2 leading-snug">
+                          <MapPinIcon className="h-3.5 w-3.5 text-slate-300 mt-0.5 shrink-0" />
+                          <span>
                             {tenant.addressLine1 || "Not Provided"}<br />
-                            <span className="text-slate-400 text-xs">{tenant.zipCode} {tenant.city}</span>
-                          </p>
-                        </div>
+                            <span className="text-slate-400 text-xs font-bold uppercase tracking-tight">
+                              {tenant.city}, {tenant.country} {tenant.zipCode}
+                            </span>
+                          </span>
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Business Type</p>
+                        <p className="text-[15px] font-extrabold text-slate-900">{tenant.businessType || "Hospitality"}</p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Email</p>
+                        <p className="text-[15px] font-extrabold text-[#1a73e8] flex items-center gap-2 truncate">
+                          <MailIcon className="h-3.5 w-3.5 text-slate-300" />
+                          {tenant.contactEmail}
+                        </p>
                       </div>
                     </div>
                   </div>
 
-                  {/* Sidebar Stats */}
-                  <div className="space-y-6">
-                    <div className="bg-[#0f172a] rounded-2xl p-6 text-white shadow-xl">
-                      <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Account Health</h4>
-                      <div className="space-y-6">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-slate-300">Total Outlets</span>
-                          <span className="text-xl font-black">{tenant.numberOfOutlets}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-slate-300">Active Users</span>
-                          <span className="text-xl font-black">{tenant.numberOfUsers}</span>
-                        </div>
-                        <div className="pt-4 border-t border-slate-800">
-                          <Button className="w-full bg-[#1a73e8] hover:bg-[#1557b0] text-xs font-bold uppercase tracking-widest h-10 border-none">
-                            Manage Credentials
-                          </Button>
-                        </div>
+                  {/* Configuration Module */}
+                  <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
+                    <div className="flex items-center gap-3 mb-10">
+                      <div className="h-6 w-6 rounded-full border border-slate-100 flex items-center justify-center bg-slate-50">
+                        <Settings2 className="h-3.5 w-3.5 text-slate-400" />
                       </div>
+                      <h3 className="font-extrabold text-slate-900 tracking-tight text-lg leading-none">Configuration</h3>
+                    </div>
+
+                    <div className="flex flex-col items-center justify-center py-20 text-center">
+                      <p className="text-[15px] text-slate-400 font-medium">
+                        Configuration not set for this tenant.
+                      </p>
                     </div>
                   </div>
                 </div>
