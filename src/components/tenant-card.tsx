@@ -3,7 +3,7 @@
 import { Tenant } from "@/lib/types"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Mail, Phone, MapPin, MoreVertical, Eye, Edit2, Settings2, Trash2, Store, Users } from "lucide-react"
+import { Mail, Phone, MapPin, MoreVertical, Eye, Edit2, Settings2, Trash2, Store, Users, ExternalLink } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
   DropdownMenu,
@@ -81,6 +81,29 @@ export function TenantCard({
     </DropdownMenu>
   )
 
+  const ExternalLinkButton = () => (
+    <TooltipProvider delayDuration={300}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-[#1a73e8]"
+            onClick={(e) => { 
+              e.stopPropagation(); 
+              window.open(`https://dine-net.app/portal/${tenant.id}`, '_blank');
+            }}
+          >
+            <ExternalLink className="h-4 w-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent className="bg-slate-900 text-slate-50 border-none px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider">
+          Launch Portal
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  )
+
   const StatusDot = () => (
     <div className={cn(
       "absolute bottom-0.5 right-0.5 h-3.5 w-3.5 rounded-full border-2 border-white shadow-sm",
@@ -154,14 +177,17 @@ export function TenantCard({
             />
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
             <Badge className={cn(
               "rounded-full px-3 py-1 text-[10px] font-bold uppercase border-none", 
               isPending ? "bg-amber-100 text-amber-700" : "bg-[#e1f9ef] text-[#22c55e]"
             )}>
               {tenant.configurationStatus === "Configuration pending" ? "Pending" : "Active"}
             </Badge>
-            <ActionsMenu />
+            <div className="flex items-center gap-1">
+              <ExternalLinkButton />
+              <ActionsMenu />
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -186,7 +212,10 @@ export function TenantCard({
             )}>
               {tenant.configurationStatus === "Configuration pending" ? "Pending" : "Active"}
             </Badge>
-            <ActionsMenu />
+            <div className="flex items-center gap-1">
+              <ExternalLinkButton />
+              <ActionsMenu />
+            </div>
           </div>
         </div>
         
