@@ -177,14 +177,20 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, o
               </button>
               <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                  <span className="flex items-center gap-1.5"><Building2 className="h-3 w-3" /> Tenants</span>
-                  <ChevronRight className="h-2.5 w-2.5 opacity-50" />
-                  <span className="text-slate-900">{tenant?.tenantName || "Global Management"}</span>
-                  <ChevronRight className="h-2.5 w-2.5 opacity-50" />
-                  <span className="text-slate-400">Users</span>
+                  <span className="flex items-center gap-1.5 opacity-80"><Building2 className="h-3 w-3" /> TENANTS</span>
+                  <ChevronRight className="h-2.5 w-2.5 opacity-30" />
+                  <span className="text-slate-900">{tenant?.tenantName.toUpperCase() || "GLOBAL MANAGEMENT"}</span>
+                  <ChevronRight className="h-2.5 w-2.5 opacity-30" />
+                  <span className="opacity-80">USERS</span>
                 </div>
                 <SheetTitle className="text-2xl font-black text-[#1e293b] tracking-tight">
-                  {editingUser ? `Edit ${editingUser.fullName}` : isAddingNew ? "Add New Staff Member" : "User Management"}
+                  {editingUser 
+                    ? `Edit ${editingUser.fullName}` 
+                    : isAddingNew 
+                      ? "Add New Staff Member" 
+                      : tenant 
+                        ? `User Management of ${tenant.tenantName}` 
+                        : "User Management"}
                 </SheetTitle>
                 {isAddingNew && (
                   <SheetDescription className="text-xs text-slate-500 font-medium">
