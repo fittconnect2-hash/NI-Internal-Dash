@@ -313,9 +313,9 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, o
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">All Roles</SelectItem>
-                        <SelectItem value="Admin">Admin</SelectItem>
+                        <SelectItem value="Organization Admin">Organization Admin</SelectItem>
                         <SelectItem value="Manager">Manager</SelectItem>
-                        <SelectItem value="Staff">Staff</SelectItem>
+                        <SelectItem value="Partner Admin">Partner Admin</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -531,14 +531,14 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, o
 
                         <div className="space-y-2">
                           <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Role <span className="text-red-500">*</span></Label>
-                          <Select defaultValue={editingUser?.role || "Staff"}>
+                          <Select defaultValue={editingUser?.role || "Partner Admin"}>
                             <SelectTrigger className="h-12 border-slate-200 bg-slate-50/30 font-bold">
                               <SelectValue placeholder="Select role" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="Admin">Admin</SelectItem>
+                              <SelectItem value="Organization Admin">Organization Admin</SelectItem>
                               <SelectItem value="Manager">Manager</SelectItem>
-                              <SelectItem value="Staff">Staff</SelectItem>
+                              <SelectItem value="Partner Admin">Partner Admin</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>

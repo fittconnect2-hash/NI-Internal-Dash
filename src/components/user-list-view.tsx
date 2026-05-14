@@ -83,11 +83,6 @@ export function UserListView({ onEditUser }: UserListViewProps) {
     )
   }, [tenantsWithCounts, tenantSearch])
 
-  // Filter outlets by current tenant filter
-  const tenantOutlets = React.useMemo(() => {
-    return initialOutlets.filter(o => !tenantFilter || o.tenantId === tenantFilter)
-  }, [tenantFilter])
-
   const filteredUsers = React.useMemo(() => {
     return initialUsers.filter(user => {
       const matchesSearch = 
@@ -238,9 +233,9 @@ export function UserListView({ onEditUser }: UserListViewProps) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Roles</SelectItem>
-                  <SelectItem value="Admin">Admin</SelectItem>
+                  <SelectItem value="Organization Admin">Organization Admin</SelectItem>
                   <SelectItem value="Manager">Manager</SelectItem>
-                  <SelectItem value="Staff">Staff</SelectItem>
+                  <SelectItem value="Partner Admin">Partner Admin</SelectItem>
                 </SelectContent>
               </Select>
             </div>

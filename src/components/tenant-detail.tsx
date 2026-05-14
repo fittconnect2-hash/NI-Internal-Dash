@@ -70,7 +70,8 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
       username: "@risiidhan@kptac.com",
       email: "risiidhan@kptac.com",
       phone: "+971 54 457 1754",
-      status: "Active"
+      status: "Active",
+      role: "Organization Admin"
     },
     {
       id: "a2",
@@ -78,7 +79,8 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
       username: "@saurabh.m",
       email: "saurabh.m@example.com",
       phone: "+971 52 123 4567",
-      status: "Active"
+      status: "Active",
+      role: "Partner Admin"
     }
   ]
 
@@ -306,6 +308,20 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                             <Input placeholder="5X XXX XXXX" className="h-12 flex-1 border-slate-200 bg-slate-50/30 font-bold tracking-widest" />
                           </div>
                         </div>
+
+                        <div className="space-y-2.5">
+                          <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Account Role <span className="text-red-500 font-black">*</span></Label>
+                          <Select defaultValue="Partner Admin">
+                            <SelectTrigger className="h-12 border-slate-200 bg-slate-50/30 font-bold">
+                              <SelectValue placeholder="Select role" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Organization Admin">Organization Admin</SelectItem>
+                              <SelectItem value="Manager">Manager</SelectItem>
+                              <SelectItem value="Partner Admin">Partner Admin</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
                     </ScrollArea>
                     <div className="p-6 border-t border-slate-100 flex justify-end gap-4 bg-slate-50/30 flex-shrink-0">
@@ -379,7 +395,7 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                             <div className="px-5 py-3 flex justify-between items-center bg-slate-50/30 border-t border-slate-50/50">
                               <div className="flex items-center gap-1.5">
                                 <ShieldCheck className="h-3.5 w-3.5 text-[#22c55e]" />
-                                <span className="text-[10px] font-bold uppercase text-[#22c55e] tracking-widest">Master Admin</span>
+                                <span className="text-[10px] font-bold uppercase text-[#22c55e] tracking-widest">{admin.role}</span>
                               </div>
                               <Badge className="bg-[#e1f9ef] text-[#22c55e] border-none px-4 py-1 rounded-full text-[10px] font-bold shadow-none uppercase tracking-widest">
                                 {admin.status}

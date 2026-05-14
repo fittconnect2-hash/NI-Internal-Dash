@@ -121,7 +121,7 @@ function generateMockUsers(tenants: Tenant[], outlets: Outlet[]): User[] {
     
     for (let k = 0; k < userCount; k++) {
       const assignedOutlet = tenantOutlets[k % tenantOutlets.length];
-      const roles: ('Admin' | 'Manager' | 'Staff')[] = ['Admin', 'Manager', 'Staff', 'Staff', 'Staff'];
+      const roles: ('Organization Admin' | 'Manager' | 'Partner Admin')[] = ['Organization Admin', 'Manager', 'Partner Admin', 'Manager', 'Partner Admin'];
       const role = roles[k % roles.length];
       const firstNames = ['John', 'Jane', 'Michael', 'Sara', 'David', 'Emily', 'Robert', 'Lisa'];
       const lastNames = ['Smith', 'Doe', 'Wilson', 'Ahmed', 'Brown', 'Davis', 'Taylor', 'Miller'];

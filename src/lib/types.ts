@@ -42,7 +42,7 @@ export interface User {
   username: string;
   email: string;
   phone: string;
-  role: 'Admin' | 'Manager' | 'Staff';
+  role: 'Organization Admin' | 'Manager' | 'Partner Admin';
   status: 'Active' | 'Inactive';
   lastActive?: string;
 }
