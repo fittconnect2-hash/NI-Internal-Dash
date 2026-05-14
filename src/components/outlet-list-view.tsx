@@ -28,6 +28,9 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import {
+  Table as TableShadcn,
+} from "@/components/ui/table"
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -178,7 +181,7 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
               <TableHeader className="bg-slate-50/50">
                 <TableRow className="hover:bg-transparent border-b border-slate-100">
                   <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-8 uppercase tracking-widest">
-                    <div className="flex items-center gap-1.5 cursor-pointer hover:text-slate-900 transition-colors">Name & Slug <ChevronsUpDown className="h-3 w-3 opacity-50" /></div>
+                    <div className="flex items-center gap-1.5 cursor-pointer hover:text-slate-900 transition-colors">Outlet Name <ChevronsUpDown className="h-3 w-3 opacity-50" /></div>
                   </TableHead>
                   <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">
                     Parent Tenant
