@@ -19,7 +19,10 @@ import {
   MailIcon,
   PhoneIcon,
   MapPinIcon,
-  Settings2
+  Settings2,
+  X,
+  RotateCcw,
+  Edit2
 } from "lucide-react"
 import { Tenant } from "@/lib/types"
 import { Button } from "@/components/ui/button"
@@ -59,6 +62,7 @@ interface TenantDetailProps {
 
 export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
   const [activeTab, setActiveTab] = React.useState("overview")
+  const [editingAdmin, setEditingAdmin] = React.useState<any | null>(null)
   
   if (!tenant) return null
 
@@ -71,6 +75,8 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
     {
       id: "a1",
       name: "Leoe Dase",
+      firstName: "Leoe",
+      lastName: "Dase",
       username: "@risiidhan@kptac.com",
       email: "risiidhan@kptac.com",
       phone: "+971 54 457 1754",
@@ -80,6 +86,8 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
     {
       id: "a2",
       name: "Saurabh Mishra",
+      firstName: "Saurabh",
+      lastName: "Mishra",
       username: "@saurabh.m",
       email: "saurabh.m@example.com",
       phone: "+971 52 123 4567",
@@ -87,6 +95,14 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
       role: "Partner Admin"
     }
   ]
+
+  const handleEditAdmin = (admin: any) => {
+    setEditingAdmin(admin)
+  }
+
+  const handleResetForm = () => {
+    setEditingAdmin(null)
+  }
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -153,13 +169,13 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
             <div className="flex-1 overflow-hidden">
               <TabsContent value="overview" className="m-0 h-full overflow-y-auto p-8 space-y-8">
                 <div className="max-w-5xl mx-auto space-y-8">
-                  {/* Tenant Profile Card */}
+                  {/* Tenant Profile Grid */}
                   <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
                     <div className="flex items-center gap-3 mb-10">
                       <div className="h-8 w-8 rounded-lg bg-blue-50/50 border border-blue-100 flex items-center justify-center">
                         <Building2 className="h-4 w-4 text-[#1a73e8]" />
                       </div>
-                      <h3 className="font-extrabold text-[#1e293b] tracking-tight text-lg">Tenant Overview</h3>
+                      <h3 className="font-extrabold text-[#1e293b] tracking-tight text-lg">Profile Details</h3>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-y-10 gap-x-12">
@@ -220,7 +236,7 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                       <h3 className="font-extrabold text-slate-900 tracking-tight text-lg leading-none">Configuration</h3>
                     </div>
 
-                    <div className="flex flex-col items-center justify-center py-20 text-center">
+                    <div className="flex flex-col items-center justify-center py-20 text-center bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
                       <p className="text-[15px] text-slate-400 font-medium">
                         Configuration not set for this tenant.
                       </p>
@@ -233,54 +249,72 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                 <div className="flex-1 flex min-h-0 p-8 gap-8 overflow-hidden bg-slate-50/50">
                   {/* Persistent Form Section */}
                   <div className="w-[450px] bg-white rounded-2xl border border-slate-200 shadow-xl flex flex-col min-h-0 overflow-hidden ring-1 ring-slate-100 flex-shrink-0">
-                    <div className="p-6 border-b border-slate-50 flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-full bg-[#1a73e8]/10 flex items-center justify-center">
-                        <UserPlus className="h-4 w-4 text-[#1a73e8]" />
+                    <div className="p-6 border-b border-slate-50 flex items-center gap-3 justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-full bg-[#1a73e8]/10 flex items-center justify-center">
+                          <UserPlus className="h-4 w-4 text-[#1a73e8]" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-black text-[#1e293b] leading-tight">
+                            {editingAdmin ? "Update Profile" : `${tenant.tenantName} Admin`}
+                          </h3>
+                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                            {editingAdmin ? "Modify Existing Admin" : "Account Enrollment"}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="text-lg font-black text-[#1e293b] leading-tight">{tenant.tenantName} Admin</h3>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Account Enrollment</p>
-                      </div>
+                      {editingAdmin && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 rounded-full text-slate-400 hover:text-slate-900" 
+                          onClick={handleResetForm}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                     <ScrollArea className="flex-1">
                       <div className="p-8 space-y-10">
                         <div className="grid grid-cols-2 gap-8">
                           <div className="space-y-2.5">
                             <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">First Name <span className="text-red-500 font-black">*</span></Label>
-                            <Input placeholder="First Name" className="h-12 border-slate-200 bg-slate-50/30 focus-visible:bg-white focus-visible:ring-1 ring-[#1a73e8]/20 transition-all font-medium" />
+                            <Input key={editingAdmin?.id || 'new'} defaultValue={editingAdmin?.firstName || ""} placeholder="First Name" className="h-12 border-slate-200 bg-slate-50/30 focus-visible:bg-white focus-visible:ring-1 ring-[#1a73e8]/20 transition-all font-medium" />
                           </div>
                           <div className="space-y-2.5">
                             <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Last Name <span className="text-red-500 font-black">*</span></Label>
-                            <Input placeholder="Last Name" className="h-12 border-slate-200 bg-slate-50/30 focus-visible:bg-white focus-visible:ring-1 ring-[#1a73e8]/20 transition-all font-medium" />
+                            <Input key={editingAdmin?.id || 'new'} defaultValue={editingAdmin?.lastName || ""} placeholder="Last Name" className="h-12 border-slate-200 bg-slate-50/30 focus-visible:bg-white focus-visible:ring-1 ring-[#1a73e8]/20 transition-all font-medium" />
                           </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-8">
                           <div className="space-y-2.5">
                             <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Username <span className="text-red-500 font-black">*</span></Label>
-                            <Input placeholder="@username" className="h-12 border-slate-200 bg-slate-50/30 font-bold" />
+                            <Input key={editingAdmin?.id || 'new'} defaultValue={editingAdmin?.username || ""} placeholder="@username" className="h-12 border-slate-200 bg-slate-50/30 font-bold" />
                           </div>
                           <div className="space-y-2.5">
                             <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email Identity</Label>
-                            <Input type="email" placeholder="admin@brand.com" className="h-12 border-slate-200 bg-slate-50/30 font-medium" />
+                            <Input key={editingAdmin?.id || 'new'} defaultValue={editingAdmin?.email || ""} type="email" placeholder="admin@brand.com" className="h-12 border-slate-200 bg-slate-50/30 font-medium" />
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-8">
-                          <div className="space-y-2.5">
-                            <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Secure Password <span className="text-red-500 font-black">*</span></Label>
-                            <Input type="password" placeholder="••••••••" className="h-12 border-slate-200 bg-slate-50/30" />
+                        {!editingAdmin && (
+                          <div className="grid grid-cols-2 gap-8">
+                            <div className="space-y-2.5">
+                              <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Secure Password <span className="text-red-500 font-black">*</span></Label>
+                              <Input type="password" placeholder="••••••••" className="h-12 border-slate-200 bg-slate-50/30" />
+                            </div>
+                            <div className="space-y-2.5">
+                              <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Confirm Access <span className="text-red-500 font-black">*</span></Label>
+                              <Input type="password" placeholder="••••••••" className="h-12 border-slate-200 bg-slate-50/30" />
+                            </div>
                           </div>
-                          <div className="space-y-2.5">
-                            <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Confirm Access <span className="text-red-500 font-black">*</span></Label>
-                            <Input type="password" placeholder="••••••••" className="h-12 border-slate-200 bg-slate-50/30" />
-                          </div>
-                        </div>
+                        )}
 
                         <div className="space-y-2.5">
                           <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Primary Phone <span className="text-red-500 font-black">*</span></Label>
                           <div className="flex gap-3">
-                            <Select defaultValue="+971">
+                            <Select defaultValue={editingAdmin?.phone?.startsWith('+1') ? '+1' : '+971'}>
                               <SelectTrigger className="w-[110px] h-12 border-slate-200 bg-slate-50/30 font-bold">
                                 <SelectValue placeholder="+971" />
                               </SelectTrigger>
@@ -290,17 +324,17 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                                 <SelectItem value="+44">+44 (UK)</SelectItem>
                               </SelectContent>
                             </Select>
-                            <Input placeholder="5X XXX XXXX" className="h-12 flex-1 border-slate-200 bg-slate-50/30 font-bold tracking-widest" />
+                            <Input key={editingAdmin?.id || 'new'} defaultValue={editingAdmin?.phone?.replace(/^\+\d+\s/, "") || ""} placeholder="5X XXX XXXX" className="h-12 flex-1 border-slate-200 bg-slate-50/30 font-bold tracking-widest" />
                           </div>
                         </div>
                       </div>
                     </ScrollArea>
                     <div className="p-6 border-t border-slate-100 flex justify-end gap-4 bg-slate-50/30 flex-shrink-0">
-                      <Button variant="outline" className="h-12 px-8 font-extrabold text-slate-600 border-slate-200 hover:bg-white active:scale-95 transition-all">
-                        Reset
+                      <Button variant="outline" className="h-12 px-8 font-extrabold text-slate-600 border-slate-200 hover:bg-white active:scale-95 transition-all" onClick={handleResetForm}>
+                        {editingAdmin ? "Cancel" : "Reset"}
                       </Button>
                       <Button className="h-12 px-8 font-extrabold bg-[#1a73e8] hover:bg-[#1557b0] text-white border-none shadow-lg shadow-[#1a73e8]/20 active:scale-95 transition-all">
-                        Enroll Admin
+                        {editingAdmin ? "Save Changes" : "Enroll Admin"}
                       </Button>
                     </div>
                   </div>
@@ -323,7 +357,10 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                         {mockAdmins.map((admin) => (
                           <div 
                             key={admin.id} 
-                            className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-md hover:border-[#1a73e8]/20 transition-all group/card cursor-pointer"
+                            className={cn(
+                              "bg-white rounded-2xl border overflow-hidden shadow-sm hover:shadow-md transition-all group/card cursor-pointer",
+                              editingAdmin?.id === admin.id ? "border-[#1a73e8] ring-1 ring-[#1a73e8]/10" : "border-slate-100 hover:border-[#1a73e8]/20"
+                            )}
                           >
                             <div className="p-5 flex items-start justify-between border-b border-slate-50/50">
                               <div className="flex items-center gap-4">
@@ -343,11 +380,17 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                                     <MoreVertical className="h-4 w-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem className="font-bold">Edit Profile</DropdownMenuItem>
-                                  <DropdownMenuItem className="font-bold">Reset Password</DropdownMenuItem>
+                                <DropdownMenuContent align="end" className="w-48">
+                                  <DropdownMenuItem className="font-bold py-2.5" onClick={() => handleEditAdmin(admin)}>
+                                    <Edit2 className="h-4 w-4 mr-3 text-slate-400" /> Edit Profile
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem className="font-bold py-2.5">
+                                    <RotateCcw className="h-4 w-4 mr-3 text-slate-400" /> Reset Password
+                                  </DropdownMenuItem>
                                   <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-destructive font-black">Disable User</DropdownMenuItem>
+                                  <DropdownMenuItem className="text-destructive font-black py-2.5">
+                                    Disable User
+                                  </DropdownMenuItem>
                                 </DropdownMenuContent>
                               </DropdownMenu>
                             </div>
