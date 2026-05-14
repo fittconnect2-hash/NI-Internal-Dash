@@ -13,7 +13,9 @@ import {
   MapPin,
   Globe,
   Phone,
-  Clock
+  Clock,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -24,9 +26,6 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import {
-  TableCaption
 } from "@/components/ui/table"
 import {
   DropdownMenu,
@@ -47,6 +46,8 @@ import { initialOutlets, initialTenants } from "@/lib/mock-data"
 import { Outlet, Tenant } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
+const ITEMS_PER_PAGE = 10
+
 interface OutletListViewProps {
   onViewUsers: (outlet: Outlet) => void;
 }
@@ -55,6 +56,7 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
   const [searchQuery, setSearchQuery] = React.useState("")
   const [tenantFilter, setTenantFilter] = React.useState<string | null>(null)
   const [statusFilter, setStatusFilter] = React.useState<string | null>(null)
+  const [currentPage, setCurrentPage] = React.useState(1)
 
   // Calculate outlet counts for each tenant for the filter
   const tenantsWithCounts = React.useMemo(() => {
@@ -73,6 +75,18 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
       const matchesStatus = !statusFilter || outlet.status === statusFilter
       return matchesSearch && matchesTenant && matchesStatus
     })
+  }, [searchQuery, tenantFilter, statusFilter])
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredOutlets.length / ITEMS_PER_PAGE)
+  const paginatedOutlets = React.useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE
+    return filteredOutlets.slice(start, start + ITEMS_PER_PAGE)
+  }, [filteredOutlets, currentPage])
+
+  // Reset page when filtering/searching
+  React.useEffect(() => {
+    setCurrentPage(1)
   }, [searchQuery, tenantFilter, statusFilter])
 
   const getTenantName = (tenantId: string) => {
@@ -185,7 +199,7 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredOutlets.map((outlet) => (
+                {paginatedOutlets.map((outlet) => (
                   <TableRow key={outlet.id} className="group hover:bg-slate-50/50 transition-all border-b border-slate-50">
                     <TableCell className="py-5 px-8">
                       <div className="font-extrabold text-[#1e293b] text-[15px] group-hover:text-[#1a73e8] transition-colors">{outlet.name}</div>
@@ -261,6 +275,66 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
               </div>
             )}
           </ScrollArea>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="px-8 py-4 border-t border-slate-100 flex items-center justify-between bg-white">
+              <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">
+                Showing <span className="text-slate-900">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to <span className="text-slate-900">{Math.min(currentPage * ITEMS_PER_PAGE, filteredOutlets.length)}</span> of <span className="text-slate-900">{filteredOutlets.length}</span> outlets
+              </p>
+              <div className="flex items-center gap-1">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="h-8 px-2 border-slate-200"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
+                  // Basic logic to show limited page buttons if many pages exist
+                  if (totalPages > 5) {
+                    if (
+                      pageNum !== 1 && 
+                      pageNum !== totalPages && 
+                      Math.abs(pageNum - currentPage) > 1
+                    ) {
+                      if (pageNum === 2 && currentPage > 3) return <span key="start-ellipsis" className="px-2 text-slate-300">...</span>;
+                      if (pageNum === totalPages - 1 && currentPage < totalPages - 2) return <span key="end-ellipsis" className="px-2 text-slate-300">...</span>;
+                      return null;
+                    }
+                  }
+
+                  return (
+                    <Button
+                      key={pageNum}
+                      variant={currentPage === pageNum ? "default" : "outline"}
+                      size="sm"
+                      className={cn(
+                        "h-8 w-8 p-0 text-[11px] font-black border-slate-200", 
+                        currentPage === pageNum ? "bg-slate-900 border-slate-900 text-white" : "text-slate-500"
+                      )}
+                      onClick={() => setCurrentPage(pageNum)}
+                    >
+                      {pageNum}
+                    </Button>
+                  );
+                })}
+                
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="h-8 px-2 border-slate-200"
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
