@@ -120,7 +120,7 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                 <div className="flex items-center gap-4 mt-2">
                   <div className="flex items-center gap-1.5 text-xs text-slate-400 font-bold uppercase tracking-tighter">
                     <CalendarDays className="h-3.5 w-3.5" />
-                    Partner Since {signupDate}
+                    Tenant Since {signupDate}
                   </div>
                   <div className="w-1 h-1 rounded-full bg-slate-200" />
                   <div className="flex items-center gap-1.5 text-xs text-[#1a73e8] font-bold uppercase tracking-tighter">
