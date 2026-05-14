@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -110,13 +109,13 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
             </div>
 
             <div className="space-y-2.5">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Filter by Brand</label>
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Filter by Tenants</label>
               <Select onValueChange={(v) => setTenantFilter(v === 'all' ? null : v)} value={tenantFilter || 'all'}>
                 <SelectTrigger className="h-11 bg-white border-slate-200 text-sm">
-                  <SelectValue placeholder="All Brands" />
+                  <SelectValue placeholder="All Tenants" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Brands</SelectItem>
+                  <SelectItem value="all">All Tenants</SelectItem>
                   {tenantsWithCounts.map(t => (
                     <SelectItem key={t.id} value={t.id}>
                       {t.tenantName} ({t.count})
@@ -162,13 +161,16 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
                     <div className="flex items-center gap-1.5 cursor-pointer hover:text-slate-900 transition-colors">Name & Slug <ChevronsUpDown className="h-3 w-3 opacity-50" /></div>
                   </TableHead>
                   <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">
-                    Parent Brand
+                    Parent Tenant
                   </TableHead>
                   <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest text-center">
                     Users
                   </TableHead>
                   <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">
-                    Location
+                    City
+                  </TableHead>
+                  <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">
+                    Country
                   </TableHead>
                   <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest text-center">
                     Status
@@ -196,13 +198,13 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
                       </div>
                     </TableCell>
                     <TableCell className="px-4">
-                      <div className="flex flex-col">
-                        <div className="text-[14px] text-slate-700 font-bold flex items-center gap-1.5">
-                          <MapPin className="h-3 w-3 text-slate-300" /> {outlet.city}
-                        </div>
-                        <div className="text-[11px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
-                          <Globe className="h-3 w-3 text-slate-200" /> {outlet.country}
-                        </div>
+                      <div className="text-[14px] text-slate-700 font-bold flex items-center gap-1.5">
+                        <MapPin className="h-3 w-3 text-slate-300" /> {outlet.city}
+                      </div>
+                    </TableCell>
+                    <TableCell className="px-4">
+                      <div className="text-[14px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                        <Globe className="h-3 w-3 text-slate-200" /> {outlet.country}
                       </div>
                     </TableCell>
                     <TableCell className="px-4">
