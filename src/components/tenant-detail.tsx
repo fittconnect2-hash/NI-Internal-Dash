@@ -135,7 +135,7 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                   value="overview" 
                   className="rounded-none border-b-[3px] border-transparent data-[state=active]:border-[#1a73e8] data-[state=active]:bg-transparent data-[state=active]:shadow-none px-0 h-14 text-xs font-bold uppercase tracking-widest text-slate-400 data-[state=active]:text-[#1a73e8] transition-all"
                 >
-                  Brand Overview
+                  Tenant Overview
                 </TabsTrigger>
                 <TabsTrigger 
                   value="admins" 
