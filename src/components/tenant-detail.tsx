@@ -406,11 +406,7 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                               </div>
                             </div>
 
-                            <div className="px-5 py-3 flex justify-between items-center bg-slate-50/30 border-t border-slate-50/50">
-                              <div className="flex items-center gap-1.5">
-                                <ShieldCheck className="h-3.5 w-3.5 text-[#22c55e]" />
-                                <span className="text-[10px] font-bold uppercase text-[#22c55e] tracking-widest">{admin.role}</span>
-                              </div>
+                            <div className="px-5 py-3 flex justify-end items-center bg-slate-50/30 border-t border-slate-50/50">
                               <Badge className="bg-[#e1f9ef] text-[#22c55e] border-none px-4 py-1 rounded-full text-[10px] font-bold shadow-none uppercase tracking-widest">
                                 {admin.status}
                               </Badge>
