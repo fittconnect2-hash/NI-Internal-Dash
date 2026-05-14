@@ -6,19 +6,15 @@ import {
   Phone, 
   Building2, 
   User, 
-  Settings, 
   UserPlus, 
   MoreVertical,
   ChevronRight,
   ArrowLeft,
   Globe,
-  Briefcase,
-  MapPin,
+  MapPinIcon,
   CalendarDays,
-  ShieldCheck,
   MailIcon,
   PhoneIcon,
-  MapPinIcon,
   Settings2,
   X,
   RotateCcw,
@@ -78,7 +74,7 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
       name: "Leoe Dase",
       firstName: "Leoe",
       lastName: "Dase",
-      username: "@risiidhan@kptac.com",
+      username: "@RISIIDHAN@KPTAC.COM",
       email: "risiidhan@kptac.com",
       phone: "+971 54 457 1754",
       status: "Active",
@@ -89,7 +85,7 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
       name: "Saurabh Mishra",
       firstName: "Saurabh",
       lastName: "Mishra",
-      username: "@saurabh.m",
+      username: "@SAURABH.M",
       email: "saurabh.m@example.com",
       phone: "+971 52 123 4567",
       status: "Active",
@@ -263,7 +259,7 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                             {editingAdmin ? "Update Profile" : `${tenant.tenantName} Admin`}
                           </h3>
                           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                            {editingAdmin ? "Modify Existing Admin" : "Account Enrollment"}
+                            {editingAdmin ? "Modify Existing Admin" : "Tenant Admin Enrollment"}
                           </p>
                         </div>
                       </div>
@@ -359,28 +355,32 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                         {mockAdmins.map((admin) => (
                           <div 
                             key={admin.id} 
+                            onClick={() => handleEditAdmin(admin)}
                             className={cn(
                               "bg-white rounded-2xl border overflow-hidden shadow-sm hover:shadow-md transition-all group/card cursor-pointer",
                               editingAdmin?.id === admin.id ? "border-[#1a73e8] ring-1 ring-[#1a73e8]/10" : "border-slate-100 hover:border-[#1a73e8]/20"
                             )}
                           >
-                            <div className="p-5 flex items-start justify-between border-b border-slate-50/50">
+                            <div className="p-6 flex items-start justify-between">
                               <div className="flex items-center gap-4">
-                                <Avatar className="h-12 w-12 border-2 border-slate-50 shadow-sm">
+                                <Avatar className="h-14 w-14 border-2 border-slate-50 shadow-sm">
                                   <AvatarFallback className="bg-[#1a73e8]/5 text-[#1a73e8] font-black text-sm">
                                     {admin.name.split(' ').map(n => n[0]).join('')}
                                   </AvatarFallback>
                                 </Avatar>
                                 <div className="flex flex-col">
-                                  <span className="font-black text-slate-900 text-[15px] group-hover/card:text-[#1a73e8] transition-colors">{admin.name}</span>
+                                  <span className="font-black text-slate-900 text-[16px] group-hover/card:text-[#1a73e8] transition-colors">{admin.name}</span>
                                   <span className="text-[11px] text-slate-400 font-bold tracking-tight uppercase">{admin.username}</span>
                                 </div>
                               </div>
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-300 rounded-full hover:bg-slate-50 active:scale-90" onClick={(e) => e.stopPropagation()}>
+                                  <button 
+                                    className="p-1 text-slate-300 hover:text-slate-900 transition-colors"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
                                     <MoreVertical className="h-4 w-4" />
-                                  </Button>
+                                  </button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="w-48">
                                   <DropdownMenuItem className="font-bold py-2.5" onClick={() => handleEditAdmin(admin)}>
@@ -397,19 +397,19 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                               </DropdownMenu>
                             </div>
 
-                            <div className="px-5 py-5 space-y-3 bg-slate-50/10">
+                            <div className="px-6 py-2 space-y-4">
                               <div className="flex items-center gap-3 text-slate-500">
                                 <Mail className="h-4 w-4 text-slate-300 group-hover/card:text-[#1a73e8] transition-colors" />
-                                <span className="text-[13px] font-bold tracking-tight">{admin.email}</span>
+                                <span className="text-[14px] font-bold tracking-tight">{admin.email}</span>
                               </div>
                               <div className="flex items-center gap-3 text-slate-500">
                                 <Phone className="h-4 w-4 text-slate-300 group-hover/card:text-[#1a73e8] transition-colors" />
-                                <span className="text-[13px] font-bold tracking-tight">{admin.phone}</span>
+                                <span className="text-[14px] font-bold tracking-tight">{admin.phone}</span>
                               </div>
                             </div>
 
-                            <div className="px-5 py-3 flex justify-end items-center bg-slate-50/30 border-t border-slate-50/50">
-                              <Badge className="bg-[#e1f9ef] text-[#22c55e] border-none px-4 py-1 rounded-full text-[10px] font-bold shadow-none uppercase tracking-widest">
+                            <div className="px-6 py-6 flex justify-end items-center">
+                              <Badge className="bg-[#e1f9ef] text-[#22c55e] border-none px-4 py-1 rounded-full text-[10px] font-black shadow-none uppercase tracking-widest">
                                 {admin.status}
                               </Badge>
                             </div>
