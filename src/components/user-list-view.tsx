@@ -69,11 +69,11 @@ export function UserListView({ onEditUser }: UserListViewProps) {
   const [tenantSearch, setTenantSearch] = React.useState("")
   const [isTenantPopoverOpen, setIsTenantPopoverOpen] = React.useState(false)
 
-  // Calculate outlet counts for each tenant for the filter
+  // Calculate user counts for each tenant for the filter
   const tenantsWithCounts = React.useMemo(() => {
     return initialTenants.map(t => ({
       ...t,
-      count: initialOutlets.filter(o => o.tenantId === t.id).length
+      count: initialUsers.filter(u => u.tenantId === t.id).length
     })).filter(t => t.count > 0)
   }, [])
 
@@ -215,7 +215,7 @@ export function UserListView({ onEditUser }: UserListViewProps) {
                           <Check className={cn("mr-2 h-4 w-4 text-[#1a73e8]", tenantFilter === t.id ? "opacity-100" : "opacity-0")} />
                           <span className="truncate flex-1 text-left">{t.tenantName}</span>
                           <span className="ml-auto text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
-                            {t.count} Outlets
+                            {t.count} Staff
                           </span>
                         </Button>
                       ))}

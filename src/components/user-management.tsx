@@ -90,11 +90,11 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, o
     }
   }, [propEditingUser])
 
-  // Calculate outlet counts for each tenant for the filter
+  // Calculate user counts for each tenant for the filter
   const tenantsWithCounts = React.useMemo(() => {
     return initialTenants.map(t => ({
       ...t,
-      count: initialOutlets.filter(o => o.tenantId === t.id).length
+      count: initialUsers.filter(u => u.tenantId === t.id).length
     })).filter(t => t.count > 0)
   }, [])
 
@@ -285,7 +285,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, o
                                   <Check className={cn("mr-2 h-4 w-4 text-[#1a73e8]", tenantFilter === t.id ? "opacity-100" : "opacity-0")} />
                                   <span className="truncate flex-1 text-left">{t.tenantName}</span>
                                   <span className="ml-auto text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
-                                    {t.count} {t.count === 1 ? 'Outlet' : 'Outlets'}
+                                    {t.count} Staff
                                   </span>
                                 </Button>
                               ))}
@@ -382,7 +382,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, o
                     </TableHeader>
                     <TableBody>
                       {filteredUsers.map((user) => (
-                        <TableRow key={user.id} className="group hover:bg-slate-50/50 transition-all border-b border-slate-50">
+                        <TableRow key={user.id} className="group hover:bg-slate-50/50 transition-all border-b border-slate-50 cursor-pointer" onClick={() => handleEditUser(user)}>
                           <TableCell className="py-5 px-8">
                             <div className="font-extrabold text-[#1e293b] text-[15px] group-hover:text-[#1a73e8] transition-colors">{user.fullName}</div>
                             <div className="text-[11px] text-slate-400 font-bold uppercase tracking-tight opacity-70">UID: {user.id}</div>
@@ -430,7 +430,12 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, o
                           <TableCell className="text-right px-8">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full hover:bg-white border border-transparent hover:border-slate-100 text-slate-400 transition-all">
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  className="h-9 w-9 rounded-full border border-slate-100 text-slate-400 hover:text-[#1e293b] hover:bg-white active:scale-90 transition-all" 
+                                  onClick={(e) => e.stopPropagation()}
+                                >
                                   <MoreHorizontal className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
