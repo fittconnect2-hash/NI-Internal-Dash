@@ -29,6 +29,9 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import {
+  TablePagination
+} from "@/components/ui/pagination"
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -109,6 +112,10 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
     setTenantFilter(null)
     setStatusFilter(null)
     setTenantSearch("")
+  }
+
+  function userCountForOutlet(outletId: string) {
+    return initialOutlets.find(o => o.id === outletId)?.userCount || 0
   }
 
   return (
@@ -194,7 +201,9 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
                         >
                           <Check className={cn("mr-2 h-4 w-4 text-[#1a73e8]", tenantFilter === t.id ? "opacity-100" : "opacity-0")} />
                           <span className="truncate flex-1 text-left">{t.tenantName}</span>
-                          <span className="ml-auto text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 rounded">{t.count}</span>
+                          <span className="ml-auto text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
+                            {t.count} {t.count === 1 ? 'Outlet' : 'Outlets'}
+                          </span>
                         </Button>
                       ))}
                       {filteredTenantsForDropdown.length === 0 && (
@@ -357,7 +366,6 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
                 </Button>
                 
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
-                  // Basic logic to show limited page buttons if many pages exist
                   if (totalPages > 5) {
                     if (
                       pageNum !== 1 && 
@@ -402,8 +410,4 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
       </div>
     </div>
   )
-}
-
-function userCountForOutlet(outletId: string) {
-  return initialOutlets.find(o => o.id === outletId)?.userCount || 0
 }

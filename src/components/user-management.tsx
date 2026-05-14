@@ -82,6 +82,14 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
   const [tenantSearch, setTenantSearch] = React.useState("")
   const [isTenantPopoverOpen, setIsTenantPopoverOpen] = React.useState(false)
 
+  // Calculate outlet counts for each tenant for the filter
+  const tenantsWithCounts = React.useMemo(() => {
+    return initialTenants.map(t => ({
+      ...t,
+      count: initialOutlets.filter(o => o.tenantId === t.id).length
+    })).filter(t => t.count > 0)
+  }, [])
+
   // Filter outlets by current tenant (or selected tenant filter)
   const activeTenantId = tenant?.id || tenantFilter
   const tenantOutlets = React.useMemo(() => {
@@ -89,10 +97,10 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
   }, [activeTenantId])
 
   const filteredTenantsForDropdown = React.useMemo(() => {
-    return initialTenants.filter(t => 
+    return tenantsWithCounts.filter(t => 
       t.tenantName.toLowerCase().includes(tenantSearch.toLowerCase())
     )
-  }, [tenantSearch])
+  }, [tenantsWithCounts, tenantSearch])
 
   const handleClearFilters = () => {
     setUserFilter("")
@@ -150,7 +158,6 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
       }
     }}>
       <SheetContent side="right" className="w-full sm:max-w-[1200px] p-0 border-l border-slate-200 bg-[#f8f9fc] flex flex-col transition-all duration-500">
-        {/* Navigation Header */}
         <SheetHeader className="px-8 py-6 bg-white border-b border-slate-100 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
@@ -189,11 +196,9 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
           </div>
         </SheetHeader>
 
-        {/* Content Area */}
         <div className="flex-1 flex flex-col min-h-0 bg-[#f8f9fc]">
           {!isAddingNew ? (
             <div className="flex flex-col flex-1 p-6 overflow-hidden">
-              {/* Smart Filter Row */}
               <div className="bg-white rounded-2xl border border-slate-200 shadow-sm mb-6 p-5">
                 <div className="grid grid-cols-1 md:grid-cols-6 gap-6 items-end">
                   <div className="space-y-2.5">
@@ -258,13 +263,16 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
                                   className="w-full justify-start font-normal text-sm h-10"
                                   onClick={() => {
                                     setTenantFilter(t.id);
-                                    setOutletFilter(null); // Reset outlet filter when tenant changes
+                                    setOutletFilter(null);
                                     setIsTenantPopoverOpen(false);
                                     setTenantSearch("");
                                   }}
                                 >
                                   <Check className={cn("mr-2 h-4 w-4 text-[#1a73e8]", tenantFilter === t.id ? "opacity-100" : "opacity-0")} />
-                                  <span className="truncate">{t.tenantName}</span>
+                                  <span className="truncate flex-1 text-left">{t.tenantName}</span>
+                                  <span className="ml-auto text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
+                                    {t.count} {t.count === 1 ? 'Outlet' : 'Outlets'}
+                                  </span>
                                 </Button>
                               ))}
                             </div>
@@ -330,7 +338,6 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
                 </div>
               </div>
 
-              {/* User Table */}
               <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col min-h-0 overflow-hidden">
                 <ScrollArea className="flex-1">
                   <Table>
@@ -448,7 +455,6 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
               <div className="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden flex flex-col flex-1">
                 <ScrollArea className="flex-1">
                   <div className="p-10 grid grid-cols-1 lg:grid-cols-2 gap-16">
-                    {/* Left Column: Personal Information */}
                     <div className="space-y-10">
                       <div>
                         <h3 className="text-xl font-black text-slate-900 tracking-tight mb-1">Personal Information</h3>
@@ -522,7 +528,6 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
                       </div>
                     </div>
 
-                    {/* Right Column: Role Assignment */}
                     <div className="space-y-10 border-l border-slate-100 pl-16">
                       <div className="flex items-center justify-between">
                         <div>
@@ -572,8 +577,7 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
                   </div>
                 </ScrollArea>
 
-                {/* Form Footer */}
-                <div className="p-8 border-t border-slate-100 flex justify-end gap-4 bg-slate-50/30">
+                <div className="p-8 border-t border-slate-100 flex justify-end gap-4 bg-slate-50/30 flex-shrink-0">
                   <Button 
                     variant="outline" 
                     className="h-12 px-8 font-black text-slate-500 border-slate-200 hover:bg-white active:scale-95 transition-all"
