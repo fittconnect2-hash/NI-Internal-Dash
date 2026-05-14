@@ -39,7 +39,9 @@ export interface User {
   tenantId: string;
   outletId?: string;
   fullName: string;
+  username: string;
   email: string;
+  phone: string;
   role: 'Admin' | 'Manager' | 'Staff';
   status: 'Active' | 'Inactive';
   lastActive?: string;

@@ -64,11 +64,12 @@ import {
 
 interface UserManagementProps {
   tenant?: Tenant | null;
+  editingUser?: User | null;
   isOpen: boolean;
   onClose: () => void;
 }
 
-export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps) {
+export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, onClose }: UserManagementProps) {
   const [users, setUsers] = React.useState<User[]>(initialUsers)
   const [userFilter, setUserFilter] = React.useState("")
   const [tenantFilter, setTenantFilter] = React.useState<string | null>(null)
@@ -81,6 +82,13 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
   
   const [tenantSearch, setTenantSearch] = React.useState("")
   const [isTenantPopoverOpen, setIsTenantPopoverOpen] = React.useState(false)
+
+  React.useEffect(() => {
+    if (propEditingUser) {
+      setEditingUser(propEditingUser)
+      setIsAddingNew(true)
+    }
+  }, [propEditingUser])
 
   // Calculate outlet counts for each tenant for the filter
   const tenantsWithCounts = React.useMemo(() => {
@@ -375,7 +383,7 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
                           </TableCell>
                           <TableCell className="px-4">
                             <div className="text-[14px] text-slate-700 font-bold leading-tight mb-0.5">{user.email}</div>
-                            <div className="text-[12px] text-slate-400 font-medium">+971 52 165 0458</div>
+                            <div className="text-[12px] text-slate-400 font-medium">{user.phone}</div>
                           </TableCell>
                           {!tenant && (
                             <TableCell className="px-4">
@@ -472,6 +480,15 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
                         </div>
 
                         <div className="space-y-2">
+                          <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Username <span className="text-red-500">*</span></Label>
+                          <Input 
+                            defaultValue={editingUser?.username || ""} 
+                            placeholder="@username" 
+                            className="h-12 border-slate-200 bg-slate-50/30 font-bold" 
+                          />
+                        </div>
+
+                        <div className="space-y-2">
                           <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email Address</Label>
                           <Input 
                             type="email" 
@@ -508,7 +525,7 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
                                 <SelectItem value="+44">+44</SelectItem>
                               </SelectContent>
                             </Select>
-                            <Input placeholder="000-000-0000" className="h-12 flex-1 border-slate-200 bg-slate-50/30 font-bold tracking-widest" />
+                            <Input defaultValue={editingUser?.phone || ""} placeholder="000-000-0000" className="h-12 flex-1 border-slate-200 bg-slate-50/30 font-bold tracking-widest" />
                           </div>
                         </div>
 

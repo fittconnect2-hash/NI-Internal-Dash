@@ -123,15 +123,21 @@ function generateMockUsers(tenants: Tenant[], outlets: Outlet[]): User[] {
       const assignedOutlet = tenantOutlets[k % tenantOutlets.length];
       const roles: ('Admin' | 'Manager' | 'Staff')[] = ['Admin', 'Manager', 'Staff', 'Staff', 'Staff'];
       const role = roles[k % roles.length];
+      const firstNames = ['John', 'Jane', 'Michael', 'Sara', 'David', 'Emily', 'Robert', 'Lisa'];
+      const lastNames = ['Smith', 'Doe', 'Wilson', 'Ahmed', 'Brown', 'Davis', 'Taylor', 'Miller'];
+      const firstName = firstNames[k % firstNames.length];
+      const lastName = lastNames[k % lastNames.length];
       
       users.push({
         id: `u-${tenant.id}-${k}`,
         tenantId: tenant.id,
         outletId: assignedOutlet?.id,
-        fullName: `${['John', 'Jane', 'Michael', 'Sara', 'David', 'Emily', 'Robert', 'Lisa'][k % 8]} ${['Smith', 'Doe', 'Wilson', 'Ahmed', 'Brown', 'Davis', 'Taylor', 'Miller'][k % 8]}`,
-        email: `user${k}@${tenant.tenantName.toLowerCase().replace(/\s+/g, '')}.com`,
+        fullName: `${firstName} ${lastName}`,
+        username: `@${firstName.toLowerCase()}.${lastName.toLowerCase()}${k}`,
+        email: `${firstName.toLowerCase()}.${k}@${tenant.tenantName.toLowerCase().replace(/\s+/g, '')}.com`,
+        phone: tenant.contactPhone,
         role: role,
-        status: 'Active',
+        status: k % 10 === 0 ? 'Inactive' : 'Active',
         lastActive: `2024-05-${Math.floor(Math.random() * 20) + 1} ${Math.floor(Math.random() * 12) + 10}:00`
       });
     }

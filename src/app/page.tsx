@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -11,8 +10,9 @@ import { OutletManagement } from "@/components/outlet-management"
 import { UserManagement } from "@/components/user-management"
 import { DashboardOverview } from "@/components/dashboard-overview"
 import { OutletListView } from "@/components/outlet-list-view"
+import { UserListView } from "@/components/user-list-view"
 import { initialTenants } from "@/lib/mock-data"
-import { Tenant, Outlet } from "@/lib/types"
+import { Tenant, User } from "@/lib/types"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { 
   Search, 
@@ -54,6 +54,7 @@ export default function DashboardPage() {
   const [configuringTenant, setConfiguringTenant] = React.useState<Tenant | null>(null)
   const [viewingTenant, setViewingTenant] = React.useState<Tenant | null>(null)
   const [selectedTenant, setSelectedTenant] = React.useState<Tenant | null>(null)
+  const [editingUser, setEditingUser] = React.useState<User | null>(null)
 
   // Filter logic
   const filteredTenants = React.useMemo(() => {
@@ -130,9 +131,19 @@ export default function DashboardPage() {
       return (
         <OutletListView 
           onViewUsers={(outlet) => {
-            // Logic to bridge to users filtered by this outlet
             const owner = tenants.find(t => t.id === outlet.tenantId)
             setSelectedTenant(owner || null)
+            setIsUsersDrawerOpen(true)
+          }}
+        />
+      )
+    }
+
+    if (activeTab === 'users') {
+      return (
+        <UserListView 
+          onEditUser={(user) => {
+            setEditingUser(user)
             setIsUsersDrawerOpen(true)
           }}
         />
@@ -296,6 +307,7 @@ export default function DashboardPage() {
         <DashboardSidebar activeTab={activeTab} onTabChange={(tab) => {
           setActiveTab(tab)
           setSelectedTenant(null)
+          setEditingUser(null)
         }} />
         <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
           {renderContent()}
@@ -329,8 +341,9 @@ export default function DashboardPage() {
       />
       <UserManagement
         tenant={selectedTenant}
+        editingUser={editingUser}
         isOpen={isUsersDrawerOpen}
-        onClose={() => {setIsUsersDrawerOpen(false); setSelectedTenant(null)}}
+        onClose={() => {setIsUsersDrawerOpen(false); setSelectedTenant(null); setEditingUser(null)}}
       />
     </SidebarProvider>
   )
