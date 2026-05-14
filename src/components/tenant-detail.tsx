@@ -164,7 +164,7 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-y-10 gap-x-12">
                       <div className="space-y-3">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Company</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Organization</p>
                         <p className="text-[15px] font-extrabold text-slate-900 leading-none">{tenant.tenantName}</p>
                       </div>
                       
