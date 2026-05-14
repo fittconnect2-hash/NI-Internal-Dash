@@ -11,7 +11,9 @@ import {
   FilterX,
   Plus,
   MapPin,
-  Globe
+  Globe,
+  Phone,
+  Clock
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -22,6 +24,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+} from "@/components/ui/table"
+import {
+  TableCaption
 } from "@/components/ui/table"
 import {
   DropdownMenu,
@@ -62,7 +67,8 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
   const filteredOutlets = React.useMemo(() => {
     return initialOutlets.filter(outlet => {
       const matchesSearch = outlet.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           outlet.city.toLowerCase().includes(searchQuery.toLowerCase())
+                           outlet.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           outlet.phone.includes(searchQuery)
       const matchesTenant = !tenantFilter || outlet.tenantId === tenantFilter
       const matchesStatus = !statusFilter || outlet.status === statusFilter
       return matchesSearch && matchesTenant && matchesStatus
@@ -100,7 +106,7 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
                 <Input 
-                  placeholder="Outlet name or city..." 
+                  placeholder="Name, city or phone..." 
                   className="pl-9 h-11 text-sm bg-white border-slate-200 focus-visible:ring-1 ring-[#1a73e8]/20" 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -163,14 +169,14 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
                   <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">
                     Parent Tenant
                   </TableHead>
+                  <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">
+                    Contact & Timezone
+                  </TableHead>
                   <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest text-center">
                     Users
                   </TableHead>
                   <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">
-                    City
-                  </TableHead>
-                  <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">
-                    Country
+                    Location
                   </TableHead>
                   <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest text-center">
                     Status
@@ -191,6 +197,16 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
                         <span className="text-[14px] text-slate-600 font-bold">{getTenantName(outlet.tenantId)}</span>
                       </div>
                     </TableCell>
+                    <TableCell className="px-4">
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
+                          <Phone className="h-3 w-3 text-slate-400" /> {outlet.phone}
+                        </div>
+                        <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-tighter">
+                          <Clock className="h-3 w-3" /> {outlet.timezone}
+                        </div>
+                      </div>
+                    </TableCell>
                     <TableCell className="px-4 text-center">
                       <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 border border-slate-100 rounded-lg">
                         <Users className="h-3.5 w-3.5 text-[#1a73e8]" />
@@ -198,12 +214,10 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
                       </div>
                     </TableCell>
                     <TableCell className="px-4">
-                      <div className="text-[14px] text-slate-700 font-bold flex items-center gap-1.5">
+                      <div className="text-[13px] text-slate-700 font-bold flex items-center gap-1.5">
                         <MapPin className="h-3 w-3 text-slate-300" /> {outlet.city}
                       </div>
-                    </TableCell>
-                    <TableCell className="px-4">
-                      <div className="text-[14px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                      <div className="text-[11px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1.5 mt-0.5">
                         <Globe className="h-3 w-3 text-slate-200" /> {outlet.country}
                       </div>
                     </TableCell>
