@@ -253,8 +253,8 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                         <UserPlus className="h-4 w-4 text-[#1a73e8]" />
                       </div>
                       <div>
-                        <h3 className="text-lg font-black text-[#1e293b] leading-tight">Account Admin</h3>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Enrollment Portal</p>
+                        <h3 className="text-lg font-black text-[#1e293b] leading-tight">{tenant.tenantName} Admin</h3>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Account Enrollment</p>
                       </div>
                     </div>
                     <ScrollArea className="flex-1">
@@ -307,20 +307,6 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                             </Select>
                             <Input placeholder="5X XXX XXXX" className="h-12 flex-1 border-slate-200 bg-slate-50/30 font-bold tracking-widest" />
                           </div>
-                        </div>
-
-                        <div className="space-y-2.5">
-                          <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Account Role <span className="text-red-500 font-black">*</span></Label>
-                          <Select defaultValue="Partner Admin">
-                            <SelectTrigger className="h-12 border-slate-200 bg-slate-50/30 font-bold">
-                              <SelectValue placeholder="Select role" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="Organization Admin">Organization Admin</SelectItem>
-                              <SelectItem value="Manager">Manager</SelectItem>
-                              <SelectItem value="Partner Admin">Partner Admin</SelectItem>
-                            </SelectContent>
-                          </Select>
                         </div>
                       </div>
                     </ScrollArea>

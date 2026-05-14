@@ -476,8 +476,13 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, o
                   <div className="p-10 grid grid-cols-1 lg:grid-cols-2 gap-16">
                     <div className="space-y-10">
                       <div>
-                        <h3 className="text-xl font-black text-slate-900 tracking-tight mb-1">Personal Information</h3>
-                        <div className="h-1 w-10 bg-[#1a73e8] rounded-full" />
+                        <h3 className="text-xl font-black text-slate-900 tracking-tight mb-1">
+                          {tenant ? tenant.tenantName : "Account Admin"}
+                        </h3>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                          {tenant ? "Tenant Admin Profile" : "Administrative Enrollment"}
+                        </p>
+                        <div className="h-1 w-10 bg-[#1a73e8] rounded-full mt-2" />
                       </div>
 
                       <div className="space-y-6">
@@ -538,20 +543,6 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, o
                             </Select>
                             <Input defaultValue={editingUser?.phone || ""} placeholder="000-000-0000" className="h-12 flex-1 border-slate-200 bg-slate-50/30 font-bold tracking-widest" />
                           </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Role <span className="text-red-500">*</span></Label>
-                          <Select defaultValue={editingUser?.role || "Partner Admin"}>
-                            <SelectTrigger className="h-12 border-slate-200 bg-slate-50/30 font-bold">
-                              <SelectValue placeholder="Select role" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="Organization Admin">Organization Admin</SelectItem>
-                              <SelectItem value="Manager">Manager</SelectItem>
-                              <SelectItem value="Partner Admin">Partner Admin</SelectItem>
-                            </SelectContent>
-                          </Select>
                         </div>
                       </div>
                     </div>
