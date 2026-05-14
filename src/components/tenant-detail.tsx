@@ -154,57 +154,59 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
               <TabsContent value="overview" className="m-0 h-full overflow-y-auto p-8 space-y-8">
                 <div className="max-w-5xl mx-auto space-y-8">
                   {/* Tenant Profile Card */}
-                  <div className="bg-white rounded-2xl border border-slate-200 p-10 shadow-sm">
+                  <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
                     <div className="flex items-center gap-3 mb-10">
-                      <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center">
+                      <div className="h-8 w-8 rounded-lg bg-blue-50/50 border border-blue-100 flex items-center justify-center">
                         <Building2 className="h-4 w-4 text-[#1a73e8]" />
                       </div>
-                      <h3 className="font-extrabold text-slate-900 tracking-tight text-lg">Tenant Overview</h3>
+                      <h3 className="font-extrabold text-[#1e293b] tracking-tight text-lg">Tenant Overview</h3>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-16">
-                      <div className="space-y-2">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-y-10 gap-x-12">
+                      <div className="space-y-3">
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Company</p>
-                        <p className="text-[15px] font-extrabold text-slate-900">{tenant.tenantName}</p>
+                        <p className="text-[15px] font-extrabold text-slate-900 leading-none">{tenant.tenantName}</p>
                       </div>
                       
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Contact Person</p>
-                        <p className="text-[15px] font-extrabold text-slate-900">{tenant.contactName || "N/A"}</p>
+                        <p className="text-[15px] font-extrabold text-slate-900 leading-none">{tenant.contactName || "N/A"}</p>
                       </div>
 
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Phone</p>
-                        <p className="text-[15px] font-extrabold text-slate-900 flex items-center gap-2">
+                        <div className="flex items-center gap-2">
                           <PhoneIcon className="h-3.5 w-3.5 text-slate-300" />
-                          {tenant.contactPhone}
-                        </p>
+                          <p className="text-[15px] font-extrabold text-slate-900 leading-none">{tenant.contactPhone}</p>
+                        </div>
                       </div>
 
-                      <div className="space-y-2 lg:col-span-1">
+                      <div className="space-y-3">
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Address</p>
-                        <p className="text-[15px] font-extrabold text-slate-900 flex items-start gap-2 leading-snug">
+                        <div className="flex items-start gap-2">
                           <MapPinIcon className="h-3.5 w-3.5 text-slate-300 mt-0.5 shrink-0" />
-                          <span>
-                            {tenant.addressLine1 || "Not Provided"}<br />
-                            <span className="text-slate-400 text-xs font-bold uppercase tracking-tight">
+                          <div className="space-y-1">
+                            <p className="text-[15px] font-extrabold text-slate-900 leading-none">{tenant.addressLine1 || "Not Provided"}</p>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">
                               {tenant.city}, {tenant.country} {tenant.zipCode}
-                            </span>
-                          </span>
-                        </p>
+                            </p>
+                          </div>
+                        </div>
                       </div>
 
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Business Type</p>
-                        <p className="text-[15px] font-extrabold text-slate-900">{tenant.businessType || "Hospitality"}</p>
+                        <p className="text-[15px] font-extrabold text-slate-900 leading-none">{tenant.businessType || "Hospitality"}</p>
                       </div>
 
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Email</p>
-                        <p className="text-[15px] font-extrabold text-[#1a73e8] flex items-center gap-2 truncate">
+                        <div className="flex items-center gap-2">
                           <MailIcon className="h-3.5 w-3.5 text-slate-300" />
-                          {tenant.contactEmail}
-                        </p>
+                          <p className="text-[15px] font-extrabold text-[#1a73e8] leading-none truncate">
+                            {tenant.contactEmail}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
