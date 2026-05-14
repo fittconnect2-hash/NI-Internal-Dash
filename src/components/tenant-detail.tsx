@@ -22,7 +22,8 @@ import {
   Settings2,
   X,
   RotateCcw,
-  Edit2
+  Edit2,
+  Info
 } from "lucide-react"
 import { Tenant } from "@/lib/types"
 import { Button } from "@/components/ui/button"
@@ -237,6 +238,9 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                     </div>
 
                     <div className="flex flex-col items-center justify-center py-20 text-center bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+                      <div className="h-12 w-12 bg-white rounded-full flex items-center justify-center shadow-sm mb-4 border border-slate-100">
+                        <Info className="h-6 w-6 text-slate-300" />
+                      </div>
                       <p className="text-[15px] text-slate-400 font-medium">
                         Configuration not set for this tenant.
                       </p>
@@ -264,14 +268,12 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                         </div>
                       </div>
                       {editingAdmin && (
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-8 w-8 rounded-full text-slate-400 hover:text-slate-900" 
+                        <button 
                           onClick={handleResetForm}
+                          className="p-1 hover:bg-slate-50 rounded-full text-slate-400 hover:text-slate-900 transition-colors"
                         >
-                          <X className="h-4 w-4" />
-                        </Button>
+                          <X className="h-5 w-5" />
+                        </button>
                       )}
                     </div>
                     <ScrollArea className="flex-1">
@@ -343,7 +345,7 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                   <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col min-h-0 overflow-hidden">
                     <div className="p-6 border-b border-slate-50 flex items-center justify-between">
                       <div>
-                        <h3 className="text-lg font-black text-slate-900 tracking-tight leading-tight">Brand Personnel</h3>
+                        <h3 className="text-lg font-black text-slate-900 tracking-tight leading-tight">Tenant Admins</h3>
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Registered Administrators</p>
                       </div>
                       <div className="flex items-center gap-2">
@@ -376,7 +378,7 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                               </div>
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-300 rounded-full hover:bg-slate-50 active:scale-90">
+                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-300 rounded-full hover:bg-slate-50 active:scale-90" onClick={(e) => e.stopPropagation()}>
                                     <MoreVertical className="h-4 w-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
