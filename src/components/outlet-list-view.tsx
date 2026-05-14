@@ -15,7 +15,8 @@ import {
   Phone,
   Clock,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Check
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -26,9 +27,6 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import {
-  Table as TableShadcn,
 } from "@/components/ui/table"
 import {
   DropdownMenu,
@@ -45,6 +43,7 @@ import {
 } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { initialOutlets, initialTenants } from "@/lib/mock-data"
 import { Outlet, Tenant } from "@/lib/types"
 import { cn } from "@/lib/utils"
@@ -60,6 +59,9 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
   const [tenantFilter, setTenantFilter] = React.useState<string | null>(null)
   const [statusFilter, setStatusFilter] = React.useState<string | null>(null)
   const [currentPage, setCurrentPage] = React.useState(1)
+  
+  const [tenantSearch, setTenantSearch] = React.useState("")
+  const [isTenantPopoverOpen, setIsTenantPopoverOpen] = React.useState(false)
 
   // Calculate outlet counts for each tenant for the filter
   const tenantsWithCounts = React.useMemo(() => {
@@ -68,6 +70,12 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
       count: initialOutlets.filter(o => o.tenantId === tenant.id).length
     })).filter(t => t.count > 0)
   }, [])
+
+  const filteredTenantsForDropdown = React.useMemo(() => {
+    return tenantsWithCounts.filter(t => 
+      t.tenantName.toLowerCase().includes(tenantSearch.toLowerCase())
+    )
+  }, [tenantsWithCounts, tenantSearch])
 
   const filteredOutlets = React.useMemo(() => {
     return initialOutlets.filter(outlet => {
@@ -100,6 +108,7 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
     setSearchQuery("")
     setTenantFilter(null)
     setStatusFilter(null)
+    setTenantSearch("")
   }
 
   return (
@@ -133,19 +142,70 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
 
             <div className="space-y-2.5">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Filter by Tenants</label>
-              <Select onValueChange={(v) => setTenantFilter(v === 'all' ? null : v)} value={tenantFilter || 'all'}>
-                <SelectTrigger className="h-11 bg-white border-slate-200 text-sm">
-                  <SelectValue placeholder="All Tenants" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Tenants</SelectItem>
-                  {tenantsWithCounts.map(t => (
-                    <SelectItem key={t.id} value={t.id}>
-                      {t.tenantName} ({t.count})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Popover open={isTenantPopoverOpen} onOpenChange={setIsTenantPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    role="combobox"
+                    className="w-full h-11 justify-between bg-white border-slate-200 text-sm font-medium px-3"
+                  >
+                    <span className="truncate">
+                      {tenantFilter 
+                        ? tenantsWithCounts.find(t => t.id === tenantFilter)?.tenantName 
+                        : "All Tenants"}
+                    </span>
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                  <div className="flex items-center border-b px-3">
+                    <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                    <input
+                      className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                      placeholder="Search tenants..."
+                      value={tenantSearch}
+                      onChange={(e) => setTenantSearch(e.target.value)}
+                    />
+                  </div>
+                  <ScrollArea className="h-72">
+                    <div className="p-1">
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start font-normal text-sm h-10"
+                        onClick={() => {
+                          setTenantFilter(null);
+                          setIsTenantPopoverOpen(false);
+                          setTenantSearch("");
+                        }}
+                      >
+                        <Check className={cn("mr-2 h-4 w-4 text-[#1a73e8]", !tenantFilter ? "opacity-100" : "opacity-0")} />
+                        All Tenants
+                      </Button>
+                      {filteredTenantsForDropdown.map((t) => (
+                        <Button
+                          key={t.id}
+                          variant="ghost"
+                          className="w-full justify-start font-normal text-sm h-10"
+                          onClick={() => {
+                            setTenantFilter(t.id);
+                            setIsTenantPopoverOpen(false);
+                            setTenantSearch("");
+                          }}
+                        >
+                          <Check className={cn("mr-2 h-4 w-4 text-[#1a73e8]", tenantFilter === t.id ? "opacity-100" : "opacity-0")} />
+                          <span className="truncate flex-1 text-left">{t.tenantName}</span>
+                          <span className="ml-auto text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 rounded">{t.count}</span>
+                        </Button>
+                      ))}
+                      {filteredTenantsForDropdown.length === 0 && (
+                        <div className="py-8 text-center text-xs text-muted-foreground font-medium">
+                          No tenants matching "{tenantSearch}"
+                        </div>
+                      )}
+                    </div>
+                  </ScrollArea>
+                </PopoverContent>
+              </Popover>
             </div>
 
             <div className="space-y-2.5">
@@ -227,7 +287,7 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
                     <TableCell className="px-4 text-center">
                       <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 border border-slate-100 rounded-lg">
                         <Users className="h-3.5 w-3.5 text-[#1a73e8]" />
-                        <span className="text-[14px] font-black text-slate-900">{outlet.userCount}</span>
+                        <span className="text-[14px] font-black text-slate-900">{userCountForOutlet(outlet.id)}</span>
                       </div>
                     </TableCell>
                     <TableCell className="px-4">
@@ -342,4 +402,8 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
       </div>
     </div>
   )
+}
+
+function userCountForOutlet(outletId: string) {
+  return initialOutlets.find(o => o.id === outletId)?.userCount || 0
 }

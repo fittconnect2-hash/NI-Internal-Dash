@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -21,7 +20,8 @@ import {
   PauseCircle,
   Mail,
   Phone,
-  User as UserIcon
+  User as UserIcon,
+  Check
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -41,7 +41,7 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet"
 import { User, Tenant, Outlet } from "@/lib/types"
-import { initialUsers, initialOutlets } from "@/lib/mock-data"
+import { initialUsers, initialOutlets, initialTenants } from "@/lib/mock-data"
 import { Badge } from "@/components/ui/badge"
 import { 
   Select, 
@@ -52,6 +52,7 @@ import {
 } from "@/components/ui/select"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Label } from "@/components/ui/label"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 import {
   DropdownMenu,
@@ -70,23 +71,36 @@ interface UserManagementProps {
 export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps) {
   const [users, setUsers] = React.useState<User[]>(initialUsers)
   const [userFilter, setUserFilter] = React.useState("")
+  const [tenantFilter, setTenantFilter] = React.useState<string | null>(null)
   const [statusFilter, setStatusFilter] = React.useState<string | null>(null)
   const [roleFilter, setRoleFilter] = React.useState<string | null>(null)
   const [outletFilter, setOutletFilter] = React.useState<string | null>(null)
   
   const [isAddingNew, setIsAddingNew] = React.useState(false)
   const [editingUser, setEditingUser] = React.useState<User | null>(null)
+  
+  const [tenantSearch, setTenantSearch] = React.useState("")
+  const [isTenantPopoverOpen, setIsTenantPopoverOpen] = React.useState(false)
 
-  // Filter outlets by current tenant
+  // Filter outlets by current tenant (or selected tenant filter)
+  const activeTenantId = tenant?.id || tenantFilter
   const tenantOutlets = React.useMemo(() => {
-    return initialOutlets.filter(o => !tenant || o.tenantId === tenant.id)
-  }, [tenant])
+    return initialOutlets.filter(o => !activeTenantId || o.tenantId === activeTenantId)
+  }, [activeTenantId])
+
+  const filteredTenantsForDropdown = React.useMemo(() => {
+    return initialTenants.filter(t => 
+      t.tenantName.toLowerCase().includes(tenantSearch.toLowerCase())
+    )
+  }, [tenantSearch])
 
   const handleClearFilters = () => {
     setUserFilter("")
+    setTenantFilter(null)
     setStatusFilter(null)
     setRoleFilter(null)
     setOutletFilter(null)
+    setTenantSearch("")
   }
 
   const handleEditUser = (user: User) => {
@@ -108,7 +122,7 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
   }
 
   const filteredUsers = users.filter(u => {
-    const matchesTenant = !tenant || u.tenantId === tenant.id
+    const matchesTenant = tenant ? u.tenantId === tenant.id : (!tenantFilter || u.tenantId === tenantFilter)
     const matchesUser = !userFilter || 
                        u.fullName.toLowerCase().includes(userFilter.toLowerCase()) || 
                        u.email.toLowerCase().includes(userFilter.toLowerCase())
@@ -121,6 +135,10 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
   const getOutletName = (outletId?: string) => {
     if (!outletId) return "Global / Unassigned"
     return initialOutlets.find(o => o.id === outletId)?.name || "Unknown Outlet"
+  }
+
+  const getTenantName = (tenantId: string) => {
+    return initialTenants.find(t => t.id === tenantId)?.tenantName || "Unknown Tenant"
   }
 
   return (
@@ -177,19 +195,84 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
             <div className="flex flex-col flex-1 p-6 overflow-hidden">
               {/* Smart Filter Row */}
               <div className="bg-white rounded-2xl border border-slate-200 shadow-sm mb-6 p-5">
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-6 items-end">
+                <div className="grid grid-cols-1 md:grid-cols-6 gap-6 items-end">
                   <div className="space-y-2.5">
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Search Users</label>
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
                       <Input 
-                        placeholder="Name or email address..." 
+                        placeholder="Name or email..." 
                         className="pl-9 h-11 text-sm bg-white border-slate-200 focus-visible:ring-1 ring-[#1a73e8]/20" 
                         value={userFilter}
                         onChange={(e) => setUserFilter(e.target.value)}
                       />
                     </div>
                   </div>
+
+                  {!tenant && (
+                    <div className="space-y-2.5">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Filter by Tenant</label>
+                      <Popover open={isTenantPopoverOpen} onOpenChange={setIsTenantPopoverOpen}>
+                        <PopoverTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            role="combobox"
+                            className="w-full h-11 justify-between bg-white border-slate-200 text-sm font-medium px-3"
+                          >
+                            <span className="truncate">
+                              {tenantFilter 
+                                ? initialTenants.find(t => t.id === tenantFilter)?.tenantName 
+                                : "All Tenants"}
+                            </span>
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                          <div className="flex items-center border-b px-3">
+                            <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                            <input
+                              className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground"
+                              placeholder="Search tenants..."
+                              value={tenantSearch}
+                              onChange={(e) => setTenantSearch(e.target.value)}
+                            />
+                          </div>
+                          <ScrollArea className="h-60">
+                            <div className="p-1">
+                              <Button
+                                variant="ghost"
+                                className="w-full justify-start font-normal text-sm h-10"
+                                onClick={() => {
+                                  setTenantFilter(null);
+                                  setIsTenantPopoverOpen(false);
+                                  setTenantSearch("");
+                                }}
+                              >
+                                <Check className={cn("mr-2 h-4 w-4 text-[#1a73e8]", !tenantFilter ? "opacity-100" : "opacity-0")} />
+                                All Tenants
+                              </Button>
+                              {filteredTenantsForDropdown.map((t) => (
+                                <Button
+                                  key={t.id}
+                                  variant="ghost"
+                                  className="w-full justify-start font-normal text-sm h-10"
+                                  onClick={() => {
+                                    setTenantFilter(t.id);
+                                    setOutletFilter(null); // Reset outlet filter when tenant changes
+                                    setIsTenantPopoverOpen(false);
+                                    setTenantSearch("");
+                                  }}
+                                >
+                                  <Check className={cn("mr-2 h-4 w-4 text-[#1a73e8]", tenantFilter === t.id ? "opacity-100" : "opacity-0")} />
+                                  <span className="truncate">{t.tenantName}</span>
+                                </Button>
+                              ))}
+                            </div>
+                          </ScrollArea>
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                  )}
                   
                   <div className="space-y-2.5">
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Assigned Outlet</label>
@@ -222,7 +305,7 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
                   </div>
 
                   <div className="space-y-2.5">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Activity Status</label>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</label>
                     <Select onValueChange={(v) => setStatusFilter(v === 'all' ? null : v)} value={statusFilter || 'all'}>
                       <SelectTrigger className="h-11 bg-white border-slate-200 text-sm">
                         <SelectValue placeholder="All Statuses" />
@@ -241,7 +324,7 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
                       className="w-full h-11 text-slate-400 hover:text-[#1a73e8] hover:bg-[#1a73e8]/5 gap-2 font-bold transition-all"
                       onClick={handleClearFilters}
                     >
-                      <FilterX className="h-4 w-4" /> Reset Filters
+                      <FilterX className="h-4 w-4" /> Reset
                     </Button>
                   </div>
                 </div>
@@ -259,6 +342,11 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
                         <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">
                           Contact Details
                         </TableHead>
+                        {!tenant && (
+                          <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">
+                            Parent Tenant
+                          </TableHead>
+                        )}
                         <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">
                           Assigned Outlet
                         </TableHead>
@@ -267,9 +355,6 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
                         </TableHead>
                         <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest text-center">
                           Status
-                        </TableHead>
-                        <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">
-                          Last Activity
                         </TableHead>
                         <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-8 text-right uppercase tracking-widest">Actions</TableHead>
                       </TableRow>
@@ -285,6 +370,14 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
                             <div className="text-[14px] text-slate-700 font-bold leading-tight mb-0.5">{user.email}</div>
                             <div className="text-[12px] text-slate-400 font-medium">+971 52 165 0458</div>
                           </TableCell>
+                          {!tenant && (
+                            <TableCell className="px-4">
+                              <div className="flex items-center gap-2">
+                                <Building2 className="h-3.5 w-3.5 text-slate-300" />
+                                <span className="text-[14px] text-slate-600 font-bold">{getTenantName(user.tenantId)}</span>
+                              </div>
+                            </TableCell>
+                          )}
                           <TableCell className="px-4">
                             <div className="flex items-center gap-2">
                               <Store className="h-3.5 w-3.5 text-slate-300" />
@@ -312,9 +405,6 @@ export function UserManagement({ tenant, isOpen, onClose }: UserManagementProps)
                                 {user.status}
                               </Badge>
                             </div>
-                          </TableCell>
-                          <TableCell className="px-4 text-[13px] text-slate-600 font-medium">
-                            {user.lastActive || "Recently active"}
                           </TableCell>
                           <TableCell className="text-right px-8">
                             <DropdownMenu>
