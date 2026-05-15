@@ -99,7 +99,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
   const [formPhone, setFormPhone] = React.useState("")
   const [formRole, setFormRole] = React.useState<User['role']>('Manager')
   const [formTenantId, setFormTenantId] = React.useState("")
-  const [formOutletId, setFormOutletId] = React.useState("")
+  const [formOutletId, setFormOutletId] = React.useState("all")
 
   React.useEffect(() => {
     if (propEditingUser) {
@@ -111,7 +111,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
       setFormPhone(propEditingUser.phone)
       setFormRole(propEditingUser.role)
       setFormTenantId(propEditingUser.tenantId)
-      setFormOutletId(propEditingUser.outletId || "")
+      setFormOutletId(propEditingUser.outletId || "all")
     } else if (defaultAdding && isOpen) {
       setIsAddingNew(true)
       setEditingUser(null)
@@ -126,7 +126,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
     setFormPhone("")
     setFormRole('Manager')
     setFormTenantId(tenant?.id || "")
-    setFormOutletId("")
+    setFormOutletId("all")
   }
 
   // Calculate user counts for each tenant for the filter
@@ -168,7 +168,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
     setFormPhone(user.phone)
     setFormRole(user.role)
     setFormTenantId(user.tenantId)
-    setFormOutletId(user.outletId || "")
+    setFormOutletId(user.outletId || "all")
     setTimeout(() => setIsFormLoading(false), 500)
   }
 
@@ -199,7 +199,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
         phone: formPhone,
         role: formRole,
         tenantId: formTenantId,
-        outletId: formOutletId || undefined
+        outletId: formOutletId === "all" ? undefined : formOutletId
       } : u))
       toast({
         title: "Staff Profile Updated",
@@ -214,7 +214,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
         phone: formPhone,
         role: formRole,
         tenantId: formTenantId,
-        outletId: formOutletId || undefined,
+        outletId: formOutletId === "all" ? undefined : formOutletId,
         status: 'Active',
         lastActive: 'Just now'
       }
@@ -774,7 +774,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                                 <SelectValue placeholder="All Outlets (Global)" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="">Global Access</SelectItem>
+                                <SelectItem value="all">Global Access</SelectItem>
                                 {tenantOutlets.map(o => (
                                   <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>
                                 ))}
