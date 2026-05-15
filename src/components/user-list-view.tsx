@@ -52,6 +52,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { initialUsers, initialOutlets, initialTenants } from "@/lib/mock-data"
 import { User, Tenant, Outlet } from "@/lib/types"
 import { cn } from "@/lib/utils"
+import { useToast } from "@/hooks/use-toast"
 
 const ITEMS_PER_PAGE = 10
 
@@ -61,6 +62,7 @@ interface UserListViewProps {
 }
 
 export function UserListView({ onAddUser, onEditUser }: UserListViewProps) {
+  const { toast } = useToast()
   const [searchQuery, setSearchQuery] = React.useState("")
   const [tenantFilter, setTenantFilter] = React.useState<string | null>(null)
   const [outletFilter, setOutletFilter] = React.useState<string | null>(null)
@@ -129,6 +131,13 @@ export function UserListView({ onAddUser, onEditUser }: UserListViewProps) {
     setRoleFilter(null)
     setStatusFilter(null)
     setTenantSearch("")
+  }
+
+  const handleResetPassword = (user: User) => {
+    toast({
+      title: "Password Reset Sent",
+      description: `A secure credentials reset link has been successfully dispatched to ${user.email}.`,
+    })
   }
 
   return (
@@ -352,7 +361,7 @@ export function UserListView({ onAddUser, onEditUser }: UserListViewProps) {
                           <DropdownMenuItem className="font-bold py-2.5" onClick={() => onEditUser(user)}>
                             <Edit2 className="h-4 w-4 mr-3 text-slate-400" /> Edit Profile
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="font-bold py-2.5">
+                          <DropdownMenuItem className="font-bold py-2.5" onClick={() => handleResetPassword(user)}>
                             <RotateCcw className="h-4 w-4 mr-3 text-slate-400" /> Reset Password
                           </DropdownMenuItem>
                           <DropdownMenuItem className="font-bold py-2.5">

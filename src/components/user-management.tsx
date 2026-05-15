@@ -304,6 +304,13 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
     })
   }
 
+  const handleResetPassword = (user: User) => {
+    toast({
+      title: "Password Reset Sent",
+      description: `A secure credentials reset link has been successfully dispatched to ${user.email}.`,
+    })
+  }
+
   const filteredUsers = React.useMemo(() => {
     return users.filter(u => {
       const matchesTenant = tenant ? u.tenantId === tenant.id : (!tenantFilter || u.tenantId === tenantFilter)
@@ -623,7 +630,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                                 <DropdownMenuItem className="font-bold py-2.5" onClick={() => handleEditUser(user)}>
                                   <Edit2 className="h-4 w-4 mr-3 text-slate-400" /> Edit Profile
                                 </DropdownMenuItem>
-                                <DropdownMenuItem className="font-bold py-2.5">
+                                <DropdownMenuItem className="font-bold py-2.5" onClick={() => handleResetPassword(user)}>
                                   <RotateCcw className="h-4 w-4 mr-3 text-slate-400" /> Reset Password
                                 </DropdownMenuItem>
                                 <DropdownMenuItem className="font-bold py-2.5" onClick={() => handleSuspendUser(user.id)}>
@@ -739,6 +746,16 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                           </div>
 
                           <div className="space-y-2">
+                            <Label className="text-[13px] font-bold text-slate-700">Full Name <span className="text-red-500">*</span></Label>
+                            <Input 
+                              value={formFullName} 
+                              onChange={(e) => setFormFullName(e.target.value)}
+                              placeholder="Enter Full Name" 
+                              className="h-11 border-slate-200 bg-white" 
+                            />
+                          </div>
+
+                          <div className="space-y-2">
                             <Label className="text-[13px] font-bold text-slate-700">Email Address</Label>
                             <Input 
                               type="email" 
@@ -778,20 +795,6 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                                 className="h-11 flex-1 border-slate-200 bg-white" 
                               />
                             </div>
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label className="text-[13px] font-bold text-slate-700">Role <span className="text-red-500">*</span></Label>
-                            <Select value={formPrimaryRole} onValueChange={setFormPrimaryRole}>
-                              <SelectTrigger className="h-11 border-slate-200">
-                                <SelectValue placeholder="Staff" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="Staff">Staff</SelectItem>
-                                <SelectItem value="Manager">Manager</SelectItem>
-                                <SelectItem value="Organization Admin">Organization Admin</SelectItem>
-                              </SelectContent>
-                            </Select>
                           </div>
 
                           <div className="space-y-2">
