@@ -18,7 +18,8 @@ import {
   ChevronRight,
   Check,
   Edit2,
-  X
+  X,
+  Loader2
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -63,6 +64,7 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
   const [tenantFilter, setTenantFilter] = React.useState<string | null>(null)
   const [statusFilter, setStatusFilter] = React.useState<string | null>(null)
   const [currentPage, setCurrentPage] = React.useState(1)
+  const [loadingOutletId, setLoadingOutletId] = React.useState<string | null>(null)
   
   const [tenantSearch, setTenantSearch] = React.useState("")
   const [isTenantPopoverOpen, setIsTenantPopoverOpen] = React.useState(false)
@@ -128,8 +130,12 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
   }, [searchQuery, tenantFilter, statusFilter])
 
   const handleEdit = (outlet: Outlet) => {
-    setEditingOutlet(outlet)
-    setIsEditSheetOpen(true)
+    setLoadingOutletId(outlet.id)
+    setTimeout(() => {
+      setEditingOutlet(outlet)
+      setIsEditSheetOpen(true)
+      setLoadingOutletId(null)
+    }, 800)
   }
 
   const resetFilters = () => {
@@ -290,12 +296,20 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
                 {paginatedOutlets.map((outlet) => (
                   <TableRow 
                     key={outlet.id} 
-                    className="group hover:bg-slate-50/50 transition-all border-b border-slate-50"
+                    className={cn(
+                      "group hover:bg-slate-50/50 transition-all border-b border-slate-50",
+                      loadingOutletId === outlet.id && "opacity-60 pointer-events-none"
+                    )}
                     onClick={() => handleEdit(outlet)}
                   >
                     <TableCell className="py-5 px-8">
-                      <div className="font-extrabold text-[15px] text-[#1e293b] border-b border-transparent inline-block leading-tight mb-1 group-hover:text-[#1a73e8] transition-colors">{outlet.name}</div>
-                      <div className="text-[11px] text-slate-400 font-medium tracking-tight opacity-70">slug: {outlet.slug}</div>
+                      <div className="flex items-center gap-3">
+                        {loadingOutletId === outlet.id && <Loader2 className="h-4 w-4 animate-spin text-[#1a73e8]" />}
+                        <div>
+                          <div className="font-extrabold text-[15px] text-[#1e293b] border-b border-transparent inline-block leading-tight mb-1 group-hover:text-[#1a73e8] transition-colors">{outlet.name}</div>
+                          <div className="text-[11px] text-slate-400 font-medium tracking-tight opacity-70">slug: {outlet.slug}</div>
+                        </div>
+                      </div>
                     </TableCell>
                     <TableCell className="px-4 text-[14px] text-[#1e293b] font-extrabold">
                       {outlet.phone}
@@ -329,8 +343,14 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
                     <TableCell className="text-right px-8">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full hover:bg-white border border-transparent hover:border-slate-100 text-slate-400" onClick={(e) => e.stopPropagation()}>
-                            <MoreHorizontal className="h-4 w-4" />
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-9 w-9 rounded-full hover:bg-white border border-transparent hover:border-slate-100 text-slate-400" 
+                            onClick={(e) => e.stopPropagation()}
+                            disabled={loadingOutletId === outlet.id}
+                          >
+                            {loadingOutletId === outlet.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <MoreHorizontal className="h-4 w-4" />}
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48 p-2">

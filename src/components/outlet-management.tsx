@@ -13,7 +13,8 @@ import {
   ArrowLeft,
   FilterX,
   Users as UsersIcon,
-  Edit2
+  Edit2,
+  Loader2
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -64,6 +65,7 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
   const [statusFilter, setStatusFilter] = React.useState<string | null>(null)
   const [isAddingNew, setIsAddingNew] = React.useState(false)
   const [editingOutlet, setEditingOutlet] = React.useState<Outlet | null>(null)
+  const [loadingOutletId, setLoadingOutletId] = React.useState<string | null>(null)
 
   // Form State
   const [formName, setFormName] = React.useState("")
@@ -104,8 +106,13 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
   }
 
   const handleEdit = (outlet: Outlet) => {
-    setEditingOutlet(outlet)
-    setIsAddingNew(true)
+    setLoadingOutletId(outlet.id)
+    // Simulate a loading delay
+    setTimeout(() => {
+      setEditingOutlet(outlet)
+      setIsAddingNew(true)
+      setLoadingOutletId(null)
+    }, 800)
   }
 
   const handleAddNew = () => {
@@ -135,7 +142,7 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                 <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                   <span className="flex items-center gap-1.5 opacity-80"><Building2 className="h-3 w-3" /> TENANTS</span>
                   <ChevronRight className="h-2.5 w-2.5 opacity-30" />
-                  <span className="text-[#1a73e8] font-black">{tenant?.tenantName.toUpperCase() || "ALL TENANTS"}</span>
+                  <span className={cn("font-black", tenant ? "text-[#1a73e8]" : "text-slate-900")}>{tenant?.tenantName.toUpperCase() || "ALL TENANTS"}</span>
                   <ChevronRight className="h-2.5 w-2.5 opacity-30" />
                   <span className="opacity-80">OUTLETS</span>
                 </div>
@@ -308,12 +315,20 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                   {filteredOutlets.map((outlet) => (
                     <TableRow 
                       key={outlet.id} 
-                      className="group hover:bg-slate-50/50 transition-all border-b border-slate-50 cursor-pointer"
+                      className={cn(
+                        "group hover:bg-slate-50/50 transition-all border-b border-slate-50 cursor-pointer relative",
+                        loadingOutletId === outlet.id && "opacity-60 pointer-events-none"
+                      )}
                       onClick={() => handleEdit(outlet)}
                     >
                       <TableCell className="py-5 px-8">
-                        <div className="font-extrabold text-[15px] text-[#1e293b] border-b border-transparent inline-block leading-tight mb-1 group-hover:text-[#1a73e8] transition-colors">{outlet.name}</div>
-                        <div className="text-[11px] text-slate-400 font-medium tracking-tight opacity-70">slug: {outlet.slug}</div>
+                        <div className="flex items-center gap-3">
+                          {loadingOutletId === outlet.id && <Loader2 className="h-4 w-4 animate-spin text-[#1a73e8]" />}
+                          <div>
+                            <div className="font-extrabold text-[15px] text-[#1e293b] border-b border-transparent inline-block leading-tight mb-1 group-hover:text-[#1a73e8] transition-colors">{outlet.name}</div>
+                            <div className="text-[11px] text-slate-400 font-medium tracking-tight opacity-70">slug: {outlet.slug}</div>
+                          </div>
+                        </div>
                       </TableCell>
                       <TableCell className="px-4 text-[14px] text-[#1e293b] font-extrabold">
                         {outlet.phone}
@@ -352,8 +367,9 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                               size="icon" 
                               className="h-9 w-9 rounded-full border border-slate-100 text-slate-400 hover:text-[#1e293b] hover:bg-white active:scale-90 transition-all" 
                               onClick={(e) => e.stopPropagation()}
+                              disabled={loadingOutletId === outlet.id}
                             >
-                              <MoreHorizontal className="h-4 w-4" />
+                              {loadingOutletId === outlet.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <MoreHorizontal className="h-4 w-4" />}
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-48 p-2">
