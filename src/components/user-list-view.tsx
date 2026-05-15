@@ -90,6 +90,16 @@ export function UserListView({ onAddUser, onEditUser }: UserListViewProps) {
   const [confirmReset, setConfirmReset] = React.useState<User | null>(null)
   const [confirmReactivate, setConfirmReactivate] = React.useState<User | null>(null)
 
+  // CRITICAL FIX: Explicitly restore pointer events when any dialog is closed
+  React.useEffect(() => {
+    if (!confirmSuspend && !confirmReset && !confirmReactivate) {
+      const timer = setTimeout(() => {
+        document.body.style.pointerEvents = 'auto';
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [confirmSuspend, confirmReset, confirmReactivate]);
+
   // Calculate user counts for each tenant for the filter
   const tenantsWithCounts = React.useMemo(() => {
     return initialTenants.map(t => ({
@@ -156,6 +166,8 @@ export function UserListView({ onAddUser, onEditUser }: UserListViewProps) {
       description: `A secure credentials reset link has been successfully dispatched to ${user.email}.`,
     })
     setConfirmReset(null)
+    // Force interaction restoration
+    document.body.style.pointerEvents = 'auto';
   }
 
   const handleSuspendUser = (user: User) => {
@@ -165,6 +177,8 @@ export function UserListView({ onAddUser, onEditUser }: UserListViewProps) {
       description: `${user.fullName}'s access has been successfully suspended.`
     })
     setConfirmSuspend(null)
+    // Force interaction restoration
+    document.body.style.pointerEvents = 'auto';
   }
 
   const handleReactivateUser = (user: User) => {
@@ -174,6 +188,8 @@ export function UserListView({ onAddUser, onEditUser }: UserListViewProps) {
       description: `${user.fullName}'s access has been restored.`
     })
     setConfirmReactivate(null)
+    // Force interaction restoration
+    document.body.style.pointerEvents = 'auto';
   }
 
   return (
@@ -219,7 +235,7 @@ export function UserListView({ onAddUser, onEditUser }: UserListViewProps) {
                         ? initialTenants.find(t => t.id === tenantFilter)?.tenantName 
                         : "All Tenants"}
                     </span>
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    <Check className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">

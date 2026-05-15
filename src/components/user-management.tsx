@@ -144,16 +144,15 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
     setAssignments([])
   }, [tenant])
 
-  // Crucial: Clean up pointer-events on unmount or closure to fix "unclickable UI" issue
+  // CRITICAL FIX: Explicitly restore pointer events when any overlay is closed
   React.useEffect(() => {
-    if (!isOpen) {
-      // Small timeout to allow Radix cleanup to finish, then force restore body interactivity
+    if (!isOpen && !confirmSuspend && !confirmReset && !confirmReactivate) {
       const timer = setTimeout(() => {
         document.body.style.pointerEvents = 'auto';
-      }, 100);
+      }, 150);
       return () => clearTimeout(timer);
     }
-  }, [isOpen]);
+  }, [isOpen, confirmSuspend, confirmReset, confirmReactivate]);
 
   React.useEffect(() => {
     if (isOpen) {
@@ -326,6 +325,8 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
       description: `${user.fullName}'s access has been successfully suspended.`
     })
     setConfirmSuspend(null)
+    // Force interaction restoration
+    document.body.style.pointerEvents = 'auto';
   }
 
   const handleReactivateUser = (user: User) => {
@@ -335,6 +336,8 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
       description: `${user.fullName}'s access has been restored.`
     })
     setConfirmReactivate(null)
+    // Force interaction restoration
+    document.body.style.pointerEvents = 'auto';
   }
 
   const handleResetPassword = (user: User) => {
@@ -343,6 +346,8 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
       description: `A secure credentials reset link has been successfully dispatched to ${user.email}.`,
     })
     setConfirmReset(null)
+    // Force interaction restoration
+    document.body.style.pointerEvents = 'auto';
   }
 
   const handleDeleteUser = (userId: string) => {
@@ -351,6 +356,8 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
       title: "User Deleted",
       description: "Staff member has been successfully removed from the platform."
     })
+    // Force interaction restoration
+    document.body.style.pointerEvents = 'auto';
   }
 
   const filteredUsers = React.useMemo(() => {
@@ -471,7 +478,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                                   ? initialTenants.find(t => t.id === tenantFilter)?.tenantName 
                                   : "All Tenants"}
                               </span>
-                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              <Check className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">

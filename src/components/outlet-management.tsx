@@ -89,6 +89,16 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
   const [formCity, setFormCity] = React.useState("")
   const [formCountry, setFormCountry] = React.useState("")
 
+  // CRITICAL FIX: Explicitly restore pointer events when the drawer closes
+  React.useEffect(() => {
+    if (!isOpen) {
+      const timer = setTimeout(() => {
+        document.body.style.pointerEvents = 'auto';
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
+
   React.useEffect(() => {
     if (editingOutlet) {
       setFormTenantId(editingOutlet.tenantId)
