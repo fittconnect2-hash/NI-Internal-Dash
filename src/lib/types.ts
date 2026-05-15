@@ -43,6 +43,6 @@ export interface User {
   email: string;
   phone: string;
   role: 'Organization Admin' | 'Manager' | 'Partner Admin';
-  status: 'Active' | 'Inactive';
+  status: 'Active' | 'Inactive' | 'Suspended';
   lastActive?: string;
 }

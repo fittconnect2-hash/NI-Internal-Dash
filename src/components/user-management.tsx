@@ -18,6 +18,7 @@ import {
   PlusCircle,
   Edit2,
   PauseCircle,
+  PlayCircle,
   Mail,
   Phone,
   User as UserIcon,
@@ -57,6 +58,16 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Label } from "@/components/ui/label"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { cn } from "@/lib/utils"
 import {
   DropdownMenu,
@@ -99,6 +110,11 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
   
   const [tenantSearch, setTenantSearch] = React.useState("")
   const [isTenantPopoverOpen, setIsTenantPopoverOpen] = React.useState(false)
+
+  // Dialog states
+  const [confirmSuspend, setConfirmSuspend] = React.useState<User | null>(null)
+  const [confirmReset, setConfirmReset] = React.useState<User | null>(null)
+  const [confirmReactivate, setConfirmReactivate] = React.useState<User | null>(null)
 
   // Form State
   const [formFullName, setFormFullName] = React.useState("")
@@ -288,20 +304,22 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
     setEditingUser(null)
   }
 
-  const handleSuspendUser = (userId: string) => {
-    setUsers(prev => prev.map(u => u.id === userId ? { ...u, status: 'Inactive' } : u))
+  const handleSuspendUser = (user: User) => {
+    setUsers(prev => prev.map(u => u.id === user.id ? { ...u, status: 'Suspended' } : u))
     toast({
       title: "User Suspended",
-      description: "Staff access has been revoked."
+      description: `${user.fullName}'s access has been successfully suspended.`
     })
+    setConfirmSuspend(null)
   }
 
-  const handleDeleteUser = (userId: string) => {
-    setUsers(prev => prev.filter(u => u.id !== userId))
+  const handleReactivateUser = (user: User) => {
+    setUsers(prev => prev.map(u => u.id === user.id ? { ...u, status: 'Active' } : u))
     toast({
-      title: "User Deleted",
-      description: "Staff record removed from database."
+      title: "User Reactivated",
+      description: `${user.fullName}'s access has been restored.`
     })
+    setConfirmReactivate(null)
   }
 
   const handleResetPassword = (user: User) => {
@@ -309,6 +327,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
       title: "Password Reset Sent",
       description: `A secure credentials reset link has been successfully dispatched to ${user.email}.`,
     })
+    setConfirmReset(null)
   }
 
   const filteredUsers = React.useMemo(() => {
@@ -523,6 +542,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                         <SelectItem value="all">All Statuses</SelectItem>
                         <SelectItem value="Active">Active</SelectItem>
                         <SelectItem value="Inactive">Inactive</SelectItem>
+                        <SelectItem value="Suspended">Suspended</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -608,7 +628,9 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                                 "rounded-full px-4 py-1 text-[10px] font-bold border shadow-none uppercase tracking-wider",
                                 user.status === 'Active' 
                                   ? "bg-[#e1f9ef] text-[#22c55e] border-[#e1f9ef]" 
-                                  : "bg-slate-100 text-slate-500 border-slate-200"
+                                  : user.status === 'Suspended'
+                                    ? "bg-rose-100 text-rose-500 border-rose-200"
+                                    : "bg-slate-100 text-slate-500 border-slate-200"
                               )}>
                                 {user.status}
                               </Badge>
@@ -630,12 +652,20 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                                 <DropdownMenuItem className="font-bold py-2.5" onClick={() => handleEditUser(user)}>
                                   <Edit2 className="h-4 w-4 mr-3 text-slate-400" /> Edit Profile
                                 </DropdownMenuItem>
-                                <DropdownMenuItem className="font-bold py-2.5" onClick={() => handleResetPassword(user)}>
+                                <DropdownMenuItem className="font-bold py-2.5" onClick={() => setConfirmReset(user)}>
                                   <RotateCcw className="h-4 w-4 mr-3 text-slate-400" /> Reset Password
                                 </DropdownMenuItem>
-                                <DropdownMenuItem className="font-bold py-2.5" onClick={() => handleSuspendUser(user.id)}>
-                                  <PauseCircle className="h-4 w-4 mr-3 text-slate-400" /> Suspend Access
-                                </DropdownMenuItem>
+                                
+                                {user.status === 'Suspended' ? (
+                                  <DropdownMenuItem className="font-bold py-2.5 text-green-600" onClick={() => setConfirmReactivate(user)}>
+                                    <PlayCircle className="h-4 w-4 mr-3" /> Reactivate Access
+                                  </DropdownMenuItem>
+                                ) : (
+                                  <DropdownMenuItem className="font-bold py-2.5 text-rose-500" onClick={() => setConfirmSuspend(user)}>
+                                    <PauseCircle className="h-4 w-4 mr-3" /> Suspend Access
+                                  </DropdownMenuItem>
+                                )}
+
                                 <DropdownMenuSeparator className="my-1" />
                                 <DropdownMenuItem className="text-destructive font-black py-2.5" onClick={() => handleDeleteUser(user.id)}>
                                   <Trash2 className="h-4 w-4 mr-3" /> Delete User
@@ -648,12 +678,12 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                     </TableBody>
                   </Table>
                   {filteredUsers.length === 0 && (
-                    <div className="py-24 text-center">
+                    <div className="py-32 text-center">
                       <div className="h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100">
                         <UsersIcon className="h-8 w-8 text-slate-200" />
                       </div>
-                      <h3 className="text-sm font-extrabold text-slate-900">No Users Found</h3>
-                      <p className="text-xs text-slate-500 mt-1">Adjust your filters or invite new team members.</p>
+                      <h3 className="text-sm font-bold text-slate-900">No Users Detected</h3>
+                      <p className="text-xs text-slate-500 mt-1">Refine your search or add a new team member.</p>
                     </div>
                   )}
                 </ScrollArea>
@@ -936,6 +966,61 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
           )}
         </div>
       </SheetContent>
+
+      {/* Confirmation Dialogs */}
+      <AlertDialog open={!!confirmSuspend} onOpenChange={() => setConfirmSuspend(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Suspend Staff Access?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will immediately revoke <strong>{confirmSuspend?.fullName}</strong>'s access to the platform. 
+              They will not be able to log in until their access is restored.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-rose-500 hover:bg-rose-600" onClick={() => confirmSuspend && handleSuspendUser(confirmSuspend)}>
+              Confirm Suspension
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!confirmReactivate} onOpenChange={() => setConfirmReactivate(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reactivate Staff Access?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will restore platform access for <strong>{confirmReactivate?.fullName}</strong>. 
+              They will be able to log in using their existing credentials.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-green-600 hover:bg-green-700" onClick={() => confirmReactivate && handleReactivateUser(confirmReactivate)}>
+              Reactivate Access
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!confirmReset} onOpenChange={() => setConfirmReset(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reset User Password?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to send a password reset link to <strong>{confirmReset?.email}</strong>? 
+              Their current password will remain active until they choose a new one.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => confirmReset && handleResetPassword(confirmReset)}>
+              Send Reset Link
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Sheet>
   )
 }

@@ -18,6 +18,7 @@ import {
   ChevronRight,
   Check,
   PauseCircle,
+  PlayCircle,
   Trash2,
   Edit2,
   RotateCcw
@@ -49,6 +50,16 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { initialUsers, initialOutlets, initialTenants } from "@/lib/mock-data"
 import { User, Tenant, Outlet } from "@/lib/types"
 import { cn } from "@/lib/utils"
@@ -63,6 +74,7 @@ interface UserListViewProps {
 
 export function UserListView({ onAddUser, onEditUser }: UserListViewProps) {
   const { toast } = useToast()
+  const [users, setUsers] = React.useState<User[]>(initialUsers)
   const [searchQuery, setSearchQuery] = React.useState("")
   const [tenantFilter, setTenantFilter] = React.useState<string | null>(null)
   const [outletFilter, setOutletFilter] = React.useState<string | null>(null)
@@ -73,13 +85,18 @@ export function UserListView({ onAddUser, onEditUser }: UserListViewProps) {
   const [tenantSearch, setTenantSearch] = React.useState("")
   const [isTenantPopoverOpen, setIsTenantPopoverOpen] = React.useState(false)
 
+  // Dialog states
+  const [confirmSuspend, setConfirmSuspend] = React.useState<User | null>(null)
+  const [confirmReset, setConfirmReset] = React.useState<User | null>(null)
+  const [confirmReactivate, setConfirmReactivate] = React.useState<User | null>(null)
+
   // Calculate user counts for each tenant for the filter
   const tenantsWithCounts = React.useMemo(() => {
     return initialTenants.map(t => ({
       ...t,
-      count: initialUsers.filter(u => u.tenantId === t.id).length
+      count: users.filter(u => u.tenantId === t.id).length
     })).filter(t => t.count > 0)
-  }, [])
+  }, [users])
 
   const filteredTenantsForDropdown = React.useMemo(() => {
     return tenantsWithCounts.filter(t => 
@@ -88,7 +105,7 @@ export function UserListView({ onAddUser, onEditUser }: UserListViewProps) {
   }, [tenantsWithCounts, tenantSearch])
 
   const filteredUsers = React.useMemo(() => {
-    return initialUsers.filter(user => {
+    return users.filter(user => {
       const matchesSearch = 
         user.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -101,7 +118,7 @@ export function UserListView({ onAddUser, onEditUser }: UserListViewProps) {
       
       return matchesSearch && matchesTenant && matchesOutlet && matchesRole && matchesStatus
     })
-  }, [searchQuery, tenantFilter, outletFilter, roleFilter, statusFilter])
+  }, [users, searchQuery, tenantFilter, outletFilter, roleFilter, statusFilter])
 
   // Pagination logic
   const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE)
@@ -138,6 +155,25 @@ export function UserListView({ onAddUser, onEditUser }: UserListViewProps) {
       title: "Password Reset Sent",
       description: `A secure credentials reset link has been successfully dispatched to ${user.email}.`,
     })
+    setConfirmReset(null)
+  }
+
+  const handleSuspendUser = (user: User) => {
+    setUsers(prev => prev.map(u => u.id === user.id ? { ...u, status: 'Suspended' } : u))
+    toast({
+      title: "User Suspended",
+      description: `${user.fullName}'s access has been successfully suspended.`
+    })
+    setConfirmSuspend(null)
+  }
+
+  const handleReactivateUser = (user: User) => {
+    setUsers(prev => prev.map(u => u.id === user.id ? { ...u, status: 'Active' } : u))
+    toast({
+      title: "User Reactivated",
+      description: `${user.fullName}'s access has been restored.`
+    })
+    setConfirmReactivate(null)
   }
 
   return (
@@ -261,6 +297,7 @@ export function UserListView({ onAddUser, onEditUser }: UserListViewProps) {
                   <SelectItem value="all">All Statuses</SelectItem>
                   <SelectItem value="Active">Active</SelectItem>
                   <SelectItem value="Inactive">Inactive</SelectItem>
+                  <SelectItem value="Suspended">Suspended</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -338,7 +375,9 @@ export function UserListView({ onAddUser, onEditUser }: UserListViewProps) {
                           "rounded-full px-4 py-1 text-[10px] font-bold border shadow-none uppercase tracking-wider",
                           user.status === 'Active' 
                             ? "bg-[#e1f9ef] text-[#22c55e] border-[#e1f9ef]" 
-                            : "bg-slate-100 text-slate-500 border-slate-200"
+                            : user.status === 'Suspended'
+                              ? "bg-rose-100 text-rose-500 border-rose-200"
+                              : "bg-slate-100 text-slate-500 border-slate-200"
                         )}>
                           {user.status}
                         </Badge>
@@ -361,12 +400,20 @@ export function UserListView({ onAddUser, onEditUser }: UserListViewProps) {
                           <DropdownMenuItem className="font-bold py-2.5" onClick={() => onEditUser(user)}>
                             <Edit2 className="h-4 w-4 mr-3 text-slate-400" /> Edit Profile
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="font-bold py-2.5" onClick={() => handleResetPassword(user)}>
+                          <DropdownMenuItem className="font-bold py-2.5" onClick={() => setConfirmReset(user)}>
                             <RotateCcw className="h-4 w-4 mr-3 text-slate-400" /> Reset Password
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="font-bold py-2.5">
-                            <PauseCircle className="h-4 w-4 mr-3 text-slate-400" /> Suspend Access
-                          </DropdownMenuItem>
+                          
+                          {user.status === 'Suspended' ? (
+                            <DropdownMenuItem className="font-bold py-2.5 text-green-600" onClick={() => setConfirmReactivate(user)}>
+                              <PlayCircle className="h-4 w-4 mr-3" /> Reactivate Access
+                            </DropdownMenuItem>
+                          ) : (
+                            <DropdownMenuItem className="font-bold py-2.5 text-rose-500" onClick={() => setConfirmSuspend(user)}>
+                              <PauseCircle className="h-4 w-4 mr-3" /> Suspend Access
+                            </DropdownMenuItem>
+                          )}
+
                           <DropdownMenuSeparator className="my-1" />
                           <DropdownMenuItem className="text-destructive font-black py-2.5">
                             <Trash2 className="h-4 w-4 mr-3" /> Delete User
@@ -449,6 +496,61 @@ export function UserListView({ onAddUser, onEditUser }: UserListViewProps) {
           )}
         </div>
       </div>
+
+      {/* Confirmation Dialogs */}
+      <AlertDialog open={!!confirmSuspend} onOpenChange={() => setConfirmSuspend(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Suspend Staff Access?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will immediately revoke <strong>{confirmSuspend?.fullName}</strong>'s access to the platform. 
+              They will not be able to log in until their access is restored.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-rose-500 hover:bg-rose-600" onClick={() => confirmSuspend && handleSuspendUser(confirmSuspend)}>
+              Confirm Suspension
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!confirmReactivate} onOpenChange={() => setConfirmReactivate(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reactivate Staff Access?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will restore platform access for <strong>{confirmReactivate?.fullName}</strong>. 
+              They will be able to log in using their existing credentials.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-green-600 hover:bg-green-700" onClick={() => confirmReactivate && handleReactivateUser(confirmReactivate)}>
+              Reactivate Access
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!confirmReset} onOpenChange={() => setConfirmReset(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reset User Password?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to send a password reset link to <strong>{confirmReset?.email}</strong>? 
+              Their current password will remain active until they choose a new one.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => confirmReset && handleResetPassword(confirmReset)}>
+              Send Reset Link
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
