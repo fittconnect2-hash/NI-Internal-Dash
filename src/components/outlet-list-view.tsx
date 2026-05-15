@@ -68,7 +68,7 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
   const [tenantSearch, setTenantSearch] = React.useState("")
   const [isTenantPopoverOpen, setIsTenantPopoverOpen] = React.useState(false)
 
-  // Edit State
+  // Edit/Add State
   const [editingOutlet, setEditingOutlet] = React.useState<Outlet | null>(null)
   const [isFormVisible, setIsFormVisible] = React.useState(false)
   const [isFormLoading, setIsFormLoading] = React.useState(false)
@@ -89,6 +89,13 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
       setFormTimezone(editingOutlet.timezone)
       setFormCity(editingOutlet.city)
       setFormCountry(editingOutlet.country)
+    } else {
+      setFormName("")
+      setFormSlug("")
+      setFormPhone("")
+      setFormTimezone("Asia/Dubai")
+      setFormCity("")
+      setFormCountry("")
     }
   }, [editingOutlet])
 
@@ -138,6 +145,12 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
     }, 800)
   }
 
+  const handleAddOutlet = () => {
+    setEditingOutlet(null)
+    setIsFormVisible(true)
+    setIsFormLoading(false)
+  }
+
   const handleCloseForm = () => {
     setIsFormVisible(false)
     setEditingOutlet(null)
@@ -158,7 +171,11 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
             <h1 className="text-3xl font-black text-slate-900 tracking-tight">Outlet Management</h1>
             <p className="text-sm text-slate-500 mt-1">Monitor and organize your global brand properties and locations.</p>
           </div>
-          <Button size="sm" className="h-10 px-6 font-black bg-[#1a73e8] hover:bg-[#1557b0] shadow-lg shadow-[#1a73e8]/20">
+          <Button 
+            size="sm" 
+            className="h-10 px-6 font-black bg-[#1a73e8] hover:bg-[#1557b0] shadow-lg shadow-[#1a73e8]/20"
+            onClick={handleAddOutlet}
+          >
             <Plus className="h-4 w-4 mr-2" /> Add Outlet
           </Button>
         </div>
@@ -275,8 +292,12 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
             <div className="w-[400px] flex-shrink-0 bg-white rounded-2xl border border-slate-200 shadow-xl flex flex-col animate-in slide-in-from-left duration-500 overflow-hidden">
               <div className="p-6 border-b border-slate-50 flex items-center justify-between">
                 <div>
-                  <h3 className="font-extrabold text-lg text-[#1e293b]">Edit Outlet Info</h3>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Update branch parameters</p>
+                  <h3 className="font-extrabold text-lg text-[#1e293b]">
+                    {editingOutlet ? "Edit Outlet Info" : "Add New Outlet"}
+                  </h3>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                    {editingOutlet ? "Update branch parameters" : "Enter new branch details"}
+                  </p>
                 </div>
                 <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={handleCloseForm}>
                   <X className="h-4 w-4" />
@@ -350,7 +371,7 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
                     className="flex-1 h-12 bg-[#1a73e8] hover:bg-[#1557b0] text-white font-bold"
                     onClick={handleCloseForm}
                   >
-                    Save Changes
+                    {editingOutlet ? "Save Changes" : "Create Outlet"}
                   </Button>
                 </div>
               )}
