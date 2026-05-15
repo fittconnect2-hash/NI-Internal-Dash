@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -40,7 +41,6 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetDescription,
 } from "@/components/ui/sheet"
 import { User, Tenant, Outlet } from "@/lib/types"
 import { initialUsers, initialOutlets, initialTenants } from "@/lib/mock-data"
@@ -66,6 +66,12 @@ import {
 import { useToast } from "@/hooks/use-toast"
 
 const ITEMS_PER_PAGE = 10
+
+interface UserAssignment {
+  id: string;
+  outletId: string;
+  role: string;
+}
 
 interface UserManagementProps {
   tenant?: Tenant | null;
@@ -97,9 +103,10 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
   const [formUsername, setFormUsername] = React.useState("")
   const [formEmail, setFormEmail] = React.useState("")
   const [formPhone, setFormPhone] = React.useState("")
-  const [formRole, setFormRole] = React.useState<User['role']>('Manager')
+  const [formEmployeeId, setFormEmployeeId] = React.useState("")
+  const [formPrimaryRole, setFormPrimaryRole] = React.useState<string>("Staff")
   const [formTenantId, setFormTenantId] = React.useState("")
-  const [formOutletId, setFormOutletId] = React.useState("all")
+  const [assignments, setAssignments] = React.useState<UserAssignment[]>([])
 
   React.useEffect(() => {
     if (propEditingUser) {
@@ -109,9 +116,20 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
       setFormUsername(propEditingUser.username)
       setFormEmail(propEditingUser.email)
       setFormPhone(propEditingUser.phone)
-      setFormRole(propEditingUser.role)
+      setFormPrimaryRole(propEditingUser.role)
       setFormTenantId(propEditingUser.tenantId)
-      setFormOutletId(propEditingUser.outletId || "all")
+      setFormEmployeeId(`EMP-${propEditingUser.id.split('-').pop()}`)
+      
+      // Initialize with single assignment if it exists
+      if (propEditingUser.outletId) {
+        setAssignments([{
+          id: '1',
+          outletId: propEditingUser.outletId,
+          role: propEditingUser.role
+        }])
+      } else {
+        setAssignments([])
+      }
     } else if (defaultAdding && isOpen) {
       setIsAddingNew(true)
       setEditingUser(null)
@@ -124,9 +142,10 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
     setFormUsername("")
     setFormEmail("")
     setFormPhone("")
-    setFormRole('Manager')
+    setFormEmployeeId("")
+    setFormPrimaryRole('Staff')
     setFormTenantId(tenant?.id || "")
-    setFormOutletId("all")
+    setAssignments([])
   }
 
   // Calculate user counts for each tenant for the filter
@@ -166,9 +185,15 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
     setFormUsername(user.username)
     setFormEmail(user.email)
     setFormPhone(user.phone)
-    setFormRole(user.role)
+    setFormPrimaryRole(user.role)
     setFormTenantId(user.tenantId)
-    setFormOutletId(user.outletId || "all")
+    setFormEmployeeId(`EMP-${user.id.split('-').pop()}`)
+    
+    if (user.outletId) {
+      setAssignments([{ id: '1', outletId: user.outletId, role: user.role }])
+    } else {
+      setAssignments([])
+    }
     setTimeout(() => setIsFormLoading(false), 500)
   }
 
@@ -178,6 +203,19 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
     setIsAddingNew(true)
     resetForm()
     setTimeout(() => setIsFormLoading(false), 400)
+  }
+
+  const handleAddAssignment = () => {
+    const newId = (assignments.length + 1).toString();
+    setAssignments([...assignments, { id: newId, outletId: "all", role: "Staff" }]);
+  }
+
+  const handleRemoveAssignment = (id: string) => {
+    setAssignments(assignments.filter(a => a.id !== id));
+  }
+
+  const handleUpdateAssignment = (id: string, field: keyof UserAssignment, value: string) => {
+    setAssignments(assignments.map(a => a.id === id ? { ...a, [field]: value } : a));
   }
 
   const handleSaveUser = () => {
@@ -190,6 +228,8 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
       return
     }
 
+    const firstAssignment = assignments[0];
+
     if (editingUser) {
       setUsers(prev => prev.map(u => u.id === editingUser.id ? {
         ...u,
@@ -197,9 +237,9 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
         username: formUsername,
         email: formEmail,
         phone: formPhone,
-        role: formRole,
+        role: (firstAssignment?.role || formPrimaryRole) as any,
         tenantId: formTenantId,
-        outletId: formOutletId === "all" ? undefined : formOutletId
+        outletId: firstAssignment?.outletId === "all" ? undefined : firstAssignment?.outletId
       } : u))
       toast({
         title: "Staff Profile Updated",
@@ -212,9 +252,9 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
         username: formUsername,
         email: formEmail,
         phone: formPhone,
-        role: formRole,
+        role: (firstAssignment?.role || formPrimaryRole) as any,
         tenantId: formTenantId,
-        outletId: formOutletId === "all" ? undefined : formOutletId,
+        outletId: firstAssignment?.outletId === "all" ? undefined : firstAssignment?.outletId,
         status: 'Active',
         lastActive: 'Just now'
       }
@@ -270,7 +310,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
   }, [userFilter, tenantFilter, statusFilter, roleFilter, outletFilter])
 
   const getOutletName = (outletId?: string) => {
-    if (!outletId) return "Global / Unassigned"
+    if (!outletId || outletId === 'all') return "Global / Unassigned"
     return initialOutlets.find(o => o.id === outletId)?.name || "Unknown Outlet"
   }
 
@@ -661,140 +701,154 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                     </div>
                   ) : (
                     <div className="p-10 grid grid-cols-1 lg:grid-cols-2 gap-16">
-                      <div className="space-y-10">
+                      {/* Personal Information */}
+                      <div className="space-y-8">
                         <div>
-                          <h3 className="text-xl font-black text-slate-900 tracking-tight mb-1">
-                            {editingUser ? "Update Profile" : selectedTenantName ? `Add User to ${selectedTenantName}` : "Account Admin"}
-                          </h3>
-                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                            {editingUser ? "Modify Existing Admin" : "Tenant Admin Enrollment"}
-                          </p>
-                          <div className="h-1 w-10 bg-[#1a73e8] rounded-full mt-2" />
+                          <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-2">Personal Information</h3>
+                          <div className="h-1 w-10 bg-[#1a73e8] rounded-full" />
                         </div>
 
                         <div className="space-y-6">
                           <div className="space-y-2">
-                            <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Full Name <span className="text-red-500">*</span></Label>
-                            <Input 
-                              value={formFullName} 
-                              onChange={(e) => setFormFullName(e.target.value)}
-                              placeholder="Enter full name" 
-                              className="h-12 border-slate-200 bg-slate-50/30 focus-visible:bg-white focus-visible:ring-1 ring-[#1a73e8]/20 transition-all font-bold" 
-                            />
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Username <span className="text-red-500">*</span></Label>
+                            <Label className="text-[13px] font-bold text-slate-700">Username <span className="text-red-500">*</span></Label>
                             <Input 
                               value={formUsername} 
                               onChange={(e) => setFormUsername(e.target.value)}
-                              placeholder="@username" 
-                              className="h-12 border-slate-200 bg-slate-50/30 font-bold" 
+                              placeholder="test1" 
+                              className="h-11 border-slate-200 bg-white focus-visible:ring-1 ring-[#1a73e8]/20" 
                             />
                           </div>
 
                           <div className="space-y-2">
-                            <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email Address</Label>
+                            <Label className="text-[13px] font-bold text-slate-700">Email Address</Label>
                             <Input 
                               type="email" 
                               value={formEmail} 
                               onChange={(e) => setFormEmail(e.target.value)}
-                              placeholder="Enter email address" 
-                              className="h-12 border-slate-200 bg-slate-50/30 font-medium" 
+                              placeholder="test1@emenu.net" 
+                              className="h-11 border-slate-200 bg-white" 
                             />
                           </div>
 
-                          {!editingUser && (
-                            <>
-                              <div className="space-y-2">
-                                <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Password <span className="text-red-500">*</span></Label>
-                                <Input type="password" placeholder="Enter password" className="h-12 border-slate-200 bg-slate-50/30" />
-                              </div>
-
-                              <div className="space-y-2">
-                                <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Confirm Password <span className="text-red-500">*</span></Label>
-                                <Input type="password" placeholder="Confirm password" className="h-12 border-slate-200 bg-slate-50/30" />
-                              </div>
-                            </>
-                          )}
+                          <div className="space-y-2">
+                            <Label className="text-[13px] font-bold text-slate-700">Employee ID</Label>
+                            <Input 
+                              value={formEmployeeId} 
+                              onChange={(e) => setFormEmployeeId(e.target.value)}
+                              placeholder="Enter Employee ID" 
+                              className="h-11 border-slate-200 bg-white" 
+                            />
+                          </div>
 
                           <div className="space-y-2">
-                            <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Phone Number <span className="text-red-500">*</span></Label>
-                            <div className="flex gap-3">
+                            <Label className="text-[13px] font-bold text-slate-700">Phone Number <span className="text-red-500">*</span></Label>
+                            <div className="flex gap-2">
                               <Select defaultValue="+971">
-                                <SelectTrigger className="w-[110px] h-12 border-slate-200 bg-slate-50/30 font-bold">
+                                <SelectTrigger className="w-[90px] h-11 border-slate-200 font-medium">
                                   <SelectValue placeholder="+971" />
                                 </SelectTrigger>
                                 <SelectContent>
                                   <SelectItem value="+971">+971</SelectItem>
                                   <SelectItem value="+1">+1</SelectItem>
-                                  <SelectItem value="+44">+44</SelectItem>
                                 </SelectContent>
                               </Select>
                               <Input 
                                 value={formPhone} 
                                 onChange={(e) => setFormPhone(e.target.value)}
-                                placeholder="000-000-0000" 
-                                className="h-12 flex-1 border-slate-200 bg-slate-50/30 font-bold tracking-widest" 
+                                placeholder="500000000" 
+                                className="h-11 flex-1 border-slate-200 bg-white" 
                               />
                             </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label className="text-[13px] font-bold text-slate-700">Role <span className="text-red-500">*</span></Label>
+                            <Select value={formPrimaryRole} onValueChange={setFormPrimaryRole}>
+                              <SelectTrigger className="h-11 border-slate-200">
+                                <SelectValue placeholder="Staff" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="Staff">Staff</SelectItem>
+                                <SelectItem value="Manager">Manager</SelectItem>
+                                <SelectItem value="Organization Admin">Organization Admin</SelectItem>
+                              </SelectContent>
+                            </Select>
                           </div>
                         </div>
                       </div>
 
-                      <div className="space-y-10 border-l border-slate-100 pl-16">
+                      {/* Role Assignment */}
+                      <div className="space-y-8 border-l border-dashed border-slate-200 pl-16">
                         <div className="flex items-center justify-between">
                           <div>
-                            <h3 className="text-xl font-black text-slate-900 tracking-tight mb-1">Role Assignment</h3>
-                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Assign staff to a specific brand and property</p>
+                            <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-2">Role Assignment</h3>
+                            <p className="text-sm text-slate-400 font-medium">Quickly add a new role and assign it to one or multiple restaurants</p>
                           </div>
+                          {tenantOutlets.length === 0 && (
+                            <Badge variant="destructive" className="bg-rose-50 text-rose-500 border-none hover:bg-rose-100 rounded-full px-4 py-1.5 text-[11px] font-bold">
+                              No outlets available to assign role
+                            </Badge>
+                          )}
                         </div>
 
-                        <div className="space-y-6">
-                          {!tenant && (
-                            <div className="space-y-2">
-                              <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Parent Tenant</Label>
-                              <Select value={formTenantId} onValueChange={setFormTenantId}>
-                                <SelectTrigger className="h-12 bg-slate-50/30 border-slate-200 font-bold">
-                                  <SelectValue placeholder="Select Brand" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {initialTenants.map(t => (
-                                    <SelectItem key={t.id} value={t.id}>{t.tenantName}</SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          )}
-
-                          <div className="space-y-2">
-                            <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Assigned Outlet</Label>
-                            <Select value={formOutletId} onValueChange={setFormOutletId}>
-                              <SelectTrigger className="h-12 bg-slate-50/30 border-slate-200 font-bold">
-                                <SelectValue placeholder="All Outlets (Global)" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="all">Global Access</SelectItem>
-                                {tenantOutlets.map(o => (
-                                  <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Primary Role</Label>
-                            <Select value={formRole} onValueChange={(v: any) => setFormRole(v)}>
-                              <SelectTrigger className="h-12 bg-slate-50/30 border-slate-200 font-bold">
-                                <SelectValue placeholder="Select Role" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="Organization Admin">Organization Admin</SelectItem>
-                                <SelectItem value="Manager">Manager</SelectItem>
-                                <SelectItem value="Partner Admin">Partner Admin</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
+                        <div className="space-y-4">
+                          <Table>
+                            <TableHeader>
+                              <TableRow className="border-none hover:bg-transparent">
+                                <TableHead className="text-[13px] font-bold text-slate-900 h-10">Outlet</TableHead>
+                                <TableHead className="text-[13px] font-bold text-slate-900 h-10">Role</TableHead>
+                                <TableHead className="text-[13px] font-bold text-slate-900 h-10 text-right">Actions</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {assignments.map((assignment) => (
+                                <TableRow key={assignment.id} className="border-none hover:bg-transparent">
+                                  <TableCell className="p-1 pb-3 pr-4">
+                                    <Select value={assignment.outletId} onValueChange={(val) => handleUpdateAssignment(assignment.id, 'outletId', val)}>
+                                      <SelectTrigger className="h-11 border-slate-200">
+                                        <SelectValue placeholder="Select Outlet" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="all">Global Access</SelectItem>
+                                        {tenantOutlets.map(o => (
+                                          <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                  </TableCell>
+                                  <TableCell className="p-1 pb-3">
+                                    <Select value={assignment.role} onValueChange={(val) => handleUpdateAssignment(assignment.id, 'role', val)}>
+                                      <SelectTrigger className="h-11 border-slate-200 min-w-[160px]">
+                                        <SelectValue placeholder="Staff" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="Staff">Staff</SelectItem>
+                                        <SelectItem value="Manager">Manager</SelectItem>
+                                        <SelectItem value="Organization Admin">Organization Admin</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </TableCell>
+                                  <TableCell className="p-1 pb-3 text-right">
+                                    <Button 
+                                      variant="ghost" 
+                                      size="icon" 
+                                      className="h-11 w-11 rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-100 hover:text-rose-600 transition-colors"
+                                      onClick={() => handleRemoveAssignment(assignment.id)}
+                                    >
+                                      <Trash2 className="h-5 w-5" />
+                                    </Button>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                          <Button 
+                            variant="outline" 
+                            className="w-full h-11 border-dashed border-slate-200 text-slate-400 hover:text-[#1a73e8] hover:border-[#1a73e8] hover:bg-[#1a73e8]/5 font-bold transition-all"
+                            onClick={handleAddAssignment}
+                          >
+                            <PlusCircle className="h-4 w-4 mr-2" /> Add Assignment
+                          </Button>
                         </div>
                       </div>
                     </div>
@@ -813,7 +867,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                     className="h-12 px-10 font-black bg-[#1a73e8] hover:bg-[#1557b0] text-white border-none shadow-lg shadow-[#1a73e8]/20 active:scale-95 transition-all"
                     onClick={handleSaveUser}
                   >
-                    {editingUser ? "Save Changes" : "Add User"}
+                    {editingUser ? "Save Changes" : "Create Account"}
                   </Button>
                 </div>
               </div>
