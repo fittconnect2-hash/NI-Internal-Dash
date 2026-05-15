@@ -295,10 +295,10 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
               <div className="p-6 border-b border-slate-50 flex items-center justify-between">
                 <div>
                   <h3 className="font-extrabold text-lg text-[#1e293b]">
-                    {editingOutlet ? "Edit Outlet Info" : "Add New Outlet"}
+                    {editingOutlet ? "Edit Outlet" : "Add New Outlet"}
                   </h3>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                    {editingOutlet ? "Update branch parameters" : "Enter new branch details"}
+                    {editingOutlet ? "UPDATE BRANCH PARAMETERS" : "ENTER NEW BRANCH DETAILS"}
                   </p>
                 </div>
                 <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={handleCloseForm}>
@@ -312,34 +312,38 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Loading Details...</p>
                   </div>
                 ) : (
-                  <div className="p-8 space-y-8">
+                  <div className="px-8 py-6 space-y-8">
                     <div className="space-y-2.5">
-                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Outlet Name</Label>
+                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">OUTLET NAME</Label>
                       <Input 
+                        placeholder="e.g. Downtown Branch"
                         value={formName} 
                         onChange={(e) => setFormName(e.target.value)} 
                         className="h-12 bg-slate-50/50 border-slate-200" 
                       />
                     </div>
                     <div className="space-y-2.5">
-                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Slug</Label>
+                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">SLUG</Label>
                       <Input 
+                        placeholder="e.g. downtown-branch"
                         value={formSlug} 
                         onChange={(e) => setFormSlug(e.target.value)} 
                         className="h-12 bg-slate-50/50 border-slate-200" 
                       />
                     </div>
                     <div className="space-y-2.5">
-                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Phone</Label>
+                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">PHONE</Label>
                       <Input 
+                        placeholder="e.g. +971 50 123 4567"
                         value={formPhone} 
                         onChange={(e) => setFormPhone(e.target.value)} 
                         className="h-12 bg-slate-50/50 border-slate-200" 
                       />
                     </div>
                     <div className="space-y-2.5">
-                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Timezone</Label>
+                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">TIMEZONE</Label>
                       <Input 
+                        placeholder="e.g. Asia/Dubai"
                         value={formTimezone} 
                         onChange={(e) => setFormTimezone(e.target.value)} 
                         className="h-12 bg-slate-50/50 border-slate-200" 
@@ -347,16 +351,18 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2.5">
-                        <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">City</Label>
+                        <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">CITY</Label>
                         <Input 
+                          placeholder="e.g. Dubai"
                           value={formCity} 
                           onChange={(e) => setFormCity(e.target.value)} 
                           className="h-12 bg-slate-50/50 border-slate-200" 
                         />
                       </div>
                       <div className="space-y-2.5">
-                        <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Country</Label>
+                        <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">COUNTRY</Label>
                         <Input 
+                          placeholder="e.g. UAE"
                           value={formCountry} 
                           onChange={(e) => setFormCountry(e.target.value)} 
                           className="h-12 bg-slate-50/50 border-slate-200" 

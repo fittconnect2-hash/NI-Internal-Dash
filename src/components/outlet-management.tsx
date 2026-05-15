@@ -174,8 +174,8 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                   <h3 className="font-extrabold text-lg text-[#1e293b]">
                     {editingOutlet ? "Edit Outlet" : "Add New Outlet"}
                   </h3>
-                  <p className="text-xs text-slate-400 font-medium mt-0.5">
-                    {editingOutlet ? "Update branch parameters" : "Define new branch parameters"}
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                    {editingOutlet ? "UPDATE BRANCH PARAMETERS" : "ENTER NEW BRANCH DETAILS"}
                   </p>
                 </div>
                 <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-slate-400 hover:bg-slate-50" onClick={handleCloseForm}>
@@ -191,7 +191,7 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                 ) : (
                   <div className="px-8 py-6 space-y-8">
                     <div className="space-y-2.5">
-                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Outlet Name</Label>
+                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">OUTLET NAME</Label>
                       <Input 
                         placeholder="e.g. Downtown Branch" 
                         className="h-12 bg-slate-50/50 border-slate-200 focus-visible:bg-white focus-visible:ring-1 ring-[#1a73e8]/20 transition-all" 
@@ -200,7 +200,7 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                       />
                     </div>
                     <div className="space-y-2.5">
-                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Slug (URL Name)</Label>
+                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">SLUG</Label>
                       <Input 
                         placeholder="e.g. downtown-branch" 
                         className="h-12 bg-slate-50/50 border-slate-200 focus-visible:bg-white" 
@@ -209,19 +209,19 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                       />
                     </div>
                     <div className="space-y-2.5">
-                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Contact Phone</Label>
+                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">PHONE</Label>
                       <Input 
-                        placeholder="+971..." 
+                        placeholder="e.g. +971 50 123 4567" 
                         className="h-12 bg-slate-50/50 border-slate-200 focus-visible:bg-white" 
                         value={formPhone}
                         onChange={(e) => setFormPhone(e.target.value)}
                       />
                     </div>
                     <div className="space-y-2.5">
-                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Business Timezone</Label>
+                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">TIMEZONE</Label>
                       <Select value={formTimezone} onValueChange={setFormTimezone}>
                         <SelectTrigger className="h-12 bg-slate-50/50 border-slate-200">
-                          <SelectValue placeholder="Select timezone" />
+                          <SelectValue placeholder="e.g. Asia/Dubai" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="Asia/Dubai">Asia/Dubai (GMT+4)</SelectItem>
@@ -232,18 +232,18 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2.5">
-                        <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">City</Label>
+                        <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">CITY</Label>
                         <Input 
-                          placeholder="Dubai" 
+                          placeholder="e.g. Dubai" 
                           className="h-12 bg-slate-50/50 border-slate-200" 
                           value={formCity}
                           onChange={(e) => setFormCity(e.target.value)}
                         />
                       </div>
                       <div className="space-y-2.5">
-                        <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Country</Label>
+                        <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">COUNTRY</Label>
                         <Input 
-                          placeholder="UAE" 
+                          placeholder="e.g. UAE" 
                           className="h-12 bg-slate-50/50 border-slate-200" 
                           value={formCountry}
                           onChange={(e) => setFormCountry(e.target.value)}
@@ -260,7 +260,7 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                     className="flex-1 h-12 bg-[#1a73e8] hover:bg-[#1557b0] text-white font-bold shadow-lg shadow-[#1a73e8]/20 active:scale-95 transition-all"
                     onClick={handleCloseForm}
                   >
-                    {editingOutlet ? "Update Branch" : "Create Branch"}
+                    {editingOutlet ? "Update Branch" : "Create Outlet"}
                   </Button>
                 </div>
               )}
