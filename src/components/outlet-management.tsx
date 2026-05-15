@@ -360,9 +360,6 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                             <DropdownMenuItem className="font-bold py-2.5" onClick={(e) => { e.stopPropagation(); handleEdit(outlet); }}>
                               <Edit2 className="h-4 w-4 mr-3 text-slate-400" /> Edit Details
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="font-bold py-2.5" onClick={(e) => { e.stopPropagation(); onViewUsers(outlet); }}>
-                              <UsersIcon className="h-4 w-4 mr-3 text-slate-400" /> Manage Staff
-                            </DropdownMenuItem>
                             <DropdownMenuItem className="text-destructive font-black py-2.5" onClick={(e) => e.stopPropagation()}>Deactivate</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
