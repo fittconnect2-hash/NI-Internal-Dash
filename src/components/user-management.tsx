@@ -26,7 +26,10 @@ import {
   Loader2,
   Eye,
   EyeOff,
-  RotateCcw
+  RotateCcw,
+  Info,
+  UserPlus,
+  HelpCircle
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -76,6 +79,12 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 import { useToast } from "@/hooks/use-toast"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 const ITEMS_PER_PAGE = 10
 
@@ -129,6 +138,10 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false)
   const [assignments, setAssignments] = React.useState<UserAssignment[]>([])
 
+  const getTenantName = (tenantId: string) => {
+    return initialTenants.find(t => t.id === tenantId)?.tenantName || "Unknown Tenant"
+  }
+
   const resetForm = React.useCallback(() => {
     setFormFullName("")
     setFormUsername("")
@@ -144,7 +157,6 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
     setAssignments([])
   }, [tenant])
 
-  // CRITICAL UI RESTORATION FIX
   const restoreUI = React.useCallback(() => {
     setTimeout(() => {
       document.body.style.pointerEvents = '';
@@ -199,7 +211,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
     })).filter(t => t.count > 0)
   }, [users])
 
-  const activeTenantId = tenant?.id || formTenantId || tenantFilter
+  const activeTenantId = formTenantId || tenant?.id
   const tenantOutlets = React.useMemo(() => {
     return initialOutlets.filter(o => !activeTenantId || o.tenantId === activeTenantId)
   }, [activeTenantId])
@@ -250,7 +262,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
   }
 
   const handleAddAssignment = () => {
-    const newId = (assignments.length + 1).toString();
+    const newId = Date.now().toString();
     setAssignments([...assignments, { id: newId, outletId: "all", role: "Staff" }]);
   }
 
@@ -263,16 +275,16 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
   }
 
   const handleSaveUser = () => {
-    if (!formFullName || !formUsername || !formEmail) {
+    if (!formFullName || !formUsername || !formEmail || !formTenantId) {
       toast({
         title: "Missing Information",
-        description: "Please fill in all required fields.",
+        description: "Please fill in all required fields, including the Parent Tenant.",
         variant: "destructive"
       })
       return
     }
 
-    if (formPassword !== formConfirmPassword) {
+    if (!editingUser && (formPassword !== formConfirmPassword)) {
       toast({
         title: "Password Mismatch",
         description: "Passwords do not match.",
@@ -292,7 +304,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
         phone: formPhone,
         role: (firstAssignment?.role || formPrimaryRole) as any,
         tenantId: formTenantId,
-        outletId: firstAssignment?.outletId === "all" ? undefined : firstAssignment?.outletId
+        outletId: (!firstAssignment || firstAssignment.outletId === "all") ? undefined : firstAssignment.outletId
       } : u))
       toast({
         title: "Staff Profile Updated",
@@ -307,14 +319,14 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
         phone: formPhone,
         role: (firstAssignment?.role || formPrimaryRole) as any,
         tenantId: formTenantId,
-        outletId: firstAssignment?.outletId === "all" ? undefined : firstAssignment?.outletId,
+        outletId: (!firstAssignment || firstAssignment.outletId === "all") ? undefined : firstAssignment.outletId,
         status: 'Active',
         lastActive: 'Just now'
       }
       setUsers(prev => [newUser, ...prev])
       toast({
         title: "Staff Member Enrolled",
-        description: `${formFullName} has been added to the system.`
+        description: `${formFullName} has been successfully added to the system.`
       })
     }
     setIsAddingNew(false)
@@ -378,21 +390,8 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
     return filteredUsers.slice(start, start + ITEMS_PER_PAGE)
   }, [filteredUsers, currentPage])
 
-  React.useEffect(() => {
-    setCurrentPage(1)
-  }, [userFilter, tenantFilter, statusFilter, roleFilter, outletFilter])
-
-  const getOutletName = (outletId?: string) => {
-    if (!outletId || outletId === 'all') return "Global / Unassigned"
-    return initialOutlets.find(o => o.id === outletId)?.name || "Unknown Outlet"
-  }
-
-  const getTenantName = (tenantId: string) => {
-    return initialTenants.find(t => t.id === tenantId)?.tenantName || "Unknown Tenant"
-  }
-
   const selectedTenantName = React.useMemo(() => {
-    const tid = tenant?.id || formTenantId
+    const tid = formTenantId || tenant?.id
     if (!tid) return null
     return initialTenants.find(t => t.id === tid)?.tenantName
   }, [tenant, formTenantId])
@@ -419,7 +418,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                   <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                     <span className="flex items-center gap-1.5 opacity-80"><Building2 className="h-3 w-3" /> TENANTS</span>
                     <ChevronRight className="h-2.5 w-2.5 opacity-30" />
-                    <span className="text-[#1a73e8] font-black">{tenant?.tenantName.toUpperCase() || "GLOBAL MANAGEMENT"}</span>
+                    <span className="text-[#1a73e8] font-black">{tenant?.tenantName.toUpperCase() || (selectedTenantName?.toUpperCase() || "GLOBAL MANAGEMENT")}</span>
                     <ChevronRight className="h-2.5 w-2.5 opacity-30" />
                     <span className="opacity-80">USERS</span>
                   </div>
@@ -427,7 +426,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                     {editingUser 
                       ? `Edit ${editingUser.fullName}` 
                       : isAddingNew 
-                        ? "Add New Staff Member" 
+                        ? (selectedTenantName ? `Add New Staff to ${selectedTenantName}` : "Add New Staff Member")
                         : tenant 
                           ? `User Management of ${tenant.tenantName}` 
                           : "User Management"}
@@ -478,7 +477,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                                   ? initialTenants.find(t => t.id === tenantFilter)?.tenantName 
                                   : "All Tenants"}
                               </span>
-                              <Check className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
@@ -638,7 +637,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                             <TableCell className="px-4">
                               <div className="flex items-center gap-2">
                                 <Store className="h-3.5 w-3.5 text-slate-300" />
-                                <span className="text-[14px] text-slate-600 font-bold">{getOutletName(user.outletId)}</span>
+                                <span className="text-[14px] text-slate-600 font-bold">{initialOutlets.find(o => o.id === user.outletId)?.name || "Global Access"}</span>
                               </div>
                             </TableCell>
                             <TableCell className="px-4">
@@ -647,7 +646,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                                   {user.role}
                                 </Badge>
                                 <div className="flex items-center gap-2 text-[11px] text-slate-400 font-bold uppercase tracking-tight">
-                                  <ShieldCheck className="h-3.5 w-3.5 text-[#1a73e8]" /> Full System Access
+                                  <ShieldCheck className="h-3.5 w-3.5 text-[#1a73e8]" /> Verified Staff
                                 </div>
                               </div>
                             </TableCell>
@@ -733,19 +732,13 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                           <ChevronLeft className="h-4 w-4" />
                         </Button>
                         
-                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
-                          if (totalPages > 5) {
-                            if (
-                              pageNum !== 1 && 
-                              pageNum !== totalPages && 
-                              Math.abs(pageNum - currentPage) > 1
-                            ) {
-                              if (pageNum === 2 && currentPage > 3) return <span key="start-ellipsis" className="px-2 text-slate-300">...</span>;
-                              if (pageNum === totalPages - 1 && currentPage < totalPages - 2) return <span key="end-ellipsis" className="px-2 text-slate-300">...</span>;
-                              return null;
-                            }
+                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                          let pageNum = i + 1;
+                          if (totalPages > 5 && currentPage > 3) {
+                            pageNum = currentPage - 2 + i;
+                            if (pageNum > totalPages) pageNum = totalPages - (4 - i);
                           }
-
+                          
                           return (
                             <Button
                               key={pageNum}
@@ -783,55 +776,78 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                     {isFormLoading ? (
                       <div className="flex flex-col items-center justify-center py-40 space-y-4">
                         <Loader2 className="h-10 w-10 animate-spin text-[#1a73e8]" />
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Preparing Profile...</p>
+                        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Preparing Profile...</p>
                       </div>
                     ) : (
                       <div className="p-10 grid grid-cols-1 lg:grid-cols-2 gap-16">
-                        <div className="space-y-8">
+                        <div className="space-y-10">
                           <div>
-                            <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-2">Personal Information</h3>
-                            <div className="h-1 w-10 bg-[#1a73e8] rounded-full" />
+                            <div className="flex items-center gap-3 mb-2">
+                              <div className="h-8 w-8 rounded-xl bg-[#1a73e8]/10 flex items-center justify-center">
+                                <UserPlus className="h-4 w-4 text-[#1a73e8]" />
+                              </div>
+                              <h3 className="text-2xl font-black text-slate-900 tracking-tight">Personal Information</h3>
+                            </div>
+                            <p className="text-sm text-slate-400 font-medium">Enter the fundamental identity details for this staff member.</p>
                           </div>
 
                           <div className="space-y-6">
                             <div className="space-y-2">
-                              <Label className="text-[13px] font-bold text-slate-700">Username <span className="text-red-500">*</span></Label>
-                              <Input 
-                                value={formUsername} 
-                                onChange={(e) => setFormUsername(e.target.value)}
-                                placeholder="test1" 
-                                className="h-11 border-slate-200 bg-white focus-visible:ring-1 ring-[#1a73e8]/20" 
-                              />
+                              <div className="flex items-center gap-2">
+                                <Label className="text-[13px] font-bold text-slate-700">Step 1: Parent Tenant <span className="text-red-500">*</span></Label>
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <HelpCircle className="h-3.5 w-3.5 text-slate-300 cursor-help" />
+                                    </TooltipTrigger>
+                                    <TooltipContent className="max-w-[250px]">
+                                      The selection here determines which restaurant locations and brands will be available for role assignment in Step 2.
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              </div>
+                              <Select value={formTenantId} onValueChange={(val) => { setFormTenantId(val); setAssignments([]); }}>
+                                <SelectTrigger className="h-12 bg-[#1a73e8]/5 border-[#1a73e8]/20 font-black text-[#1a73e8]">
+                                  <SelectValue placeholder="Select Parent Organization" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {initialTenants.map(t => (
+                                    <SelectItem key={t.id} value={t.id}>{t.tenantName}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <p className="text-[11px] text-[#1a73e8] font-bold uppercase tracking-tight mt-1">This user will belong to this organization.</p>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                              <div className="space-y-2">
+                                <Label className="text-[13px] font-bold text-slate-700">Username <span className="text-red-500">*</span></Label>
+                                <Input 
+                                  value={formUsername} 
+                                  onChange={(e) => setFormUsername(e.target.value)}
+                                  placeholder="e.g. jdoe_01" 
+                                  className="h-12 border-slate-200 bg-slate-50/30 focus-visible:bg-white" 
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-[13px] font-bold text-slate-700">Full Name <span className="text-red-500">*</span></Label>
+                                <Input 
+                                  value={formFullName} 
+                                  onChange={(e) => setFormFullName(e.target.value)}
+                                  placeholder="Enter Full Name" 
+                                  className="h-12 border-slate-200 bg-slate-50/30 focus-visible:bg-white" 
+                                />
+                              </div>
                             </div>
 
                             <div className="space-y-2">
-                              <Label className="text-[13px] font-bold text-slate-700">Full Name <span className="text-red-500">*</span></Label>
-                              <Input 
-                                value={formFullName} 
-                                onChange={(e) => setFormFullName(e.target.value)}
-                                placeholder="Enter Full Name" 
-                                className="h-11 border-slate-200 bg-white" 
-                              />
-                            </div>
-
-                            <div className="space-y-2">
-                              <Label className="text-[13px] font-bold text-slate-700">Email Address</Label>
+                              <Label className="text-[13px] font-bold text-slate-700">Email Address <span className="text-red-500">*</span></Label>
                               <Input 
                                 type="email" 
                                 value={formEmail} 
                                 onChange={(e) => setFormEmail(e.target.value)}
-                                placeholder="test1@emenu.net" 
-                                className="h-11 border-slate-200 bg-white" 
-                              />
-                            </div>
-
-                            <div className="space-y-2">
-                              <Label className="text-[13px] font-bold text-slate-700">Employee ID</Label>
-                              <Input 
-                                value={formEmployeeId} 
-                                onChange={(e) => setFormEmployeeId(e.target.value)}
-                                placeholder="Enter Employee ID" 
-                                className="h-11 border-slate-200 bg-white" 
+                                placeholder="email@brand.com" 
+                                className="h-12 border-slate-200 bg-slate-50/30 focus-visible:bg-white" 
                               />
                             </div>
 
@@ -839,7 +855,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                               <Label className="text-[13px] font-bold text-slate-700">Phone Number <span className="text-red-500">*</span></Label>
                               <div className="flex gap-2">
                                 <Select defaultValue="+971">
-                                  <SelectTrigger className="w-[90px] h-11 border-slate-200 font-medium">
+                                  <SelectTrigger className="w-[100px] h-12 border-slate-200 font-bold bg-slate-50/30">
                                     <SelectValue placeholder="+971" />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -850,124 +866,154 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                                 <Input 
                                   value={formPhone} 
                                   onChange={(e) => setFormPhone(e.target.value)}
-                                  placeholder="500000000" 
-                                  className="h-11 flex-1 border-slate-200 bg-white" 
+                                  placeholder="50 000 0000" 
+                                  className="h-12 flex-1 border-slate-200 bg-slate-50/30 focus-visible:bg-white" 
                                 />
                               </div>
                             </div>
 
-                            <div className="space-y-2">
-                              <Label className="text-[13px] font-bold text-slate-700">Password <span className="text-red-500">*</span></Label>
-                              <div className="relative">
-                                <Input 
-                                  type={showPassword ? "text" : "password"} 
-                                  value={formPassword} 
-                                  onChange={(e) => setFormPassword(e.target.value)}
-                                  placeholder="••••••••" 
-                                  className="h-11 border-slate-200 bg-white pr-10" 
-                                />
-                                <button
-                                  type="button"
-                                  onClick={() => setShowPassword(!showPassword)}
-                                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                                >
-                                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                                </button>
-                              </div>
-                            </div>
+                            {!editingUser && (
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                  <Label className="text-[13px] font-bold text-slate-700">Password <span className="text-red-500">*</span></Label>
+                                  <div className="relative">
+                                    <Input 
+                                      type={showPassword ? "text" : "password"} 
+                                      value={formPassword} 
+                                      onChange={(e) => setFormPassword(e.target.value)}
+                                      placeholder="••••••••" 
+                                      className="h-12 border-slate-200 bg-slate-50/30 focus-visible:bg-white pr-10" 
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => setShowPassword(!showPassword)}
+                                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                                    >
+                                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                    </button>
+                                  </div>
+                                </div>
 
-                            <div className="space-y-2">
-                              <Label className="text-[13px] font-bold text-slate-700">Confirm Password <span className="text-red-500">*</span></Label>
-                              <div className="relative">
-                                <Input 
-                                  type={showConfirmPassword ? "text" : "password"} 
-                                  value={formConfirmPassword} 
-                                  onChange={(e) => setFormConfirmPassword(e.target.value)}
-                                  placeholder="••••••••" 
-                                  className="h-11 border-slate-200 bg-white pr-10" 
-                                />
-                                <button
-                                  type="button"
-                                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                                >
-                                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                                </button>
+                                <div className="space-y-2">
+                                  <Label className="text-[13px] font-bold text-slate-700">Confirm <span className="text-red-500">*</span></Label>
+                                  <div className="relative">
+                                    <Input 
+                                      type={showConfirmPassword ? "text" : "password"} 
+                                      value={formConfirmPassword} 
+                                      onChange={(e) => setFormConfirmPassword(e.target.value)}
+                                      placeholder="••••••••" 
+                                      className="h-12 border-slate-200 bg-slate-50/30 focus-visible:bg-white pr-10" 
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                                    >
+                                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                    </button>
+                                  </div>
+                                </div>
                               </div>
-                            </div>
+                            )}
                           </div>
                         </div>
 
-                        <div className="space-y-8 border-l border-dashed border-slate-200 pl-16">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-2">Role Assignment</h3>
-                              <p className="text-sm text-slate-400 font-medium">Quickly add a new role and assign it to one or multiple restaurants</p>
+                        <div className="space-y-10 border-l border-dashed border-slate-200 pl-16">
+                          <div>
+                            <div className="flex items-center gap-3 mb-2">
+                              <div className="h-8 w-8 rounded-xl bg-[#1a73e8]/10 flex items-center justify-center">
+                                <ShieldCheck className="h-4 w-4 text-[#1a73e8]" />
+                              </div>
+                              <h3 className="text-2xl font-black text-slate-900 tracking-tight">Step 2: Role Assignment</h3>
                             </div>
-                            {tenantOutlets.length === 0 && (
-                              <Badge variant="destructive" className="bg-rose-50 text-rose-500 border-none hover:bg-rose-100 rounded-full px-4 py-1.5 text-[11px] font-bold">
-                                No outlets available to assign role
-                              </Badge>
-                            )}
+                            <p className="text-sm text-slate-400 font-medium">Map this staff member to specific restaurant locations with defined access levels.</p>
                           </div>
 
-                          <div className="space-y-4">
-                            <Table>
-                              <TableHeader>
-                                <TableRow className="border-none hover:bg-transparent">
-                                  <TableHead className="text-[13px] font-bold text-slate-900 h-10">Outlet</TableHead>
-                                  <TableHead className="text-[13px] font-bold text-slate-900 h-10">Role</TableHead>
-                                  <TableHead className="text-[13px] font-bold text-slate-900 h-10 text-right">Actions</TableHead>
-                                </TableRow>
-                              </TableHeader>
-                              <TableBody>
-                                {assignments.map((assignment) => (
-                                  <TableRow key={assignment.id} className="border-none hover:bg-transparent">
-                                    <TableCell className="p-1 pb-3 pr-4">
-                                      <Select value={assignment.outletId} onValueChange={(val) => handleUpdateAssignment(assignment.id, 'outletId', val)}>
-                                        <SelectTrigger className="h-11 border-slate-200">
-                                          <SelectValue placeholder="Select Outlet" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          <SelectItem value="all">Global Access</SelectItem>
-                                          {tenantOutlets.map(o => (
-                                            <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>
-                                          ))}
-                                        </SelectContent>
-                                      </Select>
-                                    </TableCell>
-                                    <TableCell className="p-1 pb-3">
-                                      <Select value={assignment.role} onValueChange={(val) => handleUpdateAssignment(assignment.id, 'role', val)}>
-                                        <SelectTrigger className="h-11 border-slate-200 min-w-[160px]">
-                                          <SelectValue placeholder="Staff" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          <SelectItem value="Staff">Staff</SelectItem>
-                                          <SelectItem value="Manager">Manager</SelectItem>
-                                          <SelectItem value="Organization Admin">Organization Admin</SelectItem>
-                                        </SelectContent>
-                                      </Select>
-                                    </TableCell>
-                                    <TableCell className="p-1 pb-3 text-right">
-                                      <button 
-                                        className="h-11 w-11 rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-100 hover:text-rose-600 transition-colors flex items-center justify-center"
-                                        onClick={() => handleRemoveAssignment(assignment.id)}
-                                      >
-                                        <Trash2 className="h-5 w-5" />
-                                      </button>
-                                    </TableCell>
+                          {!formTenantId ? (
+                            <div className="flex flex-col items-center justify-center py-24 text-center bg-slate-50/50 rounded-3xl border-2 border-dashed border-slate-100 p-8">
+                              <div className="h-16 w-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-6 border border-slate-50">
+                                <Building2 className="h-8 w-8 text-slate-200" />
+                              </div>
+                              <h4 className="font-extrabold text-[#1e293b] text-lg">Parent Tenant Required</h4>
+                              <p className="text-xs text-slate-400 mt-2 max-w-[280px] leading-relaxed">
+                                Please complete <strong>Step 1</strong> by selecting a parent organization to unlock location assignments for this user.
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="space-y-6">
+                              <Table>
+                                <TableHeader>
+                                  <TableRow className="border-none hover:bg-transparent">
+                                    <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-widest h-10">Restaurant Outlet</TableHead>
+                                    <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-widest h-10">Access Role</TableHead>
+                                    <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-widest h-10 text-right">Action</TableHead>
                                   </TableRow>
-                                ))}
-                              </TableBody>
-                            </Table>
-                            <Button 
-                              variant="outline" 
-                              className="w-full h-11 border-dashed border-slate-200 text-slate-400 hover:text-[#1a73e8] hover:border-[#1a73e8] hover:bg-[#1a73e8]/5 font-bold transition-all"
-                              onClick={handleAddAssignment}
-                            >
-                              <PlusCircle className="h-4 w-4 mr-2" /> Add Assignment
-                            </Button>
-                          </div>
+                                </TableHeader>
+                                <TableBody>
+                                  {assignments.map((assignment) => (
+                                    <TableRow key={assignment.id} className="border-none hover:bg-transparent">
+                                      <TableCell className="p-1 pb-4 pr-4">
+                                        <Select value={assignment.outletId} onValueChange={(val) => handleUpdateAssignment(assignment.id, 'outletId', val)}>
+                                          <SelectTrigger className="h-12 border-slate-200 bg-slate-50/30 focus-visible:bg-white font-bold">
+                                            <SelectValue placeholder="Select Location" />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            <SelectItem value="all" className="font-bold text-[#1a73e8]">Global Access (All Current & Future Locations)</SelectItem>
+                                            <DropdownMenuSeparator />
+                                            {tenantOutlets.map(o => (
+                                              <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>
+                                            ))}
+                                          </SelectContent>
+                                        </Select>
+                                      </TableCell>
+                                      <TableCell className="p-1 pb-4">
+                                        <Select value={assignment.role} onValueChange={(val) => handleUpdateAssignment(assignment.id, 'role', val)}>
+                                          <SelectTrigger className="h-12 border-slate-200 bg-slate-50/30 focus-visible:bg-white font-bold min-w-[160px]">
+                                            <SelectValue placeholder="Assign Role" />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            <SelectItem value="Staff">Staff</SelectItem>
+                                            <SelectItem value="Manager">Manager</SelectItem>
+                                            <SelectItem value="Organization Admin">Organization Admin</SelectItem>
+                                            <SelectItem value="Partner Admin">Partner Admin</SelectItem>
+                                          </SelectContent>
+                                        </Select>
+                                      </TableCell>
+                                      <TableCell className="p-1 pb-4 text-right">
+                                        <TooltipProvider>
+                                          <Tooltip>
+                                            <TooltipTrigger asChild>
+                                              <button 
+                                                className="h-12 w-12 rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-100 transition-all flex items-center justify-center active:scale-90"
+                                                onClick={() => handleRemoveAssignment(assignment.id)}
+                                              >
+                                                <Trash2 className="h-5 w-5" />
+                                              </button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>Remove Assignment</TooltipContent>
+                                          </Tooltip>
+                                        </TooltipProvider>
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                              <Button 
+                                variant="outline" 
+                                className="w-full h-14 border-2 border-dashed border-[#1a73e8]/20 text-[#1a73e8] hover:text-[#1a73e8] hover:border-[#1a73e8] hover:bg-[#1a73e8]/5 font-black transition-all rounded-2xl"
+                                onClick={handleAddAssignment}
+                              >
+                                <PlusCircle className="h-5 w-5 mr-3" /> 
+                                Add New Access Assignment
+                              </Button>
+                              <div className="flex gap-3 p-5 bg-amber-50 rounded-2xl border border-amber-100">
+                                <Info className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+                                <p className="text-[11px] text-amber-700 font-bold leading-relaxed uppercase tracking-tight">
+                                  Assigning multiple outlets allows this staff member to switch between branch views in their management portal.
+                                </p>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
@@ -985,7 +1031,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                       className="h-12 px-10 font-black bg-[#1a73e8] hover:bg-[#1557b0] text-white border-none shadow-lg shadow-[#1a73e8]/20 active:scale-95 transition-all"
                       onClick={handleSaveUser}
                     >
-                      {editingUser ? "Save Changes" : "Create Account"}
+                      {editingUser ? "Save Profile Changes" : "Finalize Staff Enrollment"}
                     </Button>
                   </div>
                 </div>
@@ -995,7 +1041,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
         </SheetContent>
       </Sheet>
 
-      {/* Confirmation Dialogs - MOVED OUTSIDE SHEET TO PREVENT FOCUS TRAPS */}
+      {/* Confirmation Dialogs */}
       <AlertDialog open={!!confirmSuspend} onOpenChange={(open) => {
         if (!open) {
           setConfirmSuspend(null);
