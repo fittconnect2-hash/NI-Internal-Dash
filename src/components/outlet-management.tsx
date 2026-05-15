@@ -12,7 +12,8 @@ import {
   X,
   ArrowLeft,
   FilterX,
-  Users as UsersIcon
+  Users as UsersIcon,
+  Edit2
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -58,10 +59,37 @@ interface OutletManagementProps {
 }
 
 export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: OutletManagementProps) {
-  const [outlets] = React.useState<Outlet[]>(initialOutlets)
+  const [outlets, setOutlets] = React.useState<Outlet[]>(initialOutlets)
   const [searchQuery, setSearchQuery] = React.useState("")
   const [statusFilter, setStatusFilter] = React.useState<string | null>(null)
   const [isAddingNew, setIsAddingNew] = React.useState(false)
+  const [editingOutlet, setEditingOutlet] = React.useState<Outlet | null>(null)
+
+  // Form State
+  const [formName, setFormName] = React.useState("")
+  const [formSlug, setFormSlug] = React.useState("")
+  const [formPhone, setFormPhone] = React.useState("")
+  const [formTimezone, setFormTimezone] = React.useState("Asia/Dubai")
+  const [formCity, setFormCity] = React.useState("")
+  const [formCountry, setFormCountry] = React.useState("")
+
+  React.useEffect(() => {
+    if (editingOutlet) {
+      setFormName(editingOutlet.name)
+      setFormSlug(editingOutlet.slug)
+      setFormPhone(editingOutlet.phone)
+      setFormTimezone(editingOutlet.timezone)
+      setFormCity(editingOutlet.city)
+      setFormCountry(editingOutlet.country)
+    } else {
+      setFormName("")
+      setFormSlug("")
+      setFormPhone("")
+      setFormTimezone("Asia/Dubai")
+      setFormCity("")
+      setFormCountry("")
+    }
+  }, [editingOutlet])
 
   const filteredOutlets = outlets.filter(o => {
     const matchesSearch = o.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -73,6 +101,21 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
   const resetFilters = () => {
     setSearchQuery("")
     setStatusFilter(null)
+  }
+
+  const handleEdit = (outlet: Outlet) => {
+    setEditingOutlet(outlet)
+    setIsAddingNew(true)
+  }
+
+  const handleAddNew = () => {
+    setEditingOutlet(null)
+    setIsAddingNew(true)
+  }
+
+  const handleCloseForm = () => {
+    setIsAddingNew(false)
+    setEditingOutlet(null)
   }
 
   return (
@@ -104,8 +147,8 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
             {!isAddingNew && (
               <Button 
                 size="sm" 
-                className="h-10 px-5 font-bold bg-[#1a73e8] hover:bg-[#1557b0] text-white rounded-lg shadow-sm transition-all active:scale-95"
-                onClick={() => setIsAddingNew(true)}
+                className="h-10 px-5 font-black bg-[#1a73e8] hover:bg-[#1557b0] text-white rounded-lg shadow-sm transition-all active:scale-95"
+                onClick={handleAddNew}
               >
                 <Plus className="h-4 w-4 mr-2" /> Add New Outlet
               </Button>
@@ -120,10 +163,14 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
             <div className="w-[400px] flex-shrink-0 bg-white rounded-2xl border border-slate-200 shadow-xl flex flex-col animate-in slide-in-from-left fade-in duration-500">
               <div className="p-6 border-b border-slate-50 flex items-center justify-between">
                 <div>
-                  <h3 className="font-extrabold text-lg text-[#1e293b]">Add Outlet</h3>
-                  <p className="text-xs text-slate-400 font-medium mt-0.5">Define new branch parameters</p>
+                  <h3 className="font-extrabold text-lg text-[#1e293b]">
+                    {editingOutlet ? "Edit Outlet" : "Add Outlet"}
+                  </h3>
+                  <p className="text-xs text-slate-400 font-medium mt-0.5">
+                    {editingOutlet ? "Update branch parameters" : "Define new branch parameters"}
+                  </p>
                 </div>
-                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-slate-400 hover:bg-slate-50" onClick={() => setIsAddingNew(false)}>
+                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-slate-400 hover:bg-slate-50" onClick={handleCloseForm}>
                   <X className="h-4 w-4" />
                 </Button>
               </div>
@@ -131,43 +178,74 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                 <div className="space-y-8">
                   <div className="space-y-2.5">
                     <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Outlet Name</Label>
-                    <Input placeholder="e.g. Downtown Branch" className="h-12 bg-slate-50/50 border-slate-200 focus-visible:bg-white focus-visible:ring-1 ring-[#1a73e8]/20 transition-all" />
+                    <Input 
+                      placeholder="e.g. Downtown Branch" 
+                      className="h-12 bg-slate-50/50 border-slate-200 focus-visible:bg-white focus-visible:ring-1 ring-[#1a73e8]/20 transition-all" 
+                      value={formName}
+                      onChange={(e) => setFormName(e.target.value)}
+                    />
                   </div>
                   <div className="space-y-2.5">
                     <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Slug (URL Name)</Label>
-                    <Input placeholder="e.g. downtown-branch" className="h-12 bg-slate-50/50 border-slate-200 focus-visible:bg-white" />
+                    <Input 
+                      placeholder="e.g. downtown-branch" 
+                      className="h-12 bg-slate-50/50 border-slate-200 focus-visible:bg-white" 
+                      value={formSlug}
+                      onChange={(e) => setFormSlug(e.target.value)}
+                    />
                   </div>
                   <div className="space-y-2.5">
                     <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Contact Phone</Label>
-                    <Input placeholder="+971..." className="h-12 bg-slate-50/50 border-slate-200 focus-visible:bg-white" />
+                    <Input 
+                      placeholder="+971..." 
+                      className="h-12 bg-slate-50/50 border-slate-200 focus-visible:bg-white" 
+                      value={formPhone}
+                      onChange={(e) => setFormPhone(e.target.value)}
+                    />
                   </div>
                   <div className="space-y-2.5">
                     <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Business Timezone</Label>
-                    <Select defaultValue="dubai">
+                    <Select value={formTimezone} onValueChange={setFormTimezone}>
                       <SelectTrigger className="h-12 bg-slate-50/50 border-slate-200">
                         <SelectValue placeholder="Select timezone" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="dubai">Asia/Dubai (GMT+4)</SelectItem>
-                        <SelectItem value="london">Europe/London (GMT+0)</SelectItem>
+                        <SelectItem value="Asia/Dubai">Asia/Dubai (GMT+4)</SelectItem>
+                        <SelectItem value="Europe/London">Europe/London (GMT+0)</SelectItem>
+                        <SelectItem value="America/New_York">America/New_York (GMT-5)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2.5">
                       <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">City</Label>
-                      <Input placeholder="Dubai" className="h-12 bg-slate-50/50 border-slate-200" />
+                      <Input 
+                        placeholder="Dubai" 
+                        className="h-12 bg-slate-50/50 border-slate-200" 
+                        value={formCity}
+                        onChange={(e) => setFormCity(e.target.value)}
+                      />
                     </div>
                     <div className="space-y-2.5">
                       <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Country</Label>
-                      <Input placeholder="UAE" className="h-12 bg-slate-50/50 border-slate-200" />
+                      <Input 
+                        placeholder="UAE" 
+                        className="h-12 bg-slate-50/50 border-slate-200" 
+                        value={formCountry}
+                        onChange={(e) => setFormCountry(e.target.value)}
+                      />
                     </div>
                   </div>
                 </div>
               </ScrollArea>
               <div className="p-6 border-t border-slate-50 flex gap-4 bg-slate-50/30">
-                <Button variant="outline" className="flex-1 h-12 border-slate-200 font-bold text-slate-600 hover:bg-white" onClick={() => setIsAddingNew(false)}>Cancel</Button>
-                <Button className="flex-1 h-12 bg-[#1a73e8] hover:bg-[#1557b0] text-white font-bold shadow-lg shadow-[#1a73e8]/20 active:scale-95 transition-all">Create Branch</Button>
+                <Button variant="outline" className="flex-1 h-12 border-slate-200 font-bold text-slate-600 hover:bg-white" onClick={handleCloseForm}>Cancel</Button>
+                <Button 
+                  className="flex-1 h-12 bg-[#1a73e8] hover:bg-[#1557b0] text-white font-bold shadow-lg shadow-[#1a73e8]/20 active:scale-95 transition-all"
+                  onClick={handleCloseForm}
+                >
+                  {editingOutlet ? "Update Branch" : "Create Branch"}
+                </Button>
               </div>
             </div>
           )}
@@ -231,7 +309,7 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                     <TableRow 
                       key={outlet.id} 
                       className="group hover:bg-slate-50/50 transition-all border-b border-slate-50 cursor-pointer"
-                      onClick={() => onViewUsers(outlet)}
+                      onClick={() => handleEdit(outlet)}
                     >
                       <TableCell className="py-5 px-8">
                         <div className="font-extrabold text-[15px] text-[#1e293b] border-b border-transparent inline-block leading-tight mb-1 group-hover:text-[#1a73e8] transition-colors">{outlet.name}</div>
@@ -278,10 +356,14 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>Edit Details</DropdownMenuItem>
-                            <DropdownMenuItem>Manage QR Codes</DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive">Deactivate</DropdownMenuItem>
+                          <DropdownMenuContent align="end" className="w-48 p-2">
+                            <DropdownMenuItem className="font-bold py-2.5" onClick={(e) => { e.stopPropagation(); handleEdit(outlet); }}>
+                              <Edit2 className="h-4 w-4 mr-3 text-slate-400" /> Edit Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="font-bold py-2.5" onClick={(e) => { e.stopPropagation(); onViewUsers(outlet); }}>
+                              <UsersIcon className="h-4 w-4 mr-3 text-slate-400" /> Manage Staff
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="text-destructive font-black py-2.5" onClick={(e) => e.stopPropagation()}>Deactivate</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>

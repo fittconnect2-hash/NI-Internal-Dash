@@ -16,7 +16,9 @@ import {
   Clock,
   ChevronLeft,
   ChevronRight,
-  Check
+  Check,
+  Edit2,
+  X
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -44,6 +46,8 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import { Label } from "@/components/ui/label"
 import { initialOutlets, initialTenants } from "@/lib/mock-data"
 import { Outlet, Tenant } from "@/lib/types"
 import { cn } from "@/lib/utils"
@@ -62,6 +66,29 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
   
   const [tenantSearch, setTenantSearch] = React.useState("")
   const [isTenantPopoverOpen, setIsTenantPopoverOpen] = React.useState(false)
+
+  // Edit State
+  const [editingOutlet, setEditingOutlet] = React.useState<Outlet | null>(null)
+  const [isEditSheetOpen, setIsEditSheetOpen] = React.useState(false)
+
+  // Form State
+  const [formName, setFormName] = React.useState("")
+  const [formSlug, setFormSlug] = React.useState("")
+  const [formPhone, setFormPhone] = React.useState("")
+  const [formTimezone, setFormTimezone] = React.useState("")
+  const [formCity, setFormCity] = React.useState("")
+  const [formCountry, setFormCountry] = React.useState("")
+
+  React.useEffect(() => {
+    if (editingOutlet) {
+      setFormName(editingOutlet.name)
+      setFormSlug(editingOutlet.slug)
+      setFormPhone(editingOutlet.phone)
+      setFormTimezone(editingOutlet.timezone)
+      setFormCity(editingOutlet.city)
+      setFormCountry(editingOutlet.country)
+    }
+  }, [editingOutlet])
 
   // Calculate outlet counts for each tenant for the filter
   const tenantsWithCounts = React.useMemo(() => {
@@ -100,8 +127,9 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
     setCurrentPage(1)
   }, [searchQuery, tenantFilter, statusFilter])
 
-  const getTenantName = (tenantId: string) => {
-    return initialTenants.find(t => t.id === tenantId)?.tenantName || "Unknown Tenant"
+  const handleEdit = (outlet: Outlet) => {
+    setEditingOutlet(outlet)
+    setIsEditSheetOpen(true)
   }
 
   const resetFilters = () => {
@@ -260,7 +288,11 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
               </TableHeader>
               <TableBody>
                 {paginatedOutlets.map((outlet) => (
-                  <TableRow key={outlet.id} className="group hover:bg-slate-50/50 transition-all border-b border-slate-50">
+                  <TableRow 
+                    key={outlet.id} 
+                    className="group hover:bg-slate-50/50 transition-all border-b border-slate-50"
+                    onClick={() => handleEdit(outlet)}
+                  >
                     <TableCell className="py-5 px-8">
                       <div className="font-extrabold text-[15px] text-[#1e293b] border-b border-transparent inline-block leading-tight mb-1 group-hover:text-[#1a73e8] transition-colors">{outlet.name}</div>
                       <div className="text-[11px] text-slate-400 font-medium tracking-tight opacity-70">slug: {outlet.slug}</div>
@@ -297,14 +329,18 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
                     <TableCell className="text-right px-8">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full hover:bg-white border border-transparent hover:border-slate-100 text-slate-400">
+                          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full hover:bg-white border border-transparent hover:border-slate-100 text-slate-400" onClick={(e) => e.stopPropagation()}>
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48 p-2">
-                          <DropdownMenuItem className="font-bold py-2.5">Edit Details</DropdownMenuItem>
-                          <DropdownMenuItem className="font-bold py-2.5" onClick={() => onViewUsers(outlet)}>View Staff</DropdownMenuItem>
-                          <DropdownMenuItem className="text-destructive font-black py-2.5">Deactivate</DropdownMenuItem>
+                          <DropdownMenuItem className="font-bold py-2.5" onClick={(e) => { e.stopPropagation(); handleEdit(outlet); }}>
+                            <Edit2 className="h-4 w-4 mr-3 text-slate-400" /> Edit Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="font-bold py-2.5" onClick={(e) => { e.stopPropagation(); onViewUsers(outlet); }}>
+                            <Users className="h-4 w-4 mr-3 text-slate-400" /> View Staff
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="text-destructive font-black py-2.5" onClick={(e) => e.stopPropagation()}>Deactivate</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -383,6 +419,78 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
           )}
         </div>
       </div>
+
+      {/* Edit Sheet */}
+      <Sheet open={isEditSheetOpen} onOpenChange={setIsEditSheetOpen}>
+        <SheetContent side="right" className="w-full sm:max-w-[450px] p-0 border-l border-slate-200 bg-white flex flex-col">
+          <SheetHeader className="p-6 border-b border-slate-50">
+            <SheetTitle className="text-xl font-black text-[#1e293b]">Edit Outlet Info</SheetTitle>
+          </SheetHeader>
+          <ScrollArea className="flex-1 p-8">
+            <div className="space-y-8">
+              <div className="space-y-2.5">
+                <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Outlet Name</Label>
+                <Input 
+                  value={formName} 
+                  onChange={(e) => setFormName(e.target.value)} 
+                  className="h-12 bg-slate-50/50 border-slate-200" 
+                />
+              </div>
+              <div className="space-y-2.5">
+                <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Slug</Label>
+                <Input 
+                  value={formSlug} 
+                  onChange={(e) => setFormSlug(e.target.value)} 
+                  className="h-12 bg-slate-50/50 border-slate-200" 
+                />
+              </div>
+              <div className="space-y-2.5">
+                <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Phone</Label>
+                <Input 
+                  value={formPhone} 
+                  onChange={(e) => setFormPhone(e.target.value)} 
+                  className="h-12 bg-slate-50/50 border-slate-200" 
+                />
+              </div>
+              <div className="space-y-2.5">
+                <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Timezone</Label>
+                <Input 
+                  value={formTimezone} 
+                  onChange={(e) => setFormTimezone(e.target.value)} 
+                  className="h-12 bg-slate-50/50 border-slate-200" 
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2.5">
+                  <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">City</Label>
+                  <Input 
+                    value={formCity} 
+                    onChange={(e) => setFormCity(e.target.value)} 
+                    className="h-12 bg-slate-50/50 border-slate-200" 
+                  />
+                </div>
+                <div className="space-y-2.5">
+                  <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Country</Label>
+                  <Input 
+                    value={formCountry} 
+                    onChange={(e) => setFormCountry(e.target.value)} 
+                    className="h-12 bg-slate-50/50 border-slate-200" 
+                  />
+                </div>
+              </div>
+            </div>
+          </ScrollArea>
+          <div className="p-6 border-t border-slate-100 flex gap-4 bg-slate-50/30">
+            <Button variant="outline" className="flex-1 h-12" onClick={() => setIsEditSheetOpen(false)}>Cancel</Button>
+            <Button 
+              className="flex-1 h-12 bg-[#1a73e8] hover:bg-[#1557b0] text-white font-bold"
+              onClick={() => setIsEditSheetOpen(false)}
+            >
+              Save Changes
+            </Button>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   )
 }
