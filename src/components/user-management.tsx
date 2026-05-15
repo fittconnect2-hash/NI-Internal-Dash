@@ -24,7 +24,9 @@ import {
   User as UserIcon,
   Check,
   ChevronLeft,
-  Loader2
+  Loader2,
+  Eye,
+  EyeOff
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -106,6 +108,10 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
   const [formEmployeeId, setFormEmployeeId] = React.useState("")
   const [formPrimaryRole, setFormPrimaryRole] = React.useState<string>("Staff")
   const [formTenantId, setFormTenantId] = React.useState("")
+  const [formPassword, setFormPassword] = React.useState("")
+  const [formConfirmPassword, setFormConfirmPassword] = React.useState("")
+  const [showPassword, setShowPassword] = React.useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false)
   const [assignments, setAssignments] = React.useState<UserAssignment[]>([])
 
   React.useEffect(() => {
@@ -119,8 +125,9 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
       setFormPrimaryRole(propEditingUser.role)
       setFormTenantId(propEditingUser.tenantId)
       setFormEmployeeId(`EMP-${propEditingUser.id.split('-').pop()}`)
+      setFormPassword("")
+      setFormConfirmPassword("")
       
-      // Initialize with single assignment if it exists
       if (propEditingUser.outletId) {
         setAssignments([{
           id: '1',
@@ -145,10 +152,13 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
     setFormEmployeeId("")
     setFormPrimaryRole('Staff')
     setFormTenantId(tenant?.id || "")
+    setFormPassword("")
+    setFormConfirmPassword("")
+    setShowPassword(false)
+    setShowConfirmPassword(false)
     setAssignments([])
   }
 
-  // Calculate user counts for each tenant for the filter
   const tenantsWithCounts = React.useMemo(() => {
     return initialTenants.map(t => ({
       ...t,
@@ -156,7 +166,6 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
     })).filter(t => t.count > 0)
   }, [users])
 
-  // Filter outlets by current tenant (or selected tenant filter)
   const activeTenantId = tenant?.id || formTenantId || tenantFilter
   const tenantOutlets = React.useMemo(() => {
     return initialOutlets.filter(o => !activeTenantId || o.tenantId === activeTenantId)
@@ -188,6 +197,8 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
     setFormPrimaryRole(user.role)
     setFormTenantId(user.tenantId)
     setFormEmployeeId(`EMP-${user.id.split('-').pop()}`)
+    setFormPassword("")
+    setFormConfirmPassword("")
     
     if (user.outletId) {
       setAssignments([{ id: '1', outletId: user.outletId, role: user.role }])
@@ -223,6 +234,15 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields.",
+        variant: "destructive"
+      })
+      return
+    }
+
+    if (formPassword !== formConfirmPassword) {
+      toast({
+        title: "Password Mismatch",
+        description: "Passwords do not match.",
         variant: "destructive"
       })
       return
@@ -297,14 +317,12 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
     })
   }, [users, tenant, tenantFilter, userFilter, statusFilter, roleFilter, outletFilter])
 
-  // Pagination logic
   const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE)
   const paginatedUsers = React.useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE
     return filteredUsers.slice(start, start + ITEMS_PER_PAGE)
   }, [filteredUsers, currentPage])
 
-  // Reset page when filtering/searching
   React.useEffect(() => {
     setCurrentPage(1)
   }, [userFilter, tenantFilter, statusFilter, roleFilter, outletFilter])
@@ -630,7 +648,6 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                   )}
                 </ScrollArea>
                 
-                {/* Pagination Controls */}
                 {totalPages > 1 && (
                   <div className="px-8 py-4 border-t border-slate-100 flex items-center justify-between bg-white">
                     <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">
@@ -701,7 +718,6 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                     </div>
                   ) : (
                     <div className="p-10 grid grid-cols-1 lg:grid-cols-2 gap-16">
-                      {/* Personal Information */}
                       <div className="space-y-8">
                         <div>
                           <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-2">Personal Information</h3>
@@ -774,10 +790,49 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                               </SelectContent>
                             </Select>
                           </div>
+
+                          <div className="space-y-2">
+                            <Label className="text-[13px] font-bold text-slate-700">Password <span className="text-red-500">*</span></Label>
+                            <div className="relative">
+                              <Input 
+                                type={showPassword ? "text" : "password"} 
+                                value={formPassword} 
+                                onChange={(e) => setFormPassword(e.target.value)}
+                                placeholder="••••••••" 
+                                className="h-11 border-slate-200 bg-white pr-10" 
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                              >
+                                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label className="text-[13px] font-bold text-slate-700">Confirm Password <span className="text-red-500">*</span></Label>
+                            <div className="relative">
+                              <Input 
+                                type={showConfirmPassword ? "text" : "password"} 
+                                value={formConfirmPassword} 
+                                onChange={(e) => setFormConfirmPassword(e.target.value)}
+                                placeholder="••••••••" 
+                                className="h-11 border-slate-200 bg-white pr-10" 
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                              >
+                                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                              </button>
+                            </div>
+                          </div>
                         </div>
                       </div>
 
-                      {/* Role Assignment */}
                       <div className="space-y-8 border-l border-dashed border-slate-200 pl-16">
                         <div className="flex items-center justify-between">
                           <div>
