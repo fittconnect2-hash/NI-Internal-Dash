@@ -54,6 +54,12 @@ import { cn } from "@/lib/utils"
 
 const ITEMS_PER_PAGE = 10
 
+const COUNTRY_CITY_MAP: Record<string, string[]> = {
+  "UAE": ["Dubai", "Abu Dhabi", "Sharjah", "Ajman"],
+  "USA": ["New York", "San Francisco", "Los Angeles", "Chicago", "Miami"],
+  "UK": ["London", "Manchester", "Birmingham", "Leeds", "Glasgow"]
+}
+
 interface OutletListViewProps {
   onViewUsers: (outlet: Outlet) => void;
 }
@@ -73,15 +79,17 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
   const [isFormLoading, setIsFormLoading] = React.useState(false)
 
   // Form State
+  const [formTenantId, setFormTenantId] = React.useState("")
   const [formName, setFormName] = React.useState("")
   const [formSlug, setFormSlug] = React.useState("")
   const [formPhone, setFormPhone] = React.useState("")
-  const [formTimezone, setFormTimezone] = React.useState("")
+  const [formTimezone, setFormTimezone] = React.useState("Asia/Dubai")
   const [formCity, setFormCity] = React.useState("")
   const [formCountry, setFormCountry] = React.useState("")
 
   React.useEffect(() => {
     if (editingOutlet) {
+      setFormTenantId(editingOutlet.tenantId)
       setFormName(editingOutlet.name)
       setFormSlug(editingOutlet.slug)
       setFormPhone(editingOutlet.phone)
@@ -89,6 +97,7 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
       setFormCity(editingOutlet.city)
       setFormCountry(editingOutlet.country)
     } else {
+      setFormTenantId(tenantFilter || "")
       setFormName("")
       setFormSlug("")
       setFormPhone("")
@@ -96,7 +105,7 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
       setFormCity("")
       setFormCountry("")
     }
-  }, [editingOutlet])
+  }, [editingOutlet, tenantFilter, isFormVisible])
 
   // Calculate outlet counts for each tenant for the filter
   const tenantsWithCounts = React.useMemo(() => {
@@ -164,6 +173,11 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
     setStatusFilter(null)
     setTenantSearch("")
   }
+
+  const selectedTenantName = React.useMemo(() => {
+    if (!formTenantId) return null
+    return initialTenants.find(t => t.id === formTenantId)?.tenantName
+  }, [formTenantId])
 
   return (
     <div className="p-6 md:p-8 flex flex-col h-full overflow-hidden bg-[#f8f9fc]">
@@ -295,7 +309,11 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
               <div className="p-6 border-b border-slate-50 flex items-center justify-between">
                 <div>
                   <h3 className="font-extrabold text-lg text-[#1e293b]">
-                    {editingOutlet ? "Edit Outlet" : "Add New Outlet"}
+                    {editingOutlet 
+                      ? "Edit Outlet" 
+                      : selectedTenantName 
+                        ? `Add New Outlet to ${selectedTenantName}` 
+                        : "Add New Outlet"}
                   </h3>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
                     {editingOutlet ? "UPDATE BRANCH PARAMETERS" : "ENTER NEW BRANCH DETAILS"}
@@ -313,6 +331,20 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
                   </div>
                 ) : (
                   <div className="px-8 py-6 space-y-8">
+                    <div className="space-y-2.5">
+                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">PARENT TENANT</Label>
+                      <Select value={formTenantId} onValueChange={setFormTenantId}>
+                        <SelectTrigger className="h-12 bg-slate-50/50 border-slate-200">
+                          <SelectValue placeholder="Select Parent Tenant" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {initialTenants.map(t => (
+                            <SelectItem key={t.id} value={t.id}>{t.tenantName}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
                     <div className="space-y-2.5">
                       <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">OUTLET NAME</Label>
                       <Input 
@@ -342,31 +374,44 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
                     </div>
                     <div className="space-y-2.5">
                       <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">TIMEZONE</Label>
-                      <Input 
-                        placeholder="e.g. Asia/Dubai"
-                        value={formTimezone} 
-                        onChange={(e) => setFormTimezone(e.target.value)} 
-                        className="h-12 bg-slate-50/50 border-slate-200" 
-                      />
+                      <Select value={formTimezone} onValueChange={setFormTimezone}>
+                        <SelectTrigger className="h-12 bg-slate-50/50 border-slate-200">
+                          <SelectValue placeholder="Select Timezone" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Asia/Dubai">Asia/Dubai (GMT+4)</SelectItem>
+                          <SelectItem value="America/New_York">America/New_York (GMT-5)</SelectItem>
+                          <SelectItem value="Europe/London">Europe/London (GMT+0)</SelectItem>
+                          <SelectItem value="UTC">UTC</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2.5">
-                        <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">CITY</Label>
-                        <Input 
-                          placeholder="e.g. Dubai"
-                          value={formCity} 
-                          onChange={(e) => setFormCity(e.target.value)} 
-                          className="h-12 bg-slate-50/50 border-slate-200" 
-                        />
+                        <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">COUNTRY</Label>
+                        <Select value={formCountry} onValueChange={(val) => { setFormCountry(val); setFormCity(""); }}>
+                          <SelectTrigger className="h-12 bg-slate-50/50 border-slate-200">
+                            <SelectValue placeholder="Select Country" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Object.keys(COUNTRY_CITY_MAP).map(country => (
+                              <SelectItem key={country} value={country}>{country}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                       <div className="space-y-2.5">
-                        <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">COUNTRY</Label>
-                        <Input 
-                          placeholder="e.g. UAE"
-                          value={formCountry} 
-                          onChange={(e) => setFormCountry(e.target.value)} 
-                          className="h-12 bg-slate-50/50 border-slate-200" 
-                        />
+                        <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">CITY</Label>
+                        <Select value={formCity} onValueChange={setFormCity} disabled={!formCountry}>
+                          <SelectTrigger className="h-12 bg-slate-50/50 border-slate-200">
+                            <SelectValue placeholder="Select City" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {(COUNTRY_CITY_MAP[formCountry] || []).map(city => (
+                              <SelectItem key={city} value={city}>{city}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
                   </div>
