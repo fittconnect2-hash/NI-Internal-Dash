@@ -65,7 +65,7 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
   const [statusFilter, setStatusFilter] = React.useState<string | null>(null)
   const [isAddingNew, setIsAddingNew] = React.useState(false)
   const [editingOutlet, setEditingOutlet] = React.useState<Outlet | null>(null)
-  const [loadingOutletId, setLoadingOutletId] = React.useState<string | null>(null)
+  const [isFormLoading, setIsFormLoading] = React.useState(false)
 
   // Form State
   const [formName, setFormName] = React.useState("")
@@ -106,23 +106,25 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
   }
 
   const handleEdit = (outlet: Outlet) => {
-    setLoadingOutletId(outlet.id)
-    // Simulate a loading delay
+    setEditingOutlet(outlet)
+    setIsAddingNew(true)
+    setIsFormLoading(true)
+    // Simulate a brief loading delay for the form content
     setTimeout(() => {
-      setEditingOutlet(outlet)
-      setIsAddingNew(true)
-      setLoadingOutletId(null)
-    }, 800)
+      setIsFormLoading(false)
+    }, 600)
   }
 
   const handleAddNew = () => {
     setEditingOutlet(null)
     setIsAddingNew(true)
+    setIsFormLoading(false)
   }
 
   const handleCloseForm = () => {
     setIsAddingNew(false)
     setEditingOutlet(null)
+    setIsFormLoading(false)
   }
 
   return (
@@ -181,86 +183,95 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                   <X className="h-4 w-4" />
                 </Button>
               </div>
-              <ScrollArea className="flex-1 px-8 py-6">
-                <div className="space-y-8">
-                  <div className="space-y-2.5">
-                    <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Outlet Name</Label>
-                    <Input 
-                      placeholder="e.g. Downtown Branch" 
-                      className="h-12 bg-slate-50/50 border-slate-200 focus-visible:bg-white focus-visible:ring-1 ring-[#1a73e8]/20 transition-all" 
-                      value={formName}
-                      onChange={(e) => setFormName(e.target.value)}
-                    />
+              <ScrollArea className="flex-1">
+                {isFormLoading ? (
+                  <div className="flex flex-col items-center justify-center h-full py-24 space-y-4">
+                    <Loader2 className="h-10 w-10 animate-spin text-[#1a73e8]" />
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Loading Details...</p>
                   </div>
-                  <div className="space-y-2.5">
-                    <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Slug (URL Name)</Label>
-                    <Input 
-                      placeholder="e.g. downtown-branch" 
-                      className="h-12 bg-slate-50/50 border-slate-200 focus-visible:bg-white" 
-                      value={formSlug}
-                      onChange={(e) => setFormSlug(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2.5">
-                    <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Contact Phone</Label>
-                    <Input 
-                      placeholder="+971..." 
-                      className="h-12 bg-slate-50/50 border-slate-200 focus-visible:bg-white" 
-                      value={formPhone}
-                      onChange={(e) => setFormPhone(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2.5">
-                    <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Business Timezone</Label>
-                    <Select value={formTimezone} onValueChange={setFormTimezone}>
-                      <SelectTrigger className="h-12 bg-slate-50/50 border-slate-200">
-                        <SelectValue placeholder="Select timezone" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Asia/Dubai">Asia/Dubai (GMT+4)</SelectItem>
-                        <SelectItem value="Europe/London">Europe/London (GMT+0)</SelectItem>
-                        <SelectItem value="America/New_York">America/New_York (GMT-5)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
+                ) : (
+                  <div className="px-8 py-6 space-y-8">
                     <div className="space-y-2.5">
-                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">City</Label>
+                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Outlet Name</Label>
                       <Input 
-                        placeholder="Dubai" 
-                        className="h-12 bg-slate-50/50 border-slate-200" 
-                        value={formCity}
-                        onChange={(e) => setFormCity(e.target.value)}
+                        placeholder="e.g. Downtown Branch" 
+                        className="h-12 bg-slate-50/50 border-slate-200 focus-visible:bg-white focus-visible:ring-1 ring-[#1a73e8]/20 transition-all" 
+                        value={formName}
+                        onChange={(e) => setFormName(e.target.value)}
                       />
                     </div>
                     <div className="space-y-2.5">
-                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Country</Label>
+                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Slug (URL Name)</Label>
                       <Input 
-                        placeholder="UAE" 
-                        className="h-12 bg-slate-50/50 border-slate-200" 
-                        value={formCountry}
-                        onChange={(e) => setFormCountry(e.target.value)}
+                        placeholder="e.g. downtown-branch" 
+                        className="h-12 bg-slate-50/50 border-slate-200 focus-visible:bg-white" 
+                        value={formSlug}
+                        onChange={(e) => setFormSlug(e.target.value)}
                       />
                     </div>
+                    <div className="space-y-2.5">
+                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Contact Phone</Label>
+                      <Input 
+                        placeholder="+971..." 
+                        className="h-12 bg-slate-50/50 border-slate-200 focus-visible:bg-white" 
+                        value={formPhone}
+                        onChange={(e) => setFormPhone(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2.5">
+                      <Label className="text-[10px) font-bold text-slate-400 uppercase tracking-widest">Business Timezone</Label>
+                      <Select value={formTimezone} onValueChange={setFormTimezone}>
+                        <SelectTrigger className="h-12 bg-slate-50/50 border-slate-200">
+                          <SelectValue placeholder="Select timezone" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Asia/Dubai">Asia/Dubai (GMT+4)</SelectItem>
+                          <SelectItem value="Europe/London">Europe/London (GMT+0)</SelectItem>
+                          <SelectItem value="America/New_York">America/New_York (GMT-5)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2.5">
+                        <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">City</Label>
+                        <Input 
+                          placeholder="Dubai" 
+                          className="h-12 bg-slate-50/50 border-slate-200" 
+                          value={formCity}
+                          onChange={(e) => setFormCity(e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-2.5">
+                        <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Country</Label>
+                        <Input 
+                          placeholder="UAE" 
+                          className="h-12 bg-slate-50/50 border-slate-200" 
+                          value={formCountry}
+                          onChange={(e) => setFormCountry(e.target.value)}
+                        />
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
               </ScrollArea>
-              <div className="p-6 border-t border-slate-50 flex gap-4 bg-slate-50/30">
-                <Button variant="outline" className="flex-1 h-12 border-slate-200 font-bold text-slate-600 hover:bg-white" onClick={handleCloseForm}>Cancel</Button>
-                <Button 
-                  className="flex-1 h-12 bg-[#1a73e8] hover:bg-[#1557b0] text-white font-bold shadow-lg shadow-[#1a73e8]/20 active:scale-95 transition-all"
-                  onClick={handleCloseForm}
-                >
-                  {editingOutlet ? "Update Branch" : "Create Branch"}
-                </Button>
-              </div>
+              {!isFormLoading && (
+                <div className="p-6 border-t border-slate-50 flex gap-4 bg-slate-50/30">
+                  <Button variant="outline" className="flex-1 h-12 border-slate-200 font-bold text-slate-600 hover:bg-white" onClick={handleCloseForm}>Cancel</Button>
+                  <Button 
+                    className="flex-1 h-12 bg-[#1a73e8] hover:bg-[#1557b0] text-white font-bold shadow-lg shadow-[#1a73e8]/20 active:scale-95 transition-all"
+                    onClick={handleCloseForm}
+                  >
+                    {editingOutlet ? "Update Branch" : "Create Branch"}
+                  </Button>
+                </div>
+              )}
             </div>
           )}
 
           {/* Table Container */}
           <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col min-h-0">
             <div className="p-6 flex flex-col md:flex-row gap-4 border-b border-slate-50 bg-slate-50/10">
-              <div className="relative flex-1 max-w-sm">
+              <div className="relative flex-1 max-sm:max-w-none max-w-sm">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input 
                   placeholder="Search branches..." 
@@ -315,19 +326,13 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                   {filteredOutlets.map((outlet) => (
                     <TableRow 
                       key={outlet.id} 
-                      className={cn(
-                        "group hover:bg-slate-50/50 transition-all border-b border-slate-50 cursor-pointer relative",
-                        loadingOutletId === outlet.id && "opacity-60 pointer-events-none"
-                      )}
+                      className="group hover:bg-slate-50/50 transition-all border-b border-slate-50 cursor-pointer relative"
                       onClick={() => handleEdit(outlet)}
                     >
                       <TableCell className="py-5 px-8">
-                        <div className="flex items-center gap-3">
-                          {loadingOutletId === outlet.id && <Loader2 className="h-4 w-4 animate-spin text-[#1a73e8]" />}
-                          <div>
-                            <div className="font-extrabold text-[15px] text-[#1e293b] border-b border-transparent inline-block leading-tight mb-1 group-hover:text-[#1a73e8] transition-colors">{outlet.name}</div>
-                            <div className="text-[11px] text-slate-400 font-medium tracking-tight opacity-70">slug: {outlet.slug}</div>
-                          </div>
+                        <div>
+                          <div className="font-extrabold text-[15px] text-[#1e293b] border-b border-transparent inline-block leading-tight mb-1 group-hover:text-[#1a73e8] transition-colors">{outlet.name}</div>
+                          <div className="text-[11px] text-slate-400 font-medium tracking-tight opacity-70">slug: {outlet.slug}</div>
                         </div>
                       </TableCell>
                       <TableCell className="px-4 text-[14px] text-[#1e293b] font-extrabold">
@@ -367,9 +372,8 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                               size="icon" 
                               className="h-9 w-9 rounded-full border border-slate-100 text-slate-400 hover:text-[#1e293b] hover:bg-white active:scale-90 transition-all" 
                               onClick={(e) => e.stopPropagation()}
-                              disabled={loadingOutletId === outlet.id}
                             >
-                              {loadingOutletId === outlet.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <MoreHorizontal className="h-4 w-4" />}
+                              <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-48 p-2">

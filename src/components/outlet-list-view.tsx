@@ -64,7 +64,6 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
   const [tenantFilter, setTenantFilter] = React.useState<string | null>(null)
   const [statusFilter, setStatusFilter] = React.useState<string | null>(null)
   const [currentPage, setCurrentPage] = React.useState(1)
-  const [loadingOutletId, setLoadingOutletId] = React.useState<string | null>(null)
   
   const [tenantSearch, setTenantSearch] = React.useState("")
   const [isTenantPopoverOpen, setIsTenantPopoverOpen] = React.useState(false)
@@ -72,6 +71,7 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
   // Edit State
   const [editingOutlet, setEditingOutlet] = React.useState<Outlet | null>(null)
   const [isEditSheetOpen, setIsEditSheetOpen] = React.useState(false)
+  const [isFormLoading, setIsFormLoading] = React.useState(false)
 
   // Form State
   const [formName, setFormName] = React.useState("")
@@ -97,7 +97,7 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
     return initialTenants.map(tenant => ({
       ...tenant,
       count: initialOutlets.filter(o => o.tenantId === tenant.id).length
-    })).filter(t => t.count > 0)
+    })).filter(tenant => tenant.count > 0)
   }, [])
 
   const filteredTenantsForDropdown = React.useMemo(() => {
@@ -130,11 +130,12 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
   }, [searchQuery, tenantFilter, statusFilter])
 
   const handleEdit = (outlet: Outlet) => {
-    setLoadingOutletId(outlet.id)
+    setEditingOutlet(outlet)
+    setIsEditSheetOpen(true)
+    setIsFormLoading(true)
+    // Simulate a loading delay
     setTimeout(() => {
-      setEditingOutlet(outlet)
-      setIsEditSheetOpen(true)
-      setLoadingOutletId(null)
+      setIsFormLoading(false)
     }, 800)
   }
 
@@ -296,19 +297,13 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
                 {paginatedOutlets.map((outlet) => (
                   <TableRow 
                     key={outlet.id} 
-                    className={cn(
-                      "group hover:bg-slate-50/50 transition-all border-b border-slate-50",
-                      loadingOutletId === outlet.id && "opacity-60 pointer-events-none"
-                    )}
+                    className="group hover:bg-slate-50/50 transition-all border-b border-slate-50 cursor-pointer"
                     onClick={() => handleEdit(outlet)}
                   >
                     <TableCell className="py-5 px-8">
-                      <div className="flex items-center gap-3">
-                        {loadingOutletId === outlet.id && <Loader2 className="h-4 w-4 animate-spin text-[#1a73e8]" />}
-                        <div>
-                          <div className="font-extrabold text-[15px] text-[#1e293b] border-b border-transparent inline-block leading-tight mb-1 group-hover:text-[#1a73e8] transition-colors">{outlet.name}</div>
-                          <div className="text-[11px] text-slate-400 font-medium tracking-tight opacity-70">slug: {outlet.slug}</div>
-                        </div>
+                      <div>
+                        <div className="font-extrabold text-[15px] text-[#1e293b] border-b border-transparent inline-block leading-tight mb-1 group-hover:text-[#1a73e8] transition-colors">{outlet.name}</div>
+                        <div className="text-[11px] text-slate-400 font-medium tracking-tight opacity-70">slug: {outlet.slug}</div>
                       </div>
                     </TableCell>
                     <TableCell className="px-4 text-[14px] text-[#1e293b] font-extrabold">
@@ -348,9 +343,8 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
                             size="icon" 
                             className="h-9 w-9 rounded-full hover:bg-white border border-transparent hover:border-slate-100 text-slate-400" 
                             onClick={(e) => e.stopPropagation()}
-                            disabled={loadingOutletId === outlet.id}
                           >
-                            {loadingOutletId === outlet.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <MoreHorizontal className="h-4 w-4" />}
+                            <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48 p-2">
@@ -443,69 +437,78 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
           <SheetHeader className="p-6 border-b border-slate-50">
             <SheetTitle className="text-xl font-black text-[#1e293b]">Edit Outlet Info</SheetTitle>
           </SheetHeader>
-          <ScrollArea className="flex-1 p-8">
-            <div className="space-y-8">
-              <div className="space-y-2.5">
-                <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Outlet Name</Label>
-                <Input 
-                  value={formName} 
-                  onChange={(e) => setFormName(e.target.value)} 
-                  className="h-12 bg-slate-50/50 border-slate-200" 
-                />
+          <ScrollArea className="flex-1">
+            {isFormLoading ? (
+              <div className="flex flex-col items-center justify-center h-full py-24 space-y-4">
+                <Loader2 className="h-10 w-10 animate-spin text-[#1a73e8]" />
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Loading Details...</p>
               </div>
-              <div className="space-y-2.5">
-                <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Slug</Label>
-                <Input 
-                  value={formSlug} 
-                  onChange={(e) => setFormSlug(e.target.value)} 
-                  className="h-12 bg-slate-50/50 border-slate-200" 
-                />
-              </div>
-              <div className="space-y-2.5">
-                <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Phone</Label>
-                <Input 
-                  value={formPhone} 
-                  onChange={(e) => setFormPhone(e.target.value)} 
-                  className="h-12 bg-slate-50/50 border-slate-200" 
-                />
-              </div>
-              <div className="space-y-2.5">
-                <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Timezone</Label>
-                <Input 
-                  value={formTimezone} 
-                  onChange={(e) => setFormTimezone(e.target.value)} 
-                  className="h-12 bg-slate-50/50 border-slate-200" 
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
+            ) : (
+              <div className="p-8 space-y-8">
                 <div className="space-y-2.5">
-                  <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">City</Label>
+                  <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Outlet Name</Label>
                   <Input 
-                    value={formCity} 
-                    onChange={(e) => setFormCity(e.target.value)} 
+                    value={formName} 
+                    onChange={(e) => setFormName(e.target.value)} 
                     className="h-12 bg-slate-50/50 border-slate-200" 
                   />
                 </div>
                 <div className="space-y-2.5">
-                  <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Country</Label>
+                  <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Slug</Label>
                   <Input 
-                    value={formCountry} 
-                    onChange={(e) => setFormCountry(e.target.value)} 
+                    value={formSlug} 
+                    onChange={(e) => setFormSlug(e.target.value)} 
                     className="h-12 bg-slate-50/50 border-slate-200" 
                   />
                 </div>
+                <div className="space-y-2.5">
+                  <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Phone</Label>
+                  <Input 
+                    value={formPhone} 
+                    onChange={(e) => setFormPhone(e.target.value)} 
+                    className="h-12 bg-slate-50/50 border-slate-200" 
+                  />
+                </div>
+                <div className="space-y-2.5">
+                  <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Timezone</Label>
+                  <Input 
+                    value={formTimezone} 
+                    onChange={(e) => setFormTimezone(e.target.value)} 
+                    className="h-12 bg-slate-50/50 border-slate-200" 
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2.5">
+                    <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">City</Label>
+                    <Input 
+                      value={formCity} 
+                      onChange={(e) => setFormCity(e.target.value)} 
+                      className="h-12 bg-slate-50/50 border-slate-200" 
+                    />
+                  </div>
+                  <div className="space-y-2.5">
+                    <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Country</Label>
+                    <Input 
+                      value={formCountry} 
+                      onChange={(e) => setFormCountry(e.target.value)} 
+                      className="h-12 bg-slate-50/50 border-slate-200" 
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
           </ScrollArea>
-          <div className="p-6 border-t border-slate-100 flex gap-4 bg-slate-50/30">
-            <Button variant="outline" className="flex-1 h-12" onClick={() => setIsEditSheetOpen(false)}>Cancel</Button>
-            <Button 
-              className="flex-1 h-12 bg-[#1a73e8] hover:bg-[#1557b0] text-white font-bold"
-              onClick={() => setIsEditSheetOpen(false)}
-            >
-              Save Changes
-            </Button>
-          </div>
+          {!isFormLoading && (
+            <div className="p-6 border-t border-slate-100 flex gap-4 bg-slate-50/30">
+              <Button variant="outline" className="flex-1 h-12" onClick={() => setIsEditSheetOpen(false)}>Cancel</Button>
+              <Button 
+                className="flex-1 h-12 bg-[#1a73e8] hover:bg-[#1557b0] text-white font-bold"
+                onClick={() => setIsEditSheetOpen(false)}
+              >
+                Save Changes
+              </Button>
+            </div>
+          )}
         </SheetContent>
       </Sheet>
     </div>
