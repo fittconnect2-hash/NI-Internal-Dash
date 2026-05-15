@@ -21,7 +21,8 @@ import {
   Mail,
   Phone,
   User as UserIcon,
-  Check
+  Check,
+  ChevronLeft
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -62,6 +63,8 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 
+const ITEMS_PER_PAGE = 10
+
 interface UserManagementProps {
   tenant?: Tenant | null;
   editingUser?: User | null;
@@ -76,6 +79,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, o
   const [statusFilter, setStatusFilter] = React.useState<string | null>(null)
   const [roleFilter, setRoleFilter] = React.useState<string | null>(null)
   const [outletFilter, setOutletFilter] = React.useState<string | null>(null)
+  const [currentPage, setCurrentPage] = React.useState(1)
   
   const [isAddingNew, setIsAddingNew] = React.useState(false)
   const [editingUser, setEditingUser] = React.useState<User | null>(null)
@@ -137,16 +141,30 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, o
     setUsers(prev => prev.filter(u => u.id !== userId))
   }
 
-  const filteredUsers = users.filter(u => {
-    const matchesTenant = tenant ? u.tenantId === tenant.id : (!tenantFilter || u.tenantId === tenantFilter)
-    const matchesUser = !userFilter || 
-                       u.fullName.toLowerCase().includes(userFilter.toLowerCase()) || 
-                       u.email.toLowerCase().includes(userFilter.toLowerCase())
-    const matchesStatus = !statusFilter || u.status === statusFilter
-    const matchesRole = !roleFilter || u.role === roleFilter
-    const matchesOutlet = !outletFilter || u.outletId === outletFilter
-    return matchesTenant && matchesUser && matchesStatus && matchesRole && matchesOutlet
-  })
+  const filteredUsers = React.useMemo(() => {
+    return users.filter(u => {
+      const matchesTenant = tenant ? u.tenantId === tenant.id : (!tenantFilter || u.tenantId === tenantFilter)
+      const matchesUser = !userFilter || 
+                         u.fullName.toLowerCase().includes(userFilter.toLowerCase()) || 
+                         u.email.toLowerCase().includes(userFilter.toLowerCase())
+      const matchesStatus = !statusFilter || u.status === statusFilter
+      const matchesRole = !roleFilter || u.role === roleFilter
+      const matchesOutlet = !outletFilter || u.outletId === outletFilter
+      return matchesTenant && matchesUser && matchesStatus && matchesRole && matchesOutlet
+    })
+  }, [users, tenant, tenantFilter, userFilter, statusFilter, roleFilter, outletFilter])
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE)
+  const paginatedUsers = React.useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE
+    return filteredUsers.slice(start, start + ITEMS_PER_PAGE)
+  }, [filteredUsers, currentPage])
+
+  // Reset page when filtering/searching
+  React.useEffect(() => {
+    setCurrentPage(1)
+  }, [userFilter, tenantFilter, statusFilter, roleFilter, outletFilter])
 
   const getOutletName = (outletId?: string) => {
     if (!outletId) return "Global / Unassigned"
@@ -381,7 +399,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, o
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredUsers.map((user) => (
+                      {paginatedUsers.map((user) => (
                         <TableRow key={user.id} className="group hover:bg-slate-50/50 transition-all border-b border-slate-50 cursor-pointer" onClick={() => handleEditUser(user)}>
                           <TableCell className="py-5 px-8">
                             <div className="font-extrabold text-[#1e293b] text-[15px] group-hover:text-[#1a73e8] transition-colors">{user.fullName}</div>
@@ -467,6 +485,65 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, o
                     </div>
                   )}
                 </ScrollArea>
+                
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="px-8 py-4 border-t border-slate-100 flex items-center justify-between bg-white">
+                    <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">
+                      Showing <span className="text-slate-900">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to <span className="text-slate-900">{Math.min(currentPage * ITEMS_PER_PAGE, filteredUsers.length)}</span> of <span className="text-slate-900">{filteredUsers.length}</span> staff
+                    </p>
+                    <div className="flex items-center gap-1">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="h-8 px-2 border-slate-200"
+                        disabled={currentPage === 1}
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
+                        if (totalPages > 5) {
+                          if (
+                            pageNum !== 1 && 
+                            pageNum !== totalPages && 
+                            Math.abs(pageNum - currentPage) > 1
+                          ) {
+                            if (pageNum === 2 && currentPage > 3) return <span key="start-ellipsis" className="px-2 text-slate-300">...</span>;
+                            if (pageNum === totalPages - 1 && currentPage < totalPages - 2) return <span key="end-ellipsis" className="px-2 text-slate-300">...</span>;
+                            return null;
+                          }
+                        }
+
+                        return (
+                          <Button
+                            key={pageNum}
+                            variant={currentPage === pageNum ? "default" : "outline"}
+                            size="sm"
+                            className={cn(
+                              "h-8 w-8 p-0 text-[11px] font-black border-slate-200", 
+                              currentPage === pageNum ? "bg-slate-900 border-slate-900 text-white" : "text-slate-500"
+                            )}
+                            onClick={() => setCurrentPage(pageNum)}
+                          >
+                            {pageNum}
+                          </Button>
+                        );
+                      })}
+                      
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="h-8 px-2 border-slate-200"
+                        disabled={currentPage === totalPages}
+                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           ) : (
