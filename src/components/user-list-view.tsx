@@ -90,15 +90,18 @@ export function UserListView({ onAddUser, onEditUser }: UserListViewProps) {
   const [confirmReset, setConfirmReset] = React.useState<User | null>(null)
   const [confirmReactivate, setConfirmReactivate] = React.useState<User | null>(null)
 
-  // CRITICAL FIX: Explicitly restore pointer events when any dialog is closed
-  React.useEffect(() => {
-    if (!confirmSuspend && !confirmReset && !confirmReactivate) {
-      const timer = setTimeout(() => {
-        document.body.style.pointerEvents = 'auto';
-      }, 150);
-      return () => clearTimeout(timer);
-    }
-  }, [confirmSuspend, confirmReset, confirmReactivate]);
+  // CRITICAL UI RESTORATION FIX
+  const restoreUI = React.useCallback(() => {
+    setTimeout(() => {
+      document.body.style.pointerEvents = '';
+      document.body.style.overflow = '';
+      const html = document.documentElement;
+      if (html) {
+        html.style.pointerEvents = '';
+        html.style.overflow = '';
+      }
+    }, 300);
+  }, []);
 
   // Calculate user counts for each tenant for the filter
   const tenantsWithCounts = React.useMemo(() => {
@@ -166,8 +169,7 @@ export function UserListView({ onAddUser, onEditUser }: UserListViewProps) {
       description: `A secure credentials reset link has been successfully dispatched to ${user.email}.`,
     })
     setConfirmReset(null)
-    // Force interaction restoration
-    document.body.style.pointerEvents = 'auto';
+    restoreUI()
   }
 
   const handleSuspendUser = (user: User) => {
@@ -177,8 +179,7 @@ export function UserListView({ onAddUser, onEditUser }: UserListViewProps) {
       description: `${user.fullName}'s access has been successfully suspended.`
     })
     setConfirmSuspend(null)
-    // Force interaction restoration
-    document.body.style.pointerEvents = 'auto';
+    restoreUI()
   }
 
   const handleReactivateUser = (user: User) => {
@@ -188,8 +189,7 @@ export function UserListView({ onAddUser, onEditUser }: UserListViewProps) {
       description: `${user.fullName}'s access has been restored.`
     })
     setConfirmReactivate(null)
-    // Force interaction restoration
-    document.body.style.pointerEvents = 'auto';
+    restoreUI()
   }
 
   return (
@@ -513,8 +513,13 @@ export function UserListView({ onAddUser, onEditUser }: UserListViewProps) {
         </div>
       </div>
 
-      {/* Confirmation Dialogs */}
-      <AlertDialog open={!!confirmSuspend} onOpenChange={() => setConfirmSuspend(null)}>
+      {/* Confirmation Dialogs - MOVED TO ROOT LEVEL AND ADDED OPOPENCHANGE RESTORATION */}
+      <AlertDialog open={!!confirmSuspend} onOpenChange={(open) => {
+        if (!open) {
+          setConfirmSuspend(null);
+          restoreUI();
+        }
+      }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Suspend Staff Access?</AlertDialogTitle>
@@ -524,7 +529,7 @@ export function UserListView({ onAddUser, onEditUser }: UserListViewProps) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel onClick={restoreUI}>Cancel</AlertDialogCancel>
             <AlertDialogAction className="bg-rose-500 hover:bg-rose-600" onClick={() => confirmSuspend && handleSuspendUser(confirmSuspend)}>
               Confirm Suspension
             </AlertDialogAction>
@@ -532,7 +537,12 @@ export function UserListView({ onAddUser, onEditUser }: UserListViewProps) {
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={!!confirmReactivate} onOpenChange={() => setConfirmReactivate(null)}>
+      <AlertDialog open={!!confirmReactivate} onOpenChange={(open) => {
+        if (!open) {
+          setConfirmReactivate(null);
+          restoreUI();
+        }
+      }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Reactivate Staff Access?</AlertDialogTitle>
@@ -542,7 +552,7 @@ export function UserListView({ onAddUser, onEditUser }: UserListViewProps) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel onClick={restoreUI}>Cancel</AlertDialogCancel>
             <AlertDialogAction className="bg-green-600 hover:bg-green-700" onClick={() => confirmReactivate && handleReactivateUser(confirmReactivate)}>
               Reactivate Access
             </AlertDialogAction>
@@ -550,7 +560,12 @@ export function UserListView({ onAddUser, onEditUser }: UserListViewProps) {
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={!!confirmReset} onOpenChange={() => setConfirmReset(null)}>
+      <AlertDialog open={!!confirmReset} onOpenChange={(open) => {
+        if (!open) {
+          setConfirmReset(null);
+          restoreUI();
+        }
+      }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Reset User Password?</AlertDialogTitle>
@@ -560,7 +575,7 @@ export function UserListView({ onAddUser, onEditUser }: UserListViewProps) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel onClick={restoreUI}>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={() => confirmReset && handleResetPassword(confirmReset)}>
               Send Reset Link
             </AlertDialogAction>

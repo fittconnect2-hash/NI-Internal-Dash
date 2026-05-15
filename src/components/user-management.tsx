@@ -144,15 +144,18 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
     setAssignments([])
   }, [tenant])
 
-  // CRITICAL FIX: Explicitly restore pointer events when any overlay is closed
-  React.useEffect(() => {
-    if (!isOpen && !confirmSuspend && !confirmReset && !confirmReactivate) {
-      const timer = setTimeout(() => {
-        document.body.style.pointerEvents = 'auto';
-      }, 150);
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen, confirmSuspend, confirmReset, confirmReactivate]);
+  // CRITICAL UI RESTORATION FIX
+  const restoreUI = React.useCallback(() => {
+    setTimeout(() => {
+      document.body.style.pointerEvents = '';
+      document.body.style.overflow = '';
+      const html = document.documentElement;
+      if (html) {
+        html.style.pointerEvents = '';
+        html.style.overflow = '';
+      }
+    }, 300);
+  }, []);
 
   React.useEffect(() => {
     if (isOpen) {
@@ -325,8 +328,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
       description: `${user.fullName}'s access has been successfully suspended.`
     })
     setConfirmSuspend(null)
-    // Force interaction restoration
-    document.body.style.pointerEvents = 'auto';
+    restoreUI()
   }
 
   const handleReactivateUser = (user: User) => {
@@ -336,8 +338,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
       description: `${user.fullName}'s access has been restored.`
     })
     setConfirmReactivate(null)
-    // Force interaction restoration
-    document.body.style.pointerEvents = 'auto';
+    restoreUI()
   }
 
   const handleResetPassword = (user: User) => {
@@ -346,8 +347,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
       description: `A secure credentials reset link has been successfully dispatched to ${user.email}.`,
     })
     setConfirmReset(null)
-    // Force interaction restoration
-    document.body.style.pointerEvents = 'auto';
+    restoreUI()
   }
 
   const handleDeleteUser = (userId: string) => {
@@ -356,8 +356,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
       title: "User Deleted",
       description: "Staff member has been successfully removed from the platform."
     })
-    // Force interaction restoration
-    document.body.style.pointerEvents = 'auto';
+    restoreUI()
   }
 
   const filteredUsers = React.useMemo(() => {
@@ -403,6 +402,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
       <Sheet open={isOpen} onOpenChange={(val) => {
         if (!val) {
           onClose()
+          restoreUI()
         }
       }}>
         <SheetContent side="right" className="w-full sm:max-w-[1200px] p-0 border-l border-slate-200 bg-[#f8f9fc] flex flex-col transition-all duration-500">
@@ -977,7 +977,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                     <Button 
                       variant="outline" 
                       className="h-12 px-8 font-black text-slate-500 border-slate-200 hover:bg-white active:scale-95 transition-all"
-                      onClick={() => { setIsAddingNew(false); setEditingUser(null); }}
+                      onClick={() => { setIsAddingNew(false); setEditingUser(null); restoreUI(); }}
                     >
                       Cancel
                     </Button>
@@ -992,63 +992,78 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
               </div>
             )}
           </div>
-          
-          {/* Confirmation Dialogs moved back inside the Sheet but as separate root-level Portals */}
-          <AlertDialog open={!!confirmSuspend} onOpenChange={(open) => !open && setConfirmSuspend(null)}>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Suspend Staff Access?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will immediately revoke <strong>{confirmSuspend?.fullName}</strong>'s access to the platform. 
-                  They will not be able to log in until their access is restored.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction className="bg-rose-500 hover:bg-rose-600" onClick={() => confirmSuspend && handleSuspendUser(confirmSuspend)}>
-                  Confirm Suspension
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-
-          <AlertDialog open={!!confirmReactivate} onOpenChange={(open) => !open && setConfirmReactivate(null)}>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Reactivate Staff Access?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will restore platform access for <strong>{confirmReactivate?.fullName}</strong>. 
-                  They will be able to log in using their existing credentials.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction className="bg-green-600 hover:bg-green-700" onClick={() => confirmReactivate && handleReactivateUser(confirmReactivate)}>
-                  Reactivate Access
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-
-          <AlertDialog open={!!confirmReset} onOpenChange={(open) => !open && setConfirmReset(null)}>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Reset User Password?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Are you sure you want to send a password reset link to <strong>{confirmReset?.email}</strong>? 
-                  Their current password will remain active until they choose a new one.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={() => confirmReset && handleResetPassword(confirmReset)}>
-                  Send Reset Link
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
         </SheetContent>
       </Sheet>
+
+      {/* Confirmation Dialogs - MOVED OUTSIDE SHEET TO PREVENT FOCUS TRAPS */}
+      <AlertDialog open={!!confirmSuspend} onOpenChange={(open) => {
+        if (!open) {
+          setConfirmSuspend(null);
+          restoreUI();
+        }
+      }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Suspend Staff Access?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will immediately revoke <strong>{confirmSuspend?.fullName}</strong>'s access to the platform. 
+              They will not be able to log in until their access is restored.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={restoreUI}>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-rose-500 hover:bg-rose-600" onClick={() => confirmSuspend && handleSuspendUser(confirmSuspend)}>
+              Confirm Suspension
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!confirmReactivate} onOpenChange={(open) => {
+        if (!open) {
+          setConfirmReactivate(null);
+          restoreUI();
+        }
+      }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reactivate Staff Access?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will restore platform access for <strong>{confirmReactivate?.fullName}</strong>. 
+              They will be able to log in using their existing credentials.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={restoreUI}>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-green-600 hover:bg-green-700" onClick={() => confirmReactivate && handleReactivateUser(confirmReactivate)}>
+              Reactivate Access
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!confirmReset} onOpenChange={(open) => {
+        if (!open) {
+          setConfirmReset(null);
+          restoreUI();
+        }
+      }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reset User Password?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to send a password reset link to <strong>{confirmReset?.email}</strong>? 
+              Their current password will remain active until they choose a new one.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={restoreUI}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => confirmReset && handleResetPassword(confirmReset)}>
+              Send Reset Link
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }
