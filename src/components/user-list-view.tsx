@@ -19,7 +19,8 @@ import {
   Check,
   PauseCircle,
   Trash2,
-  Edit2
+  Edit2,
+  RotateCcw
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -350,6 +351,9 @@ export function UserListView({ onAddUser, onEditUser }: UserListViewProps) {
                         <DropdownMenuContent align="end" className="w-48 p-2">
                           <DropdownMenuItem className="font-bold py-2.5" onClick={() => onEditUser(user)}>
                             <Edit2 className="h-4 w-4 mr-3 text-slate-400" /> Edit Profile
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="font-bold py-2.5">
+                            <RotateCcw className="h-4 w-4 mr-3 text-slate-400" /> Reset Password
                           </DropdownMenuItem>
                           <DropdownMenuItem className="font-bold py-2.5">
                             <PauseCircle className="h-4 w-4 mr-3 text-slate-400" /> Suspend Access

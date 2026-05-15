@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -26,7 +25,8 @@ import {
   ChevronLeft,
   Loader2,
   Eye,
-  EyeOff
+  EyeOff,
+  RotateCcw
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -622,6 +622,9 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                               <DropdownMenuContent align="end" className="w-48 p-2">
                                 <DropdownMenuItem className="font-bold py-2.5" onClick={() => handleEditUser(user)}>
                                   <Edit2 className="h-4 w-4 mr-3 text-slate-400" /> Edit Profile
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="font-bold py-2.5">
+                                  <RotateCcw className="h-4 w-4 mr-3 text-slate-400" /> Reset Password
                                 </DropdownMenuItem>
                                 <DropdownMenuItem className="font-bold py-2.5" onClick={() => handleSuspendUser(user.id)}>
                                   <PauseCircle className="h-4 w-4 mr-3 text-slate-400" /> Suspend Access
