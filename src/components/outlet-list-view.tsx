@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -47,7 +48,6 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Label } from "@/components/ui/label"
 import { initialOutlets, initialTenants } from "@/lib/mock-data"
 import { Outlet, Tenant } from "@/lib/types"
@@ -70,7 +70,7 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
 
   // Edit State
   const [editingOutlet, setEditingOutlet] = React.useState<Outlet | null>(null)
-  const [isEditSheetOpen, setIsEditSheetOpen] = React.useState(false)
+  const [isFormVisible, setIsFormVisible] = React.useState(false)
   const [isFormLoading, setIsFormLoading] = React.useState(false)
 
   // Form State
@@ -131,12 +131,16 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
 
   const handleEdit = (outlet: Outlet) => {
     setEditingOutlet(outlet)
-    setIsEditSheetOpen(true)
+    setIsFormVisible(true)
     setIsFormLoading(true)
-    // Simulate a loading delay
     setTimeout(() => {
       setIsFormLoading(false)
     }, 800)
+  }
+
+  const handleCloseForm = () => {
+    setIsFormVisible(false)
+    setEditingOutlet(null)
   }
 
   const resetFilters = () => {
@@ -168,7 +172,7 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
                 <Input 
                   placeholder="Name, city or phone..." 
-                  className="pl-9 h-11 text-sm bg-white border-slate-200 focus-visible:ring-1 ring-[#1a73e8]/20" 
+                  className="pl-9 h-11 text-sm bg-white border-slate-200" 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -266,251 +270,201 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
           </div>
         </div>
 
-        {/* Data Table */}
-        <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col min-h-0 overflow-hidden">
-          <ScrollArea className="flex-1">
-            <Table>
-              <TableHeader className="bg-slate-50/50">
-                <TableRow className="hover:bg-transparent border-b border-slate-100">
-                  <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-8 uppercase tracking-widest">
-                    <div className="flex items-center gap-1.5 cursor-pointer hover:text-slate-900 transition-colors">Name <ChevronsUpDown className="h-3 w-3 opacity-50" /></div>
-                  </TableHead>
-                  <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">
-                    Phone
-                  </TableHead>
-                  <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest text-center">
-                    Users
-                  </TableHead>
-                  <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">
-                    Timezone
-                  </TableHead>
-                  <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">
-                    City / Country
-                  </TableHead>
-                  <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest text-center">
-                    Status
-                  </TableHead>
-                  <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-8 text-right uppercase tracking-widest">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedOutlets.map((outlet) => (
-                  <TableRow 
-                    key={outlet.id} 
-                    className="group hover:bg-slate-50/50 transition-all border-b border-slate-50 cursor-pointer"
-                    onClick={() => handleEdit(outlet)}
-                  >
-                    <TableCell className="py-5 px-8">
-                      <div>
-                        <div className="font-extrabold text-[15px] text-[#1e293b] border-b border-transparent inline-block leading-tight mb-1 group-hover:text-[#1a73e8] transition-colors">{outlet.name}</div>
-                        <div className="text-[11px] text-slate-400 font-medium tracking-tight opacity-70">slug: {outlet.slug}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="px-4 text-[14px] text-[#1e293b] font-extrabold">
-                      {outlet.phone}
-                    </TableCell>
-                    <TableCell className="px-4 text-center">
-                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 border border-slate-100 rounded-lg group-hover:bg-white transition-colors">
-                        <Users className="h-3.5 w-3.5 text-[#1a73e8]" />
-                        <span className="text-[14px] font-black text-slate-900">{outlet.userCount || 0}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="px-4 text-[14px] text-slate-400 font-medium">
-                      {outlet.timezone}
-                    </TableCell>
-                    <TableCell className="px-4">
-                      <div className="text-[14px] text-[#1e293b] font-extrabold leading-none mb-1">{outlet.city}</div>
-                      <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{outlet.country}</div>
-                    </TableCell>
-                    <TableCell className="px-4">
-                      <div className="flex justify-center">
-                        <Badge className={cn(
-                          "rounded-full px-3 py-1 text-[10px] font-bold flex items-center gap-2 border shadow-none uppercase tracking-wider",
-                          outlet.status === 'Active' 
-                            ? "bg-[#e1f9ef] text-[#22c55e] border-[#e1f9ef]" 
-                            : "bg-slate-100 text-slate-500 border-slate-200"
-                        )}>
-                          <div className={cn("h-1.5 w-1.5 rounded-full", outlet.status === 'Active' ? "bg-[#22c55e]" : "bg-slate-400")} />
-                          {outlet.status}
-                        </Badge>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right px-8">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-9 w-9 rounded-full hover:bg-white border border-transparent hover:border-slate-100 text-slate-400" 
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48 p-2">
-                          <DropdownMenuItem className="font-bold py-2.5" onClick={(e) => { e.stopPropagation(); handleEdit(outlet); }}>
-                            <Edit2 className="h-4 w-4 mr-3 text-slate-400" /> Edit Details
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="text-destructive font-black py-2.5" onClick={(e) => e.stopPropagation()}>Deactivate</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            {filteredOutlets.length === 0 && (
-              <div className="py-24 text-center">
-                <div className="h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100">
-                  <Store className="h-8 w-8 text-slate-200" />
+        <div className="flex-1 flex gap-6 min-h-0 overflow-hidden">
+          {isFormVisible && (
+            <div className="w-[400px] flex-shrink-0 bg-white rounded-2xl border border-slate-200 shadow-xl flex flex-col animate-in slide-in-from-left duration-500 overflow-hidden">
+              <div className="p-6 border-b border-slate-50 flex items-center justify-between">
+                <div>
+                  <h3 className="font-extrabold text-lg text-[#1e293b]">Edit Outlet Info</h3>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Update branch parameters</p>
                 </div>
-                <h3 className="text-sm font-extrabold text-slate-900">No Outlets Detected</h3>
-                <p className="text-xs text-slate-500 mt-1">Adjust your filters or add a new branch to your network.</p>
-              </div>
-            )}
-          </ScrollArea>
-
-          {/* Pagination Controls */}
-          {totalPages > 1 && (
-            <div className="px-8 py-4 border-t border-slate-100 flex items-center justify-between bg-white">
-              <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">
-                Showing <span className="text-slate-900">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to <span className="text-slate-900">{Math.min(currentPage * ITEMS_PER_PAGE, filteredOutlets.length)}</span> of <span className="text-slate-900">{filteredOutlets.length}</span> outlets
-              </p>
-              <div className="flex items-center gap-1">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="h-8 px-2 border-slate-200"
-                  disabled={currentPage === 1}
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
-                  if (totalPages > 5) {
-                    if (
-                      pageNum !== 1 && 
-                      pageNum !== totalPages && 
-                      Math.abs(pageNum - currentPage) > 1
-                    ) {
-                      if (pageNum === 2 && currentPage > 3) return <span key="start-ellipsis" className="px-2 text-slate-300">...</span>;
-                      if (pageNum === totalPages - 1 && currentPage < totalPages - 2) return <span key="end-ellipsis" className="px-2 text-slate-300">...</span>;
-                      return null;
-                    }
-                  }
-
-                  return (
-                    <Button
-                      key={pageNum}
-                      variant={currentPage === pageNum ? "default" : "outline"}
-                      size="sm"
-                      className={cn(
-                        "h-8 w-8 p-0 text-[11px] font-black border-slate-200", 
-                        currentPage === pageNum ? "bg-slate-900 border-slate-900 text-white" : "text-slate-500"
-                      )}
-                      onClick={() => setCurrentPage(pageNum)}
-                    >
-                      {pageNum}
-                    </Button>
-                  );
-                })}
-                
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="h-8 px-2 border-slate-200"
-                  disabled={currentPage === totalPages}
-                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                >
-                  <ChevronRight className="h-4 w-4" />
+                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={handleCloseForm}>
+                  <X className="h-4 w-4" />
                 </Button>
               </div>
+              <ScrollArea className="flex-1">
+                {isFormLoading ? (
+                  <div className="flex flex-col items-center justify-center h-full py-24 space-y-4">
+                    <Loader2 className="h-10 w-10 animate-spin text-[#1a73e8]" />
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Loading Details...</p>
+                  </div>
+                ) : (
+                  <div className="p-8 space-y-8">
+                    <div className="space-y-2.5">
+                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Outlet Name</Label>
+                      <Input 
+                        value={formName} 
+                        onChange={(e) => setFormName(e.target.value)} 
+                        className="h-12 bg-slate-50/50 border-slate-200" 
+                      />
+                    </div>
+                    <div className="space-y-2.5">
+                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Slug</Label>
+                      <Input 
+                        value={formSlug} 
+                        onChange={(e) => setFormSlug(e.target.value)} 
+                        className="h-12 bg-slate-50/50 border-slate-200" 
+                      />
+                    </div>
+                    <div className="space-y-2.5">
+                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Phone</Label>
+                      <Input 
+                        value={formPhone} 
+                        onChange={(e) => setFormPhone(e.target.value)} 
+                        className="h-12 bg-slate-50/50 border-slate-200" 
+                      />
+                    </div>
+                    <div className="space-y-2.5">
+                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Timezone</Label>
+                      <Input 
+                        value={formTimezone} 
+                        onChange={(e) => setFormTimezone(e.target.value)} 
+                        className="h-12 bg-slate-50/50 border-slate-200" 
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2.5">
+                        <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">City</Label>
+                        <Input 
+                          value={formCity} 
+                          onChange={(e) => setFormCity(e.target.value)} 
+                          className="h-12 bg-slate-50/50 border-slate-200" 
+                        />
+                      </div>
+                      <div className="space-y-2.5">
+                        <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Country</Label>
+                        <Input 
+                          value={formCountry} 
+                          onChange={(e) => setFormCountry(e.target.value)} 
+                          className="h-12 bg-slate-50/50 border-slate-200" 
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </ScrollArea>
+              {!isFormLoading && (
+                <div className="p-6 border-t border-slate-100 flex gap-4 bg-slate-50/30">
+                  <Button variant="outline" className="flex-1 h-12" onClick={handleCloseForm}>Cancel</Button>
+                  <Button 
+                    className="flex-1 h-12 bg-[#1a73e8] hover:bg-[#1557b0] text-white font-bold"
+                    onClick={handleCloseForm}
+                  >
+                    Save Changes
+                  </Button>
+                </div>
+              )}
             </div>
           )}
+
+          <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col min-h-0 overflow-hidden">
+            <ScrollArea className="flex-1">
+              <Table>
+                <TableHeader className="bg-slate-50/50">
+                  <TableRow className="hover:bg-transparent border-b border-slate-100">
+                    <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-8 uppercase tracking-widest">
+                      <div className="flex items-center gap-1.5 cursor-pointer hover:text-slate-900 transition-colors">Name <ChevronsUpDown className="h-3 w-3 opacity-50" /></div>
+                    </TableHead>
+                    <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">
+                      Phone
+                    </TableHead>
+                    <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest text-center">
+                      Users
+                    </TableHead>
+                    <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">
+                      Timezone
+                    </TableHead>
+                    <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">
+                      City / Country
+                    </TableHead>
+                    <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest text-center">
+                      Status
+                    </TableHead>
+                    <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-8 text-right uppercase tracking-widest">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedOutlets.map((outlet) => (
+                    <TableRow 
+                      key={outlet.id} 
+                      className={cn(
+                        "group hover:bg-slate-50/50 transition-all border-b border-slate-50 cursor-pointer",
+                        editingOutlet?.id === outlet.id && "bg-[#1a73e8]/5"
+                      )}
+                      onClick={() => handleEdit(outlet)}
+                    >
+                      <TableCell className="py-5 px-8">
+                        <div>
+                          <div className="font-extrabold text-[15px] text-[#1e293b] border-b border-transparent inline-block leading-tight mb-1 group-hover:text-[#1a73e8] transition-colors">{outlet.name}</div>
+                          <div className="text-[11px] text-slate-400 font-medium tracking-tight opacity-70">slug: {outlet.slug}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="px-4 text-[14px] text-[#1e293b] font-extrabold">
+                        {outlet.phone}
+                      </TableCell>
+                      <TableCell className="px-4 text-center">
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 border border-slate-100 rounded-lg group-hover:bg-white transition-colors">
+                          <Users className="h-3.5 w-3.5 text-[#1a73e8]" />
+                          <span className="text-[14px] font-black text-slate-900">{outlet.userCount || 0}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="px-4 text-[14px] text-slate-400 font-medium">
+                        {outlet.timezone}
+                      </TableCell>
+                      <TableCell className="px-4">
+                        <div className="text-[14px] text-[#1e293b] font-extrabold leading-none mb-1">{outlet.city}</div>
+                        <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{outlet.country}</div>
+                      </TableCell>
+                      <TableCell className="px-4 text-center">
+                        <div className="flex justify-center">
+                          <Badge className={cn(
+                            "rounded-full px-3 py-1 text-[10px] font-bold flex items-center gap-2 border shadow-none uppercase tracking-wider",
+                            outlet.status === 'Active' 
+                              ? "bg-[#e1f9ef] text-[#22c55e] border-[#e1f9ef]" 
+                              : "bg-slate-100 text-slate-500 border-slate-200"
+                          )}>
+                            <div className={cn("h-1.5 w-1.5 rounded-full", outlet.status === 'Active' ? "bg-[#22c55e]" : "bg-slate-400")} />
+                            {outlet.status}
+                          </Badge>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right px-8">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-9 w-9 rounded-full hover:bg-white border border-transparent hover:border-slate-100 text-slate-400" 
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48 p-2">
+                            <DropdownMenuItem className="font-bold py-2.5" onClick={(e) => { e.stopPropagation(); handleEdit(outlet); }}>
+                              <Edit2 className="h-4 w-4 mr-3 text-slate-400" /> Edit Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="text-destructive font-black py-2.5" onClick={(e) => e.stopPropagation()}>Deactivate</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              {filteredOutlets.length === 0 && (
+                <div className="py-24 text-center">
+                  <div className="h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100">
+                    <Store className="h-8 w-8 text-slate-200" />
+                  </div>
+                  <h3 className="text-sm font-extrabold text-slate-900">No Outlets Detected</h3>
+                  <p className="text-xs text-slate-500 mt-1">Adjust your filters or add a new branch to your network.</p>
+                </div>
+              )}
+            </ScrollArea>
+          </div>
         </div>
       </div>
-
-      {/* Edit Sheet */}
-      <Sheet open={isEditSheetOpen} onOpenChange={setIsEditSheetOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-[450px] p-0 border-l border-slate-200 bg-white flex flex-col">
-          <SheetHeader className="p-6 border-b border-slate-50">
-            <SheetTitle className="text-xl font-black text-[#1e293b]">Edit Outlet Info</SheetTitle>
-          </SheetHeader>
-          <ScrollArea className="flex-1">
-            {isFormLoading ? (
-              <div className="flex flex-col items-center justify-center h-full py-24 space-y-4">
-                <Loader2 className="h-10 w-10 animate-spin text-[#1a73e8]" />
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Loading Details...</p>
-              </div>
-            ) : (
-              <div className="p-8 space-y-8">
-                <div className="space-y-2.5">
-                  <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Outlet Name</Label>
-                  <Input 
-                    value={formName} 
-                    onChange={(e) => setFormName(e.target.value)} 
-                    className="h-12 bg-slate-50/50 border-slate-200" 
-                  />
-                </div>
-                <div className="space-y-2.5">
-                  <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Slug</Label>
-                  <Input 
-                    value={formSlug} 
-                    onChange={(e) => setFormSlug(e.target.value)} 
-                    className="h-12 bg-slate-50/50 border-slate-200" 
-                  />
-                </div>
-                <div className="space-y-2.5">
-                  <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Phone</Label>
-                  <Input 
-                    value={formPhone} 
-                    onChange={(e) => setFormPhone(e.target.value)} 
-                    className="h-12 bg-slate-50/50 border-slate-200" 
-                  />
-                </div>
-                <div className="space-y-2.5">
-                  <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Timezone</Label>
-                  <Input 
-                    value={formTimezone} 
-                    onChange={(e) => setFormTimezone(e.target.value)} 
-                    className="h-12 bg-slate-50/50 border-slate-200" 
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2.5">
-                    <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">City</Label>
-                    <Input 
-                      value={formCity} 
-                      onChange={(e) => setFormCity(e.target.value)} 
-                      className="h-12 bg-slate-50/50 border-slate-200" 
-                    />
-                  </div>
-                  <div className="space-y-2.5">
-                    <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Country</Label>
-                    <Input 
-                      value={formCountry} 
-                      onChange={(e) => setFormCountry(e.target.value)} 
-                      className="h-12 bg-slate-50/50 border-slate-200" 
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-          </ScrollArea>
-          {!isFormLoading && (
-            <div className="p-6 border-t border-slate-100 flex gap-4 bg-slate-50/30">
-              <Button variant="outline" className="flex-1 h-12" onClick={() => setIsEditSheetOpen(false)}>Cancel</Button>
-              <Button 
-                className="flex-1 h-12 bg-[#1a73e8] hover:bg-[#1557b0] text-white font-bold"
-                onClick={() => setIsEditSheetOpen(false)}
-              >
-                Save Changes
-              </Button>
-            </div>
-          )}
-        </SheetContent>
-      </Sheet>
     </div>
   )
 }

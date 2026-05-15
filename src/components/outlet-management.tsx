@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -109,7 +110,6 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
     setEditingOutlet(outlet)
     setIsAddingNew(true)
     setIsFormLoading(true)
-    // Simulate a brief loading delay for the form content
     setTimeout(() => {
       setIsFormLoading(false)
     }, 600)
@@ -130,7 +130,6 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <SheetContent side="right" className="w-full sm:max-w-[1200px] p-0 border-l border-slate-200 bg-[#f8f9fc] flex flex-col transition-all duration-500">
-        {/* Breadcrumb Header */}
         <SheetHeader className="px-8 py-6 bg-white border-b border-slate-100 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
@@ -165,11 +164,9 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
           </div>
         </SheetHeader>
 
-        {/* Content Area */}
         <div className="flex-1 flex min-h-0 overflow-hidden bg-[#f8f9fc] p-6 gap-6">
-          {/* Animated Form Sidebar */}
           {isAddingNew && (
-            <div className="w-[400px] flex-shrink-0 bg-white rounded-2xl border border-slate-200 shadow-xl flex flex-col animate-in slide-in-from-left fade-in duration-500">
+            <div className="w-[400px] flex-shrink-0 bg-white rounded-2xl border border-slate-200 shadow-xl flex flex-col animate-in slide-in-from-left fade-in duration-500 overflow-hidden">
               <div className="p-6 border-b border-slate-50 flex items-center justify-between">
                 <div>
                   <h3 className="font-extrabold text-lg text-[#1e293b]">
@@ -219,7 +216,7 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                       />
                     </div>
                     <div className="space-y-2.5">
-                      <Label className="text-[10px) font-bold text-slate-400 uppercase tracking-widest">Business Timezone</Label>
+                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Business Timezone</Label>
                       <Select value={formTimezone} onValueChange={setFormTimezone}>
                         <SelectTrigger className="h-12 bg-slate-50/50 border-slate-200">
                           <SelectValue placeholder="Select timezone" />
@@ -268,7 +265,6 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
             </div>
           )}
 
-          {/* Table Container */}
           <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col min-h-0">
             <div className="p-6 flex flex-col md:flex-row gap-4 border-b border-slate-50 bg-slate-50/10">
               <div className="relative flex-1 max-sm:max-w-none max-w-sm">
@@ -326,7 +322,10 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                   {filteredOutlets.map((outlet) => (
                     <TableRow 
                       key={outlet.id} 
-                      className="group hover:bg-slate-50/50 transition-all border-b border-slate-50 cursor-pointer relative"
+                      className={cn(
+                        "group hover:bg-slate-50/50 transition-all border-b border-slate-50 cursor-pointer relative",
+                        editingOutlet?.id === outlet.id && "bg-[#1a73e8]/5 border-l-4 border-l-[#1a73e8]"
+                      )}
                       onClick={() => handleEdit(outlet)}
                     >
                       <TableCell className="py-5 px-8">
