@@ -207,9 +207,10 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
   }
 
   const selectedTenantName = React.useMemo(() => {
-    if (!formTenantId) return null
-    return initialTenants.find(t => t.id === formTenantId)?.tenantName
-  }, [formTenantId])
+    const tid = tenant?.id || formTenantId
+    if (!tid) return null
+    return initialTenants.find(t => t.id === tid)?.tenantName
+  }, [tenant, formTenantId])
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
