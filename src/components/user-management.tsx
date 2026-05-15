@@ -144,36 +144,49 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
     setAssignments([])
   }, [tenant])
 
+  // Crucial: Clean up pointer-events on unmount or closure to fix "unclickable UI" issue
   React.useEffect(() => {
-    if (propEditingUser) {
-      setEditingUser(propEditingUser)
-      setIsAddingNew(true)
-      setFormFullName(propEditingUser.fullName)
-      setFormUsername(propEditingUser.username)
-      setFormEmail(propEditingUser.email)
-      setFormPhone(propEditingUser.phone)
-      setFormPrimaryRole(propEditingUser.role)
-      setFormTenantId(propEditingUser.tenantId)
-      setFormEmployeeId(`EMP-${propEditingUser.id.split('-').pop()}`)
-      setFormPassword("")
-      setFormConfirmPassword("")
-      
-      if (propEditingUser.outletId) {
-        setAssignments([{
-          id: '1',
-          outletId: propEditingUser.outletId,
-          role: propEditingUser.role
-        }])
+    if (!isOpen) {
+      // Small timeout to allow Radix cleanup to finish, then force restore body interactivity
+      const timer = setTimeout(() => {
+        document.body.style.pointerEvents = 'auto';
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      if (propEditingUser) {
+        setEditingUser(propEditingUser)
+        setIsAddingNew(true)
+        setFormFullName(propEditingUser.fullName)
+        setFormUsername(propEditingUser.username)
+        setFormEmail(propEditingUser.email)
+        setFormPhone(propEditingUser.phone)
+        setFormPrimaryRole(propEditingUser.role)
+        setFormTenantId(propEditingUser.tenantId)
+        setFormEmployeeId(`EMP-${propEditingUser.id.split('-').pop()}`)
+        setFormPassword("")
+        setFormConfirmPassword("")
+        
+        if (propEditingUser.outletId) {
+          setAssignments([{
+            id: '1',
+            outletId: propEditingUser.outletId,
+            role: propEditingUser.role
+          }])
+        } else {
+          setAssignments([])
+        }
+      } else if (defaultAdding) {
+        setIsAddingNew(true)
+        setEditingUser(null)
+        resetForm()
       } else {
-        setAssignments([])
+        setIsAddingNew(false)
+        setEditingUser(null)
       }
-    } else if (defaultAdding && isOpen) {
-      setIsAddingNew(true)
-      setEditingUser(null)
-      resetForm()
-    } else if (!isOpen) {
-      setIsAddingNew(false)
-      setEditingUser(null)
     }
   }, [propEditingUser, defaultAdding, isOpen, resetForm])
 
@@ -380,8 +393,8 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
 
   return (
     <>
-      <Sheet open={isOpen} onOpenChange={(open) => {
-        if (!open) {
+      <Sheet open={isOpen} onOpenChange={(val) => {
+        if (!val) {
           onClose()
         }
       }}>
@@ -929,14 +942,12 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                                       </Select>
                                     </TableCell>
                                     <TableCell className="p-1 pb-3 text-right">
-                                      <Button 
-                                        variant="ghost" 
-                                        size="icon" 
-                                        className="h-11 w-11 rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-100 hover:text-rose-600 transition-colors"
+                                      <button 
+                                        className="h-11 w-11 rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-100 hover:text-rose-600 transition-colors flex items-center justify-center"
                                         onClick={() => handleRemoveAssignment(assignment.id)}
                                       >
                                         <Trash2 className="h-5 w-5" />
-                                      </Button>
+                                      </button>
                                     </TableCell>
                                   </TableRow>
                                 ))}
@@ -974,63 +985,63 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
               </div>
             )}
           </div>
+          
+          {/* Confirmation Dialogs moved back inside the Sheet but as separate root-level Portals */}
+          <AlertDialog open={!!confirmSuspend} onOpenChange={(open) => !open && setConfirmSuspend(null)}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Suspend Staff Access?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will immediately revoke <strong>{confirmSuspend?.fullName}</strong>'s access to the platform. 
+                  They will not be able to log in until their access is restored.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction className="bg-rose-500 hover:bg-rose-600" onClick={() => confirmSuspend && handleSuspendUser(confirmSuspend)}>
+                  Confirm Suspension
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
+          <AlertDialog open={!!confirmReactivate} onOpenChange={(open) => !open && setConfirmReactivate(null)}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Reactivate Staff Access?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will restore platform access for <strong>{confirmReactivate?.fullName}</strong>. 
+                  They will be able to log in using their existing credentials.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction className="bg-green-600 hover:bg-green-700" onClick={() => confirmReactivate && handleReactivateUser(confirmReactivate)}>
+                  Reactivate Access
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
+          <AlertDialog open={!!confirmReset} onOpenChange={(open) => !open && setConfirmReset(null)}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Reset User Password?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to send a password reset link to <strong>{confirmReset?.email}</strong>? 
+                  Their current password will remain active until they choose a new one.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={() => confirmReset && handleResetPassword(confirmReset)}>
+                  Send Reset Link
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </SheetContent>
       </Sheet>
-
-      {/* Confirmation Dialogs moved outside the Sheet to avoid conflicting focus traps */}
-      <AlertDialog open={!!confirmSuspend} onOpenChange={(open) => !open && setConfirmSuspend(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Suspend Staff Access?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will immediately revoke <strong>{confirmSuspend?.fullName}</strong>'s access to the platform. 
-              They will not be able to log in until their access is restored.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction className="bg-rose-500 hover:bg-rose-600" onClick={() => confirmSuspend && handleSuspendUser(confirmSuspend)}>
-              Confirm Suspension
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog open={!!confirmReactivate} onOpenChange={(open) => !open && setConfirmReactivate(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Reactivate Staff Access?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will restore platform access for <strong>{confirmReactivate?.fullName}</strong>. 
-              They will be able to log in using their existing credentials.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction className="bg-green-600 hover:bg-green-700" onClick={() => confirmReactivate && handleReactivateUser(confirmReactivate)}>
-              Reactivate Access
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog open={!!confirmReset} onOpenChange={(open) => !open && setConfirmReset(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Reset User Password?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to send a password reset link to <strong>{confirmReset?.email}</strong>? 
-              Their current password will remain active until they choose a new one.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => confirmReset && handleResetPassword(confirmReset)}>
-              Send Reset Link
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   )
 }
