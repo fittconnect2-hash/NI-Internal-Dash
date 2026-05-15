@@ -51,6 +51,7 @@ import { Label } from "@/components/ui/label"
 import { initialOutlets, initialTenants } from "@/lib/mock-data"
 import { Outlet, Tenant } from "@/lib/types"
 import { cn } from "@/lib/utils"
+import { useToast } from "@/hooks/use-toast"
 
 const ITEMS_PER_PAGE = 10
 
@@ -65,6 +66,8 @@ interface OutletListViewProps {
 }
 
 export function OutletListView({ onViewUsers }: OutletListViewProps) {
+  const { toast } = useToast()
+  const [outlets, setOutlets] = React.useState<Outlet[]>(initialOutlets)
   const [searchQuery, setSearchQuery] = React.useState("")
   const [tenantFilter, setTenantFilter] = React.useState<string | null>(null)
   const [statusFilter, setStatusFilter] = React.useState<string | null>(null)
@@ -111,9 +114,9 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
   const tenantsWithCounts = React.useMemo(() => {
     return initialTenants.map(tenant => ({
       ...tenant,
-      count: initialOutlets.filter(o => o.tenantId === tenant.id).length
+      count: outlets.filter(o => o.tenantId === tenant.id).length
     })).filter(tenant => tenant.count > 0)
-  }, [])
+  }, [outlets])
 
   const filteredTenantsForDropdown = React.useMemo(() => {
     return tenantsWithCounts.filter(t => 
@@ -122,7 +125,7 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
   }, [tenantsWithCounts, tenantSearch])
 
   const filteredOutlets = React.useMemo(() => {
-    return initialOutlets.filter(outlet => {
+    return outlets.filter(outlet => {
       const matchesSearch = outlet.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            outlet.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            outlet.phone.includes(searchQuery)
@@ -130,7 +133,7 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
       const matchesStatus = !statusFilter || outlet.status === statusFilter
       return matchesSearch && matchesTenant && matchesStatus
     })
-  }, [searchQuery, tenantFilter, statusFilter])
+  }, [outlets, searchQuery, tenantFilter, statusFilter])
 
   // Pagination logic
   const totalPages = Math.ceil(filteredOutlets.length / ITEMS_PER_PAGE)
@@ -165,6 +168,53 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
   const handleCloseForm = () => {
     setIsFormVisible(false)
     setEditingOutlet(null)
+  }
+
+  const handleSaveOutlet = () => {
+    if (!formTenantId || !formName) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields.",
+        variant: "destructive"
+      })
+      return
+    }
+
+    if (editingOutlet) {
+      setOutlets(prev => prev.map(o => o.id === editingOutlet.id ? {
+        ...o,
+        tenantId: formTenantId,
+        name: formName,
+        slug: formSlug,
+        phone: formPhone,
+        timezone: formTimezone,
+        city: formCity,
+        country: formCountry
+      } : o))
+      toast({
+        title: "Outlet Updated",
+        description: `${formName} has been successfully updated.`
+      })
+    } else {
+      const newOutlet: Outlet = {
+        id: Math.random().toString(36).substr(2, 9),
+        tenantId: formTenantId,
+        name: formName,
+        slug: formSlug,
+        phone: formPhone,
+        timezone: formTimezone,
+        city: formCity,
+        country: formCountry,
+        status: 'Active',
+        userCount: 0
+      }
+      setOutlets(prev => [newOutlet, ...prev])
+      toast({
+        title: "Outlet Added",
+        description: `${formName} has been successfully added to your network.`
+      })
+    }
+    handleCloseForm()
   }
 
   const resetFilters = () => {
@@ -223,7 +273,7 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
                   >
                     <span className="truncate">
                       {tenantFilter 
-                        ? tenantsWithCounts.find(t => t.id === tenantFilter)?.tenantName 
+                        ? initialTenants.find(t => t.id === tenantFilter)?.tenantName 
                         : "All Tenants"}
                     </span>
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -310,7 +360,7 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
                 <div>
                   <h3 className="font-extrabold text-lg text-[#1e293b]">
                     {editingOutlet 
-                      ? "Edit Outlet" 
+                      ? `Edit ${editingOutlet.name}` 
                       : selectedTenantName 
                         ? `Add New Outlet to ${selectedTenantName}` 
                         : "Add New Outlet"}
@@ -422,7 +472,7 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
                   <Button variant="outline" className="flex-1 h-12" onClick={handleCloseForm}>Cancel</Button>
                   <Button 
                     className="flex-1 h-12 bg-[#1a73e8] hover:bg-[#1557b0] text-white font-bold"
-                    onClick={handleCloseForm}
+                    onClick={handleSaveOutlet}
                   >
                     {editingOutlet ? "Save Changes" : "Create Outlet"}
                   </Button>
@@ -536,6 +586,57 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
                 </div>
               )}
             </ScrollArea>
+            
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="px-8 py-4 border-t border-slate-100 flex items-center justify-between bg-white">
+                <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">
+                  Showing <span className="text-slate-900">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to <span className="text-slate-900">{Math.min(currentPage * ITEMS_PER_PAGE, filteredOutlets.length)}</span> of <span className="text-slate-900">{filteredOutlets.length}</span> results
+                </p>
+                <div className="flex items-center gap-1">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="h-8 px-2 border-slate-200"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
+                    if (totalPages > 5) {
+                      if (pageNum !== 1 && pageNum !== totalPages && Math.abs(pageNum - currentPage) > 1) {
+                        if (pageNum === 2 && currentPage > 3) return <span key="start-ellipsis" className="px-2 text-slate-300">...</span>;
+                        if (pageNum === totalPages - 1 && currentPage < totalPages - 2) return <span key="end-ellipsis" className="px-2 text-slate-300">...</span>;
+                        return null;
+                      }
+                    }
+                    return (
+                      <Button
+                        key={pageNum}
+                        variant={currentPage === pageNum ? "default" : "outline"}
+                        size="sm"
+                        className={cn("h-8 w-8 p-0 text-[11px] font-black border-slate-200", currentPage === pageNum ? "bg-slate-900 border-slate-900" : "text-slate-500")}
+                        onClick={() => setCurrentPage(pageNum)}
+                      >
+                        {pageNum}
+                      </Button>
+                    );
+                  })}
+                  
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="h-8 px-2 border-slate-200"
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

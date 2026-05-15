@@ -14,7 +14,8 @@ import {
   FilterX,
   Users as UsersIcon,
   Edit2,
-  Loader2
+  Loader2,
+  ChevronLeft
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -51,6 +52,9 @@ import {
 } from "@/components/ui/select"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
+import { useToast } from "@/hooks/use-toast"
+
+const ITEMS_PER_PAGE = 10
 
 const COUNTRY_CITY_MAP: Record<string, string[]> = {
   "UAE": ["Dubai", "Abu Dhabi", "Sharjah", "Ajman"],
@@ -66,9 +70,12 @@ interface OutletManagementProps {
 }
 
 export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: OutletManagementProps) {
+  const { toast } = useToast()
   const [outlets, setOutlets] = React.useState<Outlet[]>(initialOutlets)
   const [searchQuery, setSearchQuery] = React.useState("")
   const [statusFilter, setStatusFilter] = React.useState<string | null>(null)
+  const [currentPage, setCurrentPage] = React.useState(1)
+  
   const [isAddingNew, setIsAddingNew] = React.useState(false)
   const [editingOutlet, setEditingOutlet] = React.useState<Outlet | null>(null)
   const [isFormLoading, setIsFormLoading] = React.useState(false)
@@ -102,12 +109,26 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
     }
   }, [editingOutlet, tenant, isAddingNew])
 
-  const filteredOutlets = outlets.filter(o => {
-    const matchesSearch = o.name.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesStatus = !statusFilter || o.status === statusFilter
-    const matchesTenant = !tenant || o.tenantId === tenant.id
-    return matchesSearch && matchesStatus && matchesTenant
-  })
+  const filteredOutlets = React.useMemo(() => {
+    return outlets.filter(o => {
+      const matchesSearch = o.name.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesStatus = !statusFilter || o.status === statusFilter
+      const matchesTenant = !tenant || o.tenantId === tenant.id
+      return matchesSearch && matchesStatus && matchesTenant
+    })
+  }, [outlets, searchQuery, statusFilter, tenant])
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredOutlets.length / ITEMS_PER_PAGE)
+  const paginatedOutlets = React.useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE
+    return filteredOutlets.slice(start, start + ITEMS_PER_PAGE)
+  }, [filteredOutlets, currentPage])
+
+  // Reset page when filtering/searching
+  React.useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, statusFilter])
 
   const resetFilters = () => {
     setSearchQuery("")
@@ -138,6 +159,53 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
     setIsFormLoading(false)
   }
 
+  const handleSaveOutlet = () => {
+    if (!formTenantId || !formName) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields.",
+        variant: "destructive"
+      })
+      return
+    }
+
+    if (editingOutlet) {
+      setOutlets(prev => prev.map(o => o.id === editingOutlet.id ? {
+        ...o,
+        tenantId: formTenantId,
+        name: formName,
+        slug: formSlug,
+        phone: formPhone,
+        timezone: formTimezone,
+        city: formCity,
+        country: formCountry
+      } : o))
+      toast({
+        title: "Outlet Updated",
+        description: `${formName} has been successfully updated.`
+      })
+    } else {
+      const newOutlet: Outlet = {
+        id: Math.random().toString(36).substr(2, 9),
+        tenantId: formTenantId,
+        name: formName,
+        slug: formSlug,
+        phone: formPhone,
+        timezone: formTimezone,
+        city: formCity,
+        country: formCountry,
+        status: 'Active',
+        userCount: 0
+      }
+      setOutlets(prev => [newOutlet, ...prev])
+      toast({
+        title: "Outlet Added",
+        description: `${formName} has been successfully added.`
+      })
+    }
+    handleCloseForm()
+  }
+
   const selectedTenantName = React.useMemo(() => {
     if (!formTenantId) return null
     return initialTenants.find(t => t.id === formTenantId)?.tenantName
@@ -159,7 +227,7 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                 <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                   <span className="flex items-center gap-1.5 opacity-80"><Building2 className="h-3 w-3" /> TENANTS</span>
                   <ChevronRight className="h-2.5 w-2.5 opacity-30" />
-                  <span className={cn("font-black", tenant ? "text-[#1a73e8]" : "text-slate-900")}>{tenant?.tenantName.toUpperCase() || "ALL TENANTS"}</span>
+                  <span className="text-[#1a73e8] font-black">{tenant?.tenantName.toUpperCase() || "ALL TENANTS"}</span>
                   <ChevronRight className="h-2.5 w-2.5 opacity-30" />
                   <span className="opacity-80">OUTLETS</span>
                 </div>
@@ -187,7 +255,7 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                 <div>
                   <h3 className="font-extrabold text-lg text-[#1e293b]">
                     {editingOutlet 
-                      ? "Edit Outlet" 
+                      ? `Edit ${editingOutlet.name}` 
                       : selectedTenantName 
                         ? `Add New Outlet to ${selectedTenantName}` 
                         : "Add New Outlet"}
@@ -299,7 +367,7 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                   <Button variant="outline" className="flex-1 h-12 border-slate-200 font-bold text-slate-600 hover:bg-white" onClick={handleCloseForm}>Cancel</Button>
                   <Button 
                     className="flex-1 h-12 bg-[#1a73e8] hover:bg-[#1557b0] text-white font-bold shadow-lg shadow-[#1a73e8]/20 active:scale-95 transition-all"
-                    onClick={handleCloseForm}
+                    onClick={handleSaveOutlet}
                   >
                     {editingOutlet ? "Update Branch" : "Create Outlet"}
                   </Button>
@@ -362,7 +430,7 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredOutlets.map((outlet) => (
+                  {paginatedOutlets.map((outlet) => (
                     <TableRow 
                       key={outlet.id} 
                       className={cn(
@@ -440,6 +508,57 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                 </div>
               )}
             </ScrollArea>
+            
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="px-8 py-4 border-t border-slate-100 flex items-center justify-between bg-white">
+                <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">
+                  Showing <span className="text-slate-900">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to <span className="text-slate-900">{Math.min(currentPage * ITEMS_PER_PAGE, filteredOutlets.length)}</span> of <span className="text-slate-900">{filteredOutlets.length}</span> results
+                </p>
+                <div className="flex items-center gap-1">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="h-8 px-2 border-slate-200"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
+                    if (totalPages > 5) {
+                      if (pageNum !== 1 && pageNum !== totalPages && Math.abs(pageNum - currentPage) > 1) {
+                        if (pageNum === 2 && currentPage > 3) return <span key="start-ellipsis" className="px-2 text-slate-300">...</span>;
+                        if (pageNum === totalPages - 1 && currentPage < totalPages - 2) return <span key="end-ellipsis" className="px-2 text-slate-300">...</span>;
+                        return null;
+                      }
+                    }
+                    return (
+                      <Button
+                        key={pageNum}
+                        variant={currentPage === pageNum ? "default" : "outline"}
+                        size="sm"
+                        className={cn("h-8 w-8 p-0 text-[11px] font-black border-slate-200", currentPage === pageNum ? "bg-slate-900 border-slate-900" : "text-slate-500")}
+                        onClick={() => setCurrentPage(pageNum)}
+                      >
+                        {pageNum}
+                      </Button>
+                    );
+                  })}
+                  
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="h-8 px-2 border-slate-200"
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </SheetContent>
