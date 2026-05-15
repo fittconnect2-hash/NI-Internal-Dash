@@ -55,6 +55,7 @@ export default function DashboardPage() {
   const [viewingTenant, setViewingTenant] = React.useState<Tenant | null>(null)
   const [selectedTenant, setSelectedTenant] = React.useState<Tenant | null>(null)
   const [editingUser, setEditingUser] = React.useState<User | null>(null)
+  const [isAddingNewUser, setIsAddingNewUser] = React.useState(false)
 
   // Filter logic
   const filteredTenants = React.useMemo(() => {
@@ -120,6 +121,14 @@ export default function DashboardPage() {
   const handleUsersNavigation = (tenant: Tenant) => {
     setSelectedTenant(tenant)
     setIsUsersDrawerOpen(true)
+    setIsAddingNewUser(false)
+  }
+
+  const handleAddUserGlobal = () => {
+    setSelectedTenant(null)
+    setEditingUser(null)
+    setIsAddingNewUser(true)
+    setIsUsersDrawerOpen(true)
   }
 
   const renderContent = () => {
@@ -134,6 +143,7 @@ export default function DashboardPage() {
             const owner = tenants.find(t => t.id === outlet.tenantId)
             setSelectedTenant(owner || null)
             setIsUsersDrawerOpen(true)
+            setIsAddingNewUser(false)
           }}
         />
       )
@@ -142,8 +152,10 @@ export default function DashboardPage() {
     if (activeTab === 'users') {
       return (
         <UserListView 
+          onAddUser={handleAddUserGlobal}
           onEditUser={(user) => {
             setEditingUser(user)
+            setIsAddingNewUser(false)
             setIsUsersDrawerOpen(true)
           }}
         />
@@ -308,6 +320,7 @@ export default function DashboardPage() {
           setActiveTab(tab)
           setSelectedTenant(null)
           setEditingUser(null)
+          setIsAddingNewUser(false)
         }} />
         <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
           {renderContent()}
@@ -337,13 +350,20 @@ export default function DashboardPage() {
         onViewUsers={(outlet) => {
           setIsOutletsDrawerOpen(false)
           setIsUsersDrawerOpen(true)
+          setIsAddingNewUser(false)
         }}
       />
       <UserManagement
         tenant={selectedTenant}
         editingUser={editingUser}
         isOpen={isUsersDrawerOpen}
-        onClose={() => {setIsUsersDrawerOpen(false); setSelectedTenant(null); setEditingUser(null)}}
+        defaultAdding={isAddingNewUser}
+        onClose={() => {
+          setIsUsersDrawerOpen(false); 
+          setSelectedTenant(null); 
+          setEditingUser(null);
+          setIsAddingNewUser(false);
+        }}
       />
     </SidebarProvider>
   )

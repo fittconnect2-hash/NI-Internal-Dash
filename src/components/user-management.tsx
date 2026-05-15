@@ -22,7 +22,8 @@ import {
   Phone,
   User as UserIcon,
   Check,
-  ChevronLeft
+  ChevronLeft,
+  Loader2
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -62,6 +63,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
+import { useToast } from "@/hooks/use-toast"
 
 const ITEMS_PER_PAGE = 10
 
@@ -69,10 +71,12 @@ interface UserManagementProps {
   tenant?: Tenant | null;
   editingUser?: User | null;
   isOpen: boolean;
+  defaultAdding?: boolean;
   onClose: () => void;
 }
 
-export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, onClose }: UserManagementProps) {
+export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, defaultAdding = false, onClose }: UserManagementProps) {
+  const { toast } = useToast()
   const [users, setUsers] = React.useState<User[]>(initialUsers)
   const [userFilter, setUserFilter] = React.useState("")
   const [tenantFilter, setTenantFilter] = React.useState<string | null>(null)
@@ -83,27 +87,58 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, o
   
   const [isAddingNew, setIsAddingNew] = React.useState(false)
   const [editingUser, setEditingUser] = React.useState<User | null>(null)
+  const [isFormLoading, setIsFormLoading] = React.useState(false)
   
   const [tenantSearch, setTenantSearch] = React.useState("")
   const [isTenantPopoverOpen, setIsTenantPopoverOpen] = React.useState(false)
+
+  // Form State
+  const [formFullName, setFormFullName] = React.useState("")
+  const [formUsername, setFormUsername] = React.useState("")
+  const [formEmail, setFormEmail] = React.useState("")
+  const [formPhone, setFormPhone] = React.useState("")
+  const [formRole, setFormRole] = React.useState<User['role']>('Manager')
+  const [formTenantId, setFormTenantId] = React.useState("")
+  const [formOutletId, setFormOutletId] = React.useState("")
 
   React.useEffect(() => {
     if (propEditingUser) {
       setEditingUser(propEditingUser)
       setIsAddingNew(true)
+      setFormFullName(propEditingUser.fullName)
+      setFormUsername(propEditingUser.username)
+      setFormEmail(propEditingUser.email)
+      setFormPhone(propEditingUser.phone)
+      setFormRole(propEditingUser.role)
+      setFormTenantId(propEditingUser.tenantId)
+      setFormOutletId(propEditingUser.outletId || "")
+    } else if (defaultAdding && isOpen) {
+      setIsAddingNew(true)
+      setEditingUser(null)
+      resetForm()
     }
-  }, [propEditingUser])
+  }, [propEditingUser, defaultAdding, isOpen])
+
+  const resetForm = () => {
+    setFormFullName("")
+    setFormUsername("")
+    setFormEmail("")
+    setFormPhone("")
+    setFormRole('Manager')
+    setFormTenantId(tenant?.id || "")
+    setFormOutletId("")
+  }
 
   // Calculate user counts for each tenant for the filter
   const tenantsWithCounts = React.useMemo(() => {
     return initialTenants.map(t => ({
       ...t,
-      count: initialUsers.filter(u => u.tenantId === t.id).length
+      count: users.filter(u => u.tenantId === t.id).length
     })).filter(t => t.count > 0)
-  }, [])
+  }, [users])
 
   // Filter outlets by current tenant (or selected tenant filter)
-  const activeTenantId = tenant?.id || tenantFilter
+  const activeTenantId = tenant?.id || formTenantId || tenantFilter
   const tenantOutlets = React.useMemo(() => {
     return initialOutlets.filter(o => !activeTenantId || o.tenantId === activeTenantId)
   }, [activeTenantId])
@@ -124,21 +159,89 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, o
   }
 
   const handleEditUser = (user: User) => {
+    setIsFormLoading(true)
     setEditingUser(user)
     setIsAddingNew(true)
+    setFormFullName(user.fullName)
+    setFormUsername(user.username)
+    setFormEmail(user.email)
+    setFormPhone(user.phone)
+    setFormRole(user.role)
+    setFormTenantId(user.tenantId)
+    setFormOutletId(user.outletId || "")
+    setTimeout(() => setIsFormLoading(false), 500)
   }
 
   const handleAddNewUser = () => {
+    setIsFormLoading(true)
     setEditingUser(null)
     setIsAddingNew(true)
+    resetForm()
+    setTimeout(() => setIsFormLoading(false), 400)
+  }
+
+  const handleSaveUser = () => {
+    if (!formFullName || !formUsername || !formEmail) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
+        variant: "destructive"
+      })
+      return
+    }
+
+    if (editingUser) {
+      setUsers(prev => prev.map(u => u.id === editingUser.id ? {
+        ...u,
+        fullName: formFullName,
+        username: formUsername,
+        email: formEmail,
+        phone: formPhone,
+        role: formRole,
+        tenantId: formTenantId,
+        outletId: formOutletId || undefined
+      } : u))
+      toast({
+        title: "Staff Profile Updated",
+        description: `${formFullName}'s details have been saved.`
+      })
+    } else {
+      const newUser: User = {
+        id: `u-${Math.random().toString(36).substr(2, 9)}`,
+        fullName: formFullName,
+        username: formUsername,
+        email: formEmail,
+        phone: formPhone,
+        role: formRole,
+        tenantId: formTenantId,
+        outletId: formOutletId || undefined,
+        status: 'Active',
+        lastActive: 'Just now'
+      }
+      setUsers(prev => [newUser, ...prev])
+      toast({
+        title: "Staff Member Enrolled",
+        description: `${formFullName} has been added to the system.`
+      })
+    }
+    setIsAddingNew(false)
+    setEditingUser(null)
   }
 
   const handleSuspendUser = (userId: string) => {
     setUsers(prev => prev.map(u => u.id === userId ? { ...u, status: 'Inactive' } : u))
+    toast({
+      title: "User Suspended",
+      description: "Staff access has been revoked."
+    })
   }
 
   const handleDeleteUser = (userId: string) => {
     setUsers(prev => prev.filter(u => u.id !== userId))
+    toast({
+      title: "User Deleted",
+      description: "Staff record removed from database."
+    })
   }
 
   const filteredUsers = React.useMemo(() => {
@@ -175,6 +278,12 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, o
     return initialTenants.find(t => t.id === tenantId)?.tenantName || "Unknown Tenant"
   }
 
+  const selectedTenantName = React.useMemo(() => {
+    const tid = tenant?.id || formTenantId
+    if (!tid) return null
+    return initialTenants.find(t => t.id === tid)?.tenantName
+  }, [tenant, formTenantId])
+
   return (
     <Sheet open={isOpen} onOpenChange={(open) => {
       if (!open) {
@@ -197,7 +306,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, o
                 <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                   <span className="flex items-center gap-1.5 opacity-80"><Building2 className="h-3 w-3" /> TENANTS</span>
                   <ChevronRight className="h-2.5 w-2.5 opacity-30" />
-                  <span className="text-slate-900">{tenant?.tenantName.toUpperCase() || "GLOBAL MANAGEMENT"}</span>
+                  <span className="text-[#1a73e8] font-black">{tenant?.tenantName.toUpperCase() || "GLOBAL MANAGEMENT"}</span>
                   <ChevronRight className="h-2.5 w-2.5 opacity-30" />
                   <span className="opacity-80">USERS</span>
                 </div>
@@ -210,11 +319,6 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, o
                         ? `User Management of ${tenant.tenantName}` 
                         : "User Management"}
                 </SheetTitle>
-                {isAddingNew && (
-                  <SheetDescription className="text-xs text-slate-500 font-medium">
-                    {editingUser ? `Update permissions and profile for ${editingUser.fullName}.` : "Enter the details for the new user. They will receive an email to set their password."}
-                  </SheetDescription>
-                )}
               </div>
             </div>
             {!isAddingNew && (
@@ -550,127 +654,151 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, o
             <div className="flex flex-col flex-1 p-8 overflow-hidden animate-in fade-in slide-in-from-right duration-500">
               <div className="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden flex flex-col flex-1">
                 <ScrollArea className="flex-1">
-                  <div className="p-10 grid grid-cols-1 lg:grid-cols-2 gap-16">
-                    <div className="space-y-10">
-                      <div>
-                        <h3 className="text-xl font-black text-slate-900 tracking-tight mb-1">
-                          {tenant ? tenant.tenantName : "Account Admin"}
-                        </h3>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                          {tenant ? "Tenant Admin Profile" : "Administrative Enrollment"}
-                        </p>
-                        <div className="h-1 w-10 bg-[#1a73e8] rounded-full mt-2" />
+                  {isFormLoading ? (
+                    <div className="flex flex-col items-center justify-center py-40 space-y-4">
+                      <Loader2 className="h-10 w-10 animate-spin text-[#1a73e8]" />
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Preparing Profile...</p>
+                    </div>
+                  ) : (
+                    <div className="p-10 grid grid-cols-1 lg:grid-cols-2 gap-16">
+                      <div className="space-y-10">
+                        <div>
+                          <h3 className="text-xl font-black text-slate-900 tracking-tight mb-1">
+                            {editingUser ? "Update Profile" : selectedTenantName ? `Add User to ${selectedTenantName}` : "Account Admin"}
+                          </h3>
+                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                            {editingUser ? "Modify Existing Admin" : "Tenant Admin Enrollment"}
+                          </p>
+                          <div className="h-1 w-10 bg-[#1a73e8] rounded-full mt-2" />
+                        </div>
+
+                        <div className="space-y-6">
+                          <div className="space-y-2">
+                            <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Full Name <span className="text-red-500">*</span></Label>
+                            <Input 
+                              value={formFullName} 
+                              onChange={(e) => setFormFullName(e.target.value)}
+                              placeholder="Enter full name" 
+                              className="h-12 border-slate-200 bg-slate-50/30 focus-visible:bg-white focus-visible:ring-1 ring-[#1a73e8]/20 transition-all font-bold" 
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Username <span className="text-red-500">*</span></Label>
+                            <Input 
+                              value={formUsername} 
+                              onChange={(e) => setFormUsername(e.target.value)}
+                              placeholder="@username" 
+                              className="h-12 border-slate-200 bg-slate-50/30 font-bold" 
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email Address</Label>
+                            <Input 
+                              type="email" 
+                              value={formEmail} 
+                              onChange={(e) => setFormEmail(e.target.value)}
+                              placeholder="Enter email address" 
+                              className="h-12 border-slate-200 bg-slate-50/30 font-medium" 
+                            />
+                          </div>
+
+                          {!editingUser && (
+                            <>
+                              <div className="space-y-2">
+                                <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Password <span className="text-red-500">*</span></Label>
+                                <Input type="password" placeholder="Enter password" className="h-12 border-slate-200 bg-slate-50/30" />
+                              </div>
+
+                              <div className="space-y-2">
+                                <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Confirm Password <span className="text-red-500">*</span></Label>
+                                <Input type="password" placeholder="Confirm password" className="h-12 border-slate-200 bg-slate-50/30" />
+                              </div>
+                            </>
+                          )}
+
+                          <div className="space-y-2">
+                            <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Phone Number <span className="text-red-500">*</span></Label>
+                            <div className="flex gap-3">
+                              <Select defaultValue="+971">
+                                <SelectTrigger className="w-[110px] h-12 border-slate-200 bg-slate-50/30 font-bold">
+                                  <SelectValue placeholder="+971" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="+971">+971</SelectItem>
+                                  <SelectItem value="+1">+1</SelectItem>
+                                  <SelectItem value="+44">+44</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <Input 
+                                value={formPhone} 
+                                onChange={(e) => setFormPhone(e.target.value)}
+                                placeholder="000-000-0000" 
+                                className="h-12 flex-1 border-slate-200 bg-slate-50/30 font-bold tracking-widest" 
+                              />
+                            </div>
+                          </div>
+                        </div>
                       </div>
 
-                      <div className="space-y-6">
-                        <div className="space-y-2">
-                          <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Full Name <span className="text-red-500">*</span></Label>
-                          <Input 
-                            defaultValue={editingUser?.fullName || ""} 
-                            placeholder="Enter full name" 
-                            className="h-12 border-slate-200 bg-slate-50/30 focus-visible:bg-white focus-visible:ring-1 ring-[#1a73e8]/20 transition-all font-bold" 
-                          />
+                      <div className="space-y-10 border-l border-slate-100 pl-16">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h3 className="text-xl font-black text-slate-900 tracking-tight mb-1">Role Assignment</h3>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Assign staff to a specific brand and property</p>
+                          </div>
                         </div>
 
-                        <div className="space-y-2">
-                          <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Username <span className="text-red-500">*</span></Label>
-                          <Input 
-                            defaultValue={editingUser?.username || ""} 
-                            placeholder="@username" 
-                            className="h-12 border-slate-200 bg-slate-50/30 font-bold" 
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email Address</Label>
-                          <Input 
-                            type="email" 
-                            defaultValue={editingUser?.email || ""} 
-                            placeholder="Enter email address" 
-                            className="h-12 border-slate-200 bg-slate-50/30 font-medium" 
-                          />
-                        </div>
-
-                        {!editingUser && (
-                          <>
+                        <div className="space-y-6">
+                          {!tenant && (
                             <div className="space-y-2">
-                              <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Password <span className="text-red-500">*</span></Label>
-                              <Input type="password" placeholder="Enter password" className="h-12 border-slate-200 bg-slate-50/30" />
+                              <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Parent Tenant</Label>
+                              <Select value={formTenantId} onValueChange={setFormTenantId}>
+                                <SelectTrigger className="h-12 bg-slate-50/30 border-slate-200 font-bold">
+                                  <SelectValue placeholder="Select Brand" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {initialTenants.map(t => (
+                                    <SelectItem key={t.id} value={t.id}>{t.tenantName}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
                             </div>
+                          )}
 
-                            <div className="space-y-2">
-                              <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Confirm Password <span className="text-red-500">*</span></Label>
-                              <Input type="password" placeholder="Confirm password" className="h-12 border-slate-200 bg-slate-50/30" />
-                            </div>
-                          </>
-                        )}
-
-                        <div className="space-y-2">
-                          <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Phone Number <span className="text-red-500">*</span></Label>
-                          <div className="flex gap-3">
-                            <Select defaultValue="+971">
-                              <SelectTrigger className="w-[110px] h-12 border-slate-200 bg-slate-50/30 font-bold">
-                                <SelectValue placeholder="+971" />
+                          <div className="space-y-2">
+                            <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Assigned Outlet</Label>
+                            <Select value={formOutletId} onValueChange={setFormOutletId}>
+                              <SelectTrigger className="h-12 bg-slate-50/30 border-slate-200 font-bold">
+                                <SelectValue placeholder="All Outlets (Global)" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="+971">+971</SelectItem>
-                                <SelectItem value="+1">+1</SelectItem>
-                                <SelectItem value="+44">+44</SelectItem>
+                                <SelectItem value="">Global Access</SelectItem>
+                                {tenantOutlets.map(o => (
+                                  <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>
+                                ))}
                               </SelectContent>
                             </Select>
-                            <Input defaultValue={editingUser?.phone || ""} placeholder="000-000-0000" className="h-12 flex-1 border-slate-200 bg-slate-50/30 font-bold tracking-widest" />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Primary Role</Label>
+                            <Select value={formRole} onValueChange={(v: any) => setFormRole(v)}>
+                              <SelectTrigger className="h-12 bg-slate-50/30 border-slate-200 font-bold">
+                                <SelectValue placeholder="Select Role" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="Organization Admin">Organization Admin</SelectItem>
+                                <SelectItem value="Manager">Manager</SelectItem>
+                                <SelectItem value="Partner Admin">Partner Admin</SelectItem>
+                              </SelectContent>
+                            </Select>
                           </div>
                         </div>
                       </div>
                     </div>
-
-                    <div className="space-y-10 border-l border-slate-100 pl-16">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="text-xl font-black text-slate-900 tracking-tight mb-1">Role Assignment</h3>
-                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Quickly add a new role and assign it to one or multiple restaurants</p>
-                        </div>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="h-9 border-slate-200 text-[#1a73e8] font-bold gap-2 hover:bg-[#1a73e8]/5"
-                        >
-                          <PlusCircle className="h-4 w-4" /> Add New Role
-                        </Button>
-                      </div>
-
-                      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                        <Table>
-                          <TableHeader className="bg-slate-50/50">
-                            <TableRow className="border-b border-slate-100">
-                              <TableHead className="text-[10px] font-bold text-slate-400 h-10 px-4 uppercase tracking-widest">Outlet</TableHead>
-                              <TableHead className="text-[10px] font-bold text-slate-400 h-10 px-4 uppercase tracking-widest">Role</TableHead>
-                              <TableHead className="text-[10px] font-bold text-slate-400 h-10 px-4 text-right uppercase tracking-widest">Actions</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {editingUser?.outletId ? (
-                              <TableRow className="border-b-0">
-                                <TableCell className="px-4 py-4 text-xs font-bold text-slate-900">{getOutletName(editingUser.outletId)}</TableCell>
-                                <TableCell className="px-4 py-4 text-xs font-medium text-slate-500">{editingUser.role}</TableCell>
-                                <TableCell className="px-4 py-4 text-right">
-                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive">
-                                    <Trash2 className="h-3.5 w-3.5" />
-                                  </Button>
-                                </TableCell>
-                              </TableRow>
-                            ) : (
-                              <TableRow className="border-b-0">
-                                <TableCell colSpan={3} className="py-20 text-center">
-                                  <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">No assignments yet</p>
-                                </TableCell>
-                              </TableRow>
-                            )}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    </div>
-                  </div>
+                  )}
                 </ScrollArea>
 
                 <div className="p-8 border-t border-slate-100 flex justify-end gap-4 bg-slate-50/30 flex-shrink-0">
@@ -683,7 +811,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, o
                   </Button>
                   <Button 
                     className="h-12 px-10 font-black bg-[#1a73e8] hover:bg-[#1557b0] text-white border-none shadow-lg shadow-[#1a73e8]/20 active:scale-95 transition-all"
-                    onClick={() => { setIsAddingNew(false); setEditingUser(null); }}
+                    onClick={handleSaveUser}
                   >
                     {editingUser ? "Save Changes" : "Add User"}
                   </Button>

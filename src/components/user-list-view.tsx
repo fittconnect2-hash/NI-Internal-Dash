@@ -55,10 +55,11 @@ import { cn } from "@/lib/utils"
 const ITEMS_PER_PAGE = 10
 
 interface UserListViewProps {
+  onAddUser: () => void;
   onEditUser: (user: User) => void;
 }
 
-export function UserListView({ onEditUser }: UserListViewProps) {
+export function UserListView({ onAddUser, onEditUser }: UserListViewProps) {
   const [searchQuery, setSearchQuery] = React.useState("")
   const [tenantFilter, setTenantFilter] = React.useState<string | null>(null)
   const [outletFilter, setOutletFilter] = React.useState<string | null>(null)
@@ -137,7 +138,7 @@ export function UserListView({ onEditUser }: UserListViewProps) {
             <h1 className="text-3xl font-black text-slate-900 tracking-tight">User Management</h1>
             <p className="text-sm text-slate-500 mt-1">Manage platform administrators, brand managers, and outlet staff.</p>
           </div>
-          <Button size="sm" className="h-10 px-6 font-black bg-[#1a73e8] hover:bg-[#1557b0] shadow-lg shadow-[#1a73e8]/20">
+          <Button size="sm" className="h-10 px-6 font-black bg-[#1a73e8] hover:bg-[#1557b0] shadow-lg shadow-[#1a73e8]/20" onClick={onAddUser}>
             <Plus className="h-4 w-4 mr-2" /> Add New User
           </Button>
         </div>
