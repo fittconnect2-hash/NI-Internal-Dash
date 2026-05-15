@@ -11,7 +11,8 @@ import {
   ChevronsUpDown,
   X,
   ArrowLeft,
-  FilterX
+  FilterX,
+  Users as UsersIcon
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -91,7 +92,7 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                 <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                   <span className="flex items-center gap-1.5 opacity-80"><Building2 className="h-3 w-3" /> TENANTS</span>
                   <ChevronRight className="h-2.5 w-2.5 opacity-30" />
-                  <span className="text-[#1a73e8]">{tenant?.tenantName.toUpperCase() || "ALL TENANTS"}</span>
+                  <span className="text-[#1a73e8] font-black">{tenant?.tenantName.toUpperCase() || "ALL TENANTS"}</span>
                   <ChevronRight className="h-2.5 w-2.5 opacity-30" />
                   <span className="opacity-80">OUTLETS</span>
                 </div>
@@ -210,8 +211,11 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                     <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">
                       Phone
                     </TableHead>
+                    <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest text-center">
+                      Users
+                    </TableHead>
                     <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">
-                      <div className="flex items-center gap-1.5">Timezone</div>
+                      Timezone
                     </TableHead>
                     <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">
                       City / Country
@@ -230,18 +234,24 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                       onClick={() => onViewUsers(outlet)}
                     >
                       <TableCell className="py-5 px-8">
-                        <div className="font-extrabold text-[15px] text-[#1e293b] border-b border-transparent inline-block leading-tight mb-1 group-hover:text-[#1a73e8] group-hover:border-[#1a73e8] transition-colors">{outlet.name}</div>
+                        <div className="font-extrabold text-[15px] text-[#1e293b] border-b border-transparent inline-block leading-tight mb-1 group-hover:text-[#1a73e8] transition-colors">{outlet.name}</div>
                         <div className="text-[11px] text-slate-400 font-medium tracking-tight opacity-70">slug: {outlet.slug}</div>
                       </TableCell>
-                      <TableCell className="px-4 text-[14px] text-[#1e293b] font-medium">
+                      <TableCell className="px-4 text-[14px] text-[#1e293b] font-extrabold">
                         {outlet.phone}
                       </TableCell>
-                      <TableCell className="px-4 text-[13px] text-slate-500 font-medium">
+                      <TableCell className="px-4 text-center">
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 border border-slate-100 rounded-lg group-hover:bg-white transition-colors">
+                          <UsersIcon className="h-3.5 w-3.5 text-[#1a73e8]" />
+                          <span className="text-[14px] font-black text-slate-900">{outlet.userCount || 0}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="px-4 text-[14px] text-slate-400 font-medium">
                         {outlet.timezone}
                       </TableCell>
                       <TableCell className="px-4">
-                        <div className="text-[14px] text-[#1e293b] font-bold">{outlet.city}</div>
-                        <div className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">{outlet.country}</div>
+                        <div className="text-[14px] text-[#1e293b] font-extrabold leading-none mb-1">{outlet.city}</div>
+                        <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{outlet.country}</div>
                       </TableCell>
                       <TableCell className="text-center px-4">
                         <div className="flex justify-center">
@@ -251,7 +261,7 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                               ? "bg-[#e1f9ef] text-[#22c55e] border-[#e1f9ef]" 
                               : "bg-slate-100 text-slate-500 border-slate-200"
                           )}>
-                            <div className={cn("h-1.5 w-1.5 rounded-full", outlet.status === 'Active' ? "bg-[#22c55e] animate-pulse" : "bg-slate-400")} />
+                            <div className={cn("h-1.5 w-1.5 rounded-full", outlet.status === 'Active' ? "bg-[#22c55e]" : "bg-slate-400")} />
                             {outlet.status}
                           </Badge>
                         </div>

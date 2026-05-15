@@ -29,9 +29,6 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import {
-  TablePagination
-} from "@/components/ui/pagination"
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -114,10 +111,6 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
     setTenantSearch("")
   }
 
-  function userCountForOutlet(outletId: string) {
-    return initialOutlets.find(o => o.id === outletId)?.userCount || 0
-  }
-
   return (
     <div className="p-6 md:p-8 flex flex-col h-full overflow-hidden bg-[#f8f9fc]">
       <div className="max-w-7xl mx-auto w-full flex-1 flex flex-col min-h-0">
@@ -168,7 +161,7 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
                   <div className="flex items-center border-b px-3">
                     <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
                     <input
-                      className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                      className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground"
                       placeholder="Search tenants..."
                       value={tenantSearch}
                       onChange={(e) => setTenantSearch(e.target.value)}
@@ -206,11 +199,6 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
                           </span>
                         </Button>
                       ))}
-                      {filteredTenantsForDropdown.length === 0 && (
-                        <div className="py-8 text-center text-xs text-muted-foreground font-medium">
-                          No tenants matching "{tenantSearch}"
-                        </div>
-                      )}
                     </div>
                   </ScrollArea>
                 </PopoverContent>
@@ -250,19 +238,19 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
               <TableHeader className="bg-slate-50/50">
                 <TableRow className="hover:bg-transparent border-b border-slate-100">
                   <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-8 uppercase tracking-widest">
-                    <div className="flex items-center gap-1.5 cursor-pointer hover:text-slate-900 transition-colors">Outlet Name <ChevronsUpDown className="h-3 w-3 opacity-50" /></div>
+                    <div className="flex items-center gap-1.5 cursor-pointer hover:text-slate-900 transition-colors">Name <ChevronsUpDown className="h-3 w-3 opacity-50" /></div>
                   </TableHead>
                   <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">
-                    Parent Tenant
-                  </TableHead>
-                  <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">
-                    Contact & Timezone
+                    Phone
                   </TableHead>
                   <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest text-center">
                     Users
                   </TableHead>
                   <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">
-                    Location
+                    Timezone
+                  </TableHead>
+                  <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">
+                    City / Country
                   </TableHead>
                   <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest text-center">
                     Status
@@ -274,47 +262,34 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
                 {paginatedOutlets.map((outlet) => (
                   <TableRow key={outlet.id} className="group hover:bg-slate-50/50 transition-all border-b border-slate-50">
                     <TableCell className="py-5 px-8">
-                      <div className="font-extrabold text-[#1e293b] text-[15px] group-hover:text-[#1a73e8] transition-colors">{outlet.name}</div>
-                      <div className="text-[11px] text-slate-400 font-bold uppercase tracking-tight opacity-70">slug: {outlet.slug}</div>
+                      <div className="font-extrabold text-[15px] text-[#1e293b] border-b border-transparent inline-block leading-tight mb-1 group-hover:text-[#1a73e8] transition-colors">{outlet.name}</div>
+                      <div className="text-[11px] text-slate-400 font-medium tracking-tight opacity-70">slug: {outlet.slug}</div>
                     </TableCell>
-                    <TableCell className="px-4">
-                      <div className="flex items-center gap-2">
-                        <Building2 className="h-3.5 w-3.5 text-slate-300" />
-                        <span className="text-[14px] text-slate-600 font-bold">{getTenantName(outlet.tenantId)}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="px-4">
-                      <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
-                          <Phone className="h-3 w-3 text-slate-400" /> {outlet.phone}
-                        </div>
-                        <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-tighter">
-                          <Clock className="h-3 w-3" /> {outlet.timezone}
-                        </div>
-                      </div>
+                    <TableCell className="px-4 text-[14px] text-[#1e293b] font-extrabold">
+                      {outlet.phone}
                     </TableCell>
                     <TableCell className="px-4 text-center">
-                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 border border-slate-100 rounded-lg">
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 border border-slate-100 rounded-lg group-hover:bg-white transition-colors">
                         <Users className="h-3.5 w-3.5 text-[#1a73e8]" />
-                        <span className="text-[14px] font-black text-slate-900">{userCountForOutlet(outlet.id)}</span>
+                        <span className="text-[14px] font-black text-slate-900">{outlet.userCount || 0}</span>
                       </div>
                     </TableCell>
+                    <TableCell className="px-4 text-[14px] text-slate-400 font-medium">
+                      {outlet.timezone}
+                    </TableCell>
                     <TableCell className="px-4">
-                      <div className="text-[13px] text-slate-700 font-bold flex items-center gap-1.5">
-                        <MapPin className="h-3 w-3 text-slate-300" /> {outlet.city}
-                      </div>
-                      <div className="text-[11px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1.5 mt-0.5">
-                        <Globe className="h-3 w-3 text-slate-200" /> {outlet.country}
-                      </div>
+                      <div className="text-[14px] text-[#1e293b] font-extrabold leading-none mb-1">{outlet.city}</div>
+                      <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{outlet.country}</div>
                     </TableCell>
                     <TableCell className="px-4">
                       <div className="flex justify-center">
                         <Badge className={cn(
-                          "rounded-full px-4 py-1 text-[10px] font-bold border shadow-none uppercase tracking-wider",
+                          "rounded-full px-3 py-1 text-[10px] font-bold flex items-center gap-2 border shadow-none uppercase tracking-wider",
                           outlet.status === 'Active' 
                             ? "bg-[#e1f9ef] text-[#22c55e] border-[#e1f9ef]" 
                             : "bg-slate-100 text-slate-500 border-slate-200"
                         )}>
+                          <div className={cn("h-1.5 w-1.5 rounded-full", outlet.status === 'Active' ? "bg-[#22c55e]" : "bg-slate-400")} />
                           {outlet.status}
                         </Badge>
                       </div>
