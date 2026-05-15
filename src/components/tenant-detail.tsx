@@ -61,24 +61,30 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
   const [activeTab, setActiveTab] = React.useState("overview")
   const [editingAdmin, setEditingAdmin] = React.useState<any | null>(null)
   
+  // Reset tab to overview when drawer opens or tenant changes
+  React.useEffect(() => {
+    if (isOpen) {
+      setActiveTab("overview")
+      setEditingAdmin(null)
+    }
+  }, [isOpen, tenant?.id])
+
   if (!tenant) return null
 
   const initials = tenant.tenantName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
   const signupDate = tenant.lastLoginDate || "May 13, 2026"
   const isPending = tenant.configurationStatus === "Configuration pending"
 
-  // Mock admin data for the detail view
   const mockAdmins = [
     {
       id: "a1",
       name: "Leoe Dase",
       firstName: "Leoe",
       lastName: "Dase",
-      username: "@RISIIDHAN@KPTAC.COM",
-      email: "risiidhan@kptac.com",
+      username: "@LEOE.DASE",
+      email: "lisiidhan@kptac.com",
       phone: "+971 54 457 1754",
-      status: "Active",
-      role: "Partner Admin"
+      status: "Active"
     },
     {
       id: "a2",
@@ -88,8 +94,7 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
       username: "@SAURABH.M",
       email: "saurabh.m@example.com",
       phone: "+971 52 123 4567",
-      status: "Active",
-      role: "Partner Admin"
+      status: "Active"
     }
   ]
 
@@ -105,7 +110,6 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <SheetContent side="right" className="p-0 border-l border-slate-200 bg-[#f8f9fc] sm:max-w-[1200px] w-full transition-all duration-500">
         <div className="flex flex-col h-full">
-          {/* Header Section */}
           <SheetHeader className="p-8 bg-white border-b border-slate-100 flex-shrink-0">
             <div className="flex items-center gap-6">
               <button onClick={onClose} className="p-2 hover:bg-slate-50 rounded-lg group transition-colors">
@@ -166,7 +170,6 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
             <div className="flex-1 overflow-hidden">
               <TabsContent value="overview" className="m-0 h-full overflow-y-auto p-8 space-y-8">
                 <div className="max-w-5xl mx-auto space-y-8">
-                  {/* Tenant Profile Grid */}
                   <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
                     <div className="flex items-center gap-3 mb-10">
                       <div className="h-8 w-8 rounded-lg bg-blue-50/50 border border-blue-100 flex items-center justify-center">
@@ -180,12 +183,10 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Organization</p>
                         <p className="text-[15px] font-extrabold text-slate-900 leading-none">{tenant.tenantName}</p>
                       </div>
-                      
                       <div className="space-y-3">
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Contact Person</p>
                         <p className="text-[15px] font-extrabold text-slate-900 leading-none">{tenant.contactName || "N/A"}</p>
                       </div>
-
                       <div className="space-y-3">
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Phone</p>
                         <div className="flex items-center gap-2">
@@ -193,7 +194,6 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                           <p className="text-[15px] font-extrabold text-slate-900 leading-none">{tenant.contactPhone}</p>
                         </div>
                       </div>
-
                       <div className="space-y-3">
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Address</p>
                         <div className="flex items-start gap-2">
@@ -206,12 +206,10 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                           </div>
                         </div>
                       </div>
-
                       <div className="space-y-3">
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Business Type</p>
                         <p className="text-[15px] font-extrabold text-slate-900 leading-none">{tenant.businessType || "Hospitality"}</p>
                       </div>
-
                       <div className="space-y-3">
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Email</p>
                         <div className="flex items-center gap-2">
@@ -224,7 +222,6 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                     </div>
                   </div>
 
-                  {/* Configuration Module */}
                   <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
                     <div className="flex items-center gap-3 mb-10">
                       <div className="h-6 w-6 rounded-full border border-slate-100 flex items-center justify-center bg-slate-50">
@@ -247,7 +244,6 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
 
               <TabsContent value="admins" className="m-0 h-full flex flex-col">
                 <div className="flex-1 flex min-h-0 p-8 gap-8 overflow-hidden bg-slate-50/50">
-                  {/* Persistent Form Section */}
                   <div className="w-[450px] bg-white rounded-2xl border border-slate-200 shadow-xl flex flex-col min-h-0 overflow-hidden ring-1 ring-slate-100 flex-shrink-0">
                     <div className="p-6 border-b border-slate-50 flex items-center gap-3 justify-between">
                       <div className="flex items-center gap-3">
@@ -256,7 +252,7 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                         </div>
                         <div>
                           <h3 className="text-lg font-black text-[#1e293b] leading-tight">
-                            {editingAdmin ? "Update Profile" : `${tenant.tenantName} Admin`}
+                            {editingAdmin ? "Update Profile" : "Tenant Admin"}
                           </h3>
                           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
                             {editingAdmin ? "Modify Existing Admin" : "Tenant Admin Enrollment"}
@@ -284,7 +280,6 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                             <Input key={editingAdmin?.id || 'new'} defaultValue={editingAdmin?.lastName || ""} placeholder="Last Name" className="h-12 border-slate-200 bg-slate-50/30 focus-visible:bg-white focus-visible:ring-1 ring-[#1a73e8]/20 transition-all font-medium" />
                           </div>
                         </div>
-
                         <div className="grid grid-cols-2 gap-8">
                           <div className="space-y-2.5">
                             <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Username <span className="text-red-500 font-black">*</span></Label>
@@ -295,7 +290,6 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                             <Input key={editingAdmin?.id || 'new'} defaultValue={editingAdmin?.email || ""} type="email" placeholder="admin@brand.com" className="h-12 border-slate-200 bg-slate-50/30 font-medium" />
                           </div>
                         </div>
-
                         {!editingAdmin && (
                           <div className="grid grid-cols-2 gap-8">
                             <div className="space-y-2.5">
@@ -308,7 +302,6 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                             </div>
                           </div>
                         )}
-
                         <div className="space-y-2.5">
                           <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Primary Phone <span className="text-red-500 font-black">*</span></Label>
                           <div className="flex gap-3">
@@ -337,18 +330,15 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                     </div>
                   </div>
 
-                  {/* Active Personnel List */}
                   <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col min-h-0 overflow-hidden">
                     <div className="p-6 border-b border-slate-50 flex items-center justify-between">
                       <div>
                         <h3 className="text-lg font-black text-slate-900 tracking-tight leading-tight">Tenant Admins</h3>
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Registered Administrators</p>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Badge className="bg-[#1a73e8]/10 text-[#1a73e8] border-none px-3 py-1 text-[10px] font-bold shadow-none">
-                          {mockAdmins.length} Total
-                        </Badge>
-                      </div>
+                      <Badge className="bg-[#1a73e8]/10 text-[#1a73e8] border-none px-3 py-1 text-[10px] font-bold shadow-none">
+                        {mockAdmins.length} Total
+                      </Badge>
                     </div>
                     <ScrollArea className="flex-1">
                       <div className="p-8 grid grid-cols-1 xl:grid-cols-2 gap-6">
@@ -375,10 +365,7 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                               </div>
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <button 
-                                    className="p-1 text-slate-300 hover:text-slate-900 transition-colors"
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
+                                  <button className="p-1 text-slate-300 hover:text-slate-900 transition-colors" onClick={(e) => e.stopPropagation()}>
                                     <MoreVertical className="h-4 w-4" />
                                   </button>
                                 </DropdownMenuTrigger>
@@ -390,13 +377,10 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                                     <RotateCcw className="h-4 w-4 mr-3 text-slate-400" /> Reset Password
                                   </DropdownMenuItem>
                                   <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-destructive font-black py-2.5">
-                                    Disable User
-                                  </DropdownMenuItem>
+                                  <DropdownMenuItem className="text-destructive font-black py-2.5">Disable User</DropdownMenuItem>
                                 </DropdownMenuContent>
                               </DropdownMenu>
                             </div>
-
                             <div className="px-6 py-2 space-y-4">
                               <div className="flex items-center gap-3 text-slate-500">
                                 <Mail className="h-4 w-4 text-slate-300 group-hover/card:text-[#1a73e8] transition-colors" />
@@ -407,7 +391,6 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                                 <span className="text-[14px] font-bold tracking-tight">{admin.phone}</span>
                               </div>
                             </div>
-
                             <div className="px-6 py-6 flex justify-end items-center">
                               <Badge className="bg-[#e1f9ef] text-[#22c55e] border-none px-4 py-1 rounded-full text-[10px] font-black shadow-none uppercase tracking-widest">
                                 {admin.status}
@@ -415,16 +398,6 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                             </div>
                           </div>
                         ))}
-
-                        {mockAdmins.length === 0 && (
-                          <div className="col-span-full text-center py-24">
-                            <div className="h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                              <User className="h-8 w-8 text-slate-200" />
-                            </div>
-                            <h3 className="text-sm font-extrabold text-slate-900">No Administrators Found</h3>
-                            <p className="text-xs text-slate-500 mt-1">Enroll your first team member to manage this brand.</p>
-                          </div>
-                        )}
                       </div>
                     </ScrollArea>
                   </div>
