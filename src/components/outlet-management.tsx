@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -118,7 +117,10 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
   const handleAddNew = () => {
     setEditingOutlet(null)
     setIsAddingNew(true)
-    setIsFormLoading(false)
+    setIsFormLoading(true)
+    setTimeout(() => {
+      setIsFormLoading(false)
+    }, 400)
   }
 
   const handleCloseForm = () => {
@@ -170,7 +172,7 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
               <div className="p-6 border-b border-slate-50 flex items-center justify-between">
                 <div>
                   <h3 className="font-extrabold text-lg text-[#1e293b]">
-                    {editingOutlet ? "Edit Outlet" : "Add Outlet"}
+                    {editingOutlet ? "Edit Outlet" : "Add New Outlet"}
                   </h3>
                   <p className="text-xs text-slate-400 font-medium mt-0.5">
                     {editingOutlet ? "Update branch parameters" : "Define new branch parameters"}

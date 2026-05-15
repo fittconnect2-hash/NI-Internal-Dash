@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -148,7 +147,10 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
   const handleAddOutlet = () => {
     setEditingOutlet(null)
     setIsFormVisible(true)
-    setIsFormLoading(false)
+    setIsFormLoading(true)
+    setTimeout(() => {
+      setIsFormLoading(false)
+    }, 400)
   }
 
   const handleCloseForm = () => {
