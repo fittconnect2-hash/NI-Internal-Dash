@@ -89,14 +89,14 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
               </button>
               <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                  <span className="flex items-center gap-1.5"><Building2 className="h-3 w-3" /> Tenants</span>
-                  <ChevronRight className="h-2.5 w-2.5 opacity-50" />
-                  <span className="text-slate-900">{tenant?.tenantName || "All Tenants"}</span>
-                  <ChevronRight className="h-2.5 w-2.5 opacity-50" />
-                  <span className="text-slate-400">Outlets</span>
+                  <span className="flex items-center gap-1.5 opacity-80"><Building2 className="h-3 w-3" /> TENANTS</span>
+                  <ChevronRight className="h-2.5 w-2.5 opacity-30" />
+                  <span className="text-slate-900">{tenant?.tenantName.toUpperCase() || "ALL TENANTS"}</span>
+                  <ChevronRight className="h-2.5 w-2.5 opacity-30" />
+                  <span className="opacity-80">OUTLETS</span>
                 </div>
-                <SheetTitle className="text-2xl font-extrabold text-[#1e293b] tracking-tight">
-                  Outlet Portfolio
+                <SheetTitle className="text-2xl font-black text-[#1e293b] tracking-tight">
+                  {tenant ? `Outlet Management of ${tenant.tenantName}` : "Outlet Management"}
                 </SheetTitle>
               </div>
             </div>
@@ -177,7 +177,7 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
               <div className="relative flex-1 max-w-sm">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input 
-                  placeholder="Nihal" 
+                  placeholder="Search branches..." 
                   className="pl-10 h-11 text-sm bg-white border-slate-200 focus-visible:ring-1 ring-[#1a73e8]/10"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -230,7 +230,7 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                       onClick={() => onViewUsers(outlet)}
                     >
                       <TableCell className="py-5 px-8">
-                        <div className="font-extrabold text-[15px] text-[#1e293b] border-b border-[#1e293b] inline-block leading-tight mb-1 group-hover:text-[#1a73e8] group-hover:border-[#1a73e8] transition-colors">{outlet.name}</div>
+                        <div className="font-extrabold text-[15px] text-[#1e293b] border-b border-transparent inline-block leading-tight mb-1 group-hover:text-[#1a73e8] group-hover:border-[#1a73e8] transition-colors">{outlet.name}</div>
                         <div className="text-[11px] text-slate-400 font-medium tracking-tight opacity-70">slug: {outlet.slug}</div>
                       </TableCell>
                       <TableCell className="px-4 text-[14px] text-[#1e293b] font-medium">
