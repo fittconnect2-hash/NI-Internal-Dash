@@ -135,14 +135,15 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                   </Badge>
                 </div>
                 <div className="flex items-center gap-4 mt-2">
+                  <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    <span className="flex items-center gap-1.5 opacity-80"><Building2 className="h-3 w-3" /> TENANTS</span>
+                    <ChevronRight className="h-2.5 w-2.5 opacity-30" />
+                    <span className="text-[#1a73e8]">{tenant.tenantName.toUpperCase()}</span>
+                  </div>
+                  <div className="w-1 h-1 rounded-full bg-slate-200" />
                   <div className="flex items-center gap-1.5 text-xs text-slate-400 font-bold uppercase tracking-tighter">
                     <CalendarDays className="h-3.5 w-3.5" />
                     Tenant Since {signupDate}
-                  </div>
-                  <div className="w-1 h-1 rounded-full bg-slate-200" />
-                  <div className="flex items-center gap-1.5 text-xs text-[#1a73e8] font-bold uppercase tracking-tighter">
-                    <Globe className="h-3.5 w-3.5" />
-                    ID: {tenant.id}
                   </div>
                 </div>
               </div>

@@ -91,7 +91,7 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                 <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                   <span className="flex items-center gap-1.5 opacity-80"><Building2 className="h-3 w-3" /> TENANTS</span>
                   <ChevronRight className="h-2.5 w-2.5 opacity-30" />
-                  <span className="text-slate-900">{tenant?.tenantName.toUpperCase() || "ALL TENANTS"}</span>
+                  <span className="text-[#1a73e8]">{tenant?.tenantName.toUpperCase() || "ALL TENANTS"}</span>
                   <ChevronRight className="h-2.5 w-2.5 opacity-30" />
                   <span className="opacity-80">OUTLETS</span>
                 </div>
