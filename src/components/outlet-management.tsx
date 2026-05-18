@@ -216,7 +216,7 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
                 onClick={() => { setIsFormLoading(true); setIsAddingNew(true); setEditingOutlet(null); setTimeout(() => setIsFormLoading(false), 400); }} 
                 className="h-10 px-6 font-black bg-[#1a73e8] hover:bg-[#1557b0] shadow-lg shadow-[#1a73e8]/20"
               >
-                <Plus className="h-4 w-4 mr-2" /> Add Branch
+                <Plus className="h-4 w-4 mr-2" /> Add Outlet
               </Button>
             )}
           </div>
