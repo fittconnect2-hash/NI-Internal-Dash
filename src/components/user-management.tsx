@@ -441,7 +441,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                               <Badge className="bg-slate-100 text-slate-600 border-none px-2.5 py-0.5 text-[10px] font-bold uppercase rounded-md">{user.role}</Badge>
                             </TableCell>
                             <TableCell className="px-4 text-center">
-                              <Badge className={cn("rounded-full px-4 py-1 text-[10px] font-bold uppercase", user.status === 'Active' ? "bg-[#e1f9ef] text-[#22c55e]" : user.status === 'Suspended' ? "bg-rose-100 text-rose-500" : "bg-slate-100 text-slate-500")}>
+                              <Badge className={cn("rounded-full px-4 py-1 text-[10px] font-bold uppercase", user.status === 'Active' ? "bg-[#e1f9ef] text-[#22c55e]" : user.status === 'Suspended' ? "bg-rose-100 text-rose-500" : "bg-slate-100 text-slate-50")}>
                                 {user.status}
                               </Badge>
                             </TableCell>
@@ -501,7 +501,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                                 <Label className="text-[13px] font-bold text-slate-700">Step 1: Parent Tenant <span className="text-red-500">*</span></Label>
                                 <HelpCircle className="h-3.5 w-3.5 text-slate-300 cursor-help" />
                               </div>
-                              <Popover open={isFormTenantPopoverOpen} onOpenChange={setIsFormTenantPopoverOpen}>
+                              <Popover modal={true} open={isFormTenantPopoverOpen} onOpenChange={setIsFormTenantPopoverOpen}>
                                 <PopoverTrigger asChild>
                                   <Button variant="outline" className="w-full h-12 justify-between bg-[#1a73e8]/5 border-[#1a73e8]/20 font-black text-[#1a73e8] px-3">
                                     <span className="truncate">{formTenantId ? getTenantName(formTenantId) : "Select Parent Organization"}</span>
@@ -509,8 +509,10 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                                   </Button>
                                 </PopoverTrigger>
                                 <PopoverContent 
-                                  className="w-80 p-0 shadow-2xl border-slate-200 z-[100]" 
+                                  className="w-80 p-0 shadow-2xl border-slate-200 z-[110]" 
                                   align="start"
+                                  onPointerDownOutside={(e) => e.preventDefault()}
+                                  onInteractOutside={(e) => e.preventDefault()}
                                 >
                                   <div className="p-2 border-b bg-slate-50/50">
                                     <div className="relative">

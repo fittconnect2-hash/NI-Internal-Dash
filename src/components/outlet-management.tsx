@@ -312,7 +312,7 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                     <div className="space-y-2.5">
                       <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">PARENT TENANT</Label>
                       
-                      <Popover modal={false} open={isFormTenantPopoverOpen} onOpenChange={setIsFormTenantPopoverOpen}>
+                      <Popover modal={true} open={isFormTenantPopoverOpen} onOpenChange={setIsFormTenantPopoverOpen}>
                         <PopoverTrigger asChild>
                           <Button 
                             variant="outline" 
@@ -327,7 +327,12 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                           </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-80 p-0 z-[100] shadow-2xl border-slate-200" align="start">
+                        <PopoverContent 
+                          className="w-80 p-0 z-[110] shadow-2xl border-slate-200" 
+                          align="start"
+                          onPointerDownOutside={(e) => e.preventDefault()}
+                          onInteractOutside={(e) => e.preventDefault()}
+                        >
                           <div className="flex items-center border-b px-3">
                             <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
                             <input
