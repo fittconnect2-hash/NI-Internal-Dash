@@ -8,17 +8,13 @@ import {
   Clock, 
   RefreshCw, 
   Share, 
-  ArrowUpRight,
   TrendingUp,
   TrendingDown,
-  ExternalLink,
-  MoreHorizontal,
   ChevronRight,
   Users
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { 
   BarChart, 
@@ -30,7 +26,6 @@ import {
   ResponsiveContainer,
   AreaChart,
   Area,
-  LineChart,
   Line,
   Cell
 } from "recharts"
@@ -40,6 +35,7 @@ import {
   liveOrders 
 } from "@/lib/mock-data"
 import { cn } from "@/lib/utils"
+import { Badge } from "@/components/ui/badge"
 
 // Analytical Data
 const revenueTrend = [
@@ -53,9 +49,9 @@ const revenueTrend = [
 ];
 
 const revenueBySource = [
-  { name: 'Dine-in', value: 65, color: 'hsl(var(--primary))' },
-  { name: 'Takeaway', value: 25, color: '#e91e63' },
-  { name: 'Delivery', value: 10, color: '#f59e0b' },
+  { name: 'Eating in Restaurant', value: 65, color: 'hsl(var(--primary))' },
+  { name: 'Picking up Food', value: 25, color: '#e91e63' },
+  { name: 'Home Delivery', value: 10, color: '#f59e0b' },
 ];
 
 const orderVolumeData = [
@@ -89,13 +85,13 @@ export function DashboardOverview() {
     setTimeout(() => setIsRefreshing(false), 800)
   }
 
-  // Mock stats with more user-friendly labels
+  // Simplified stats for everyone to understand
   const getStats = (range: TimeRange) => {
     const baseStats = [
-      { id: 'revenue', label: "Platform Revenue", value: "AED 84.2k", change: "+12%", trend: "up", icon: DollarSign, color: "text-primary" },
-      { id: 'orders', label: "Global Orders", value: "1,382", change: "+7%", trend: "up", icon: Receipt, color: "text-[#22c55e]" },
-      { id: 'growth', label: "Connected Outlets", value: "247", change: "-3", trend: "down", icon: Store, color: "text-primary" },
-      { id: 'efficiency', label: "Avg. Fulfillment", value: "28 min", change: "-3 min", trend: "up", icon: Clock, color: "text-amber-600" },
+      { id: 'revenue', label: "Total Sales", value: "AED 84.2k", change: "+12%", trend: "up", icon: DollarSign, color: "text-primary", desc: "Money collected from all shops" },
+      { id: 'orders', label: "Number of Orders", value: "1,382", change: "+7%", trend: "up", icon: Receipt, color: "text-[#22c55e]", desc: "How many customers bought food" },
+      { id: 'growth', label: "Total Restaurants", value: "247", change: "-3", trend: "down", icon: Store, color: "text-primary", desc: "Number of shops currently open" },
+      { id: 'efficiency', label: "Average Service Time", value: "28 min", change: "-3 min", trend: "up", icon: Clock, color: "text-amber-600", desc: "How fast we get food to tables" },
     ]
 
     if (range === '7d') {
@@ -117,17 +113,17 @@ export function DashboardOverview() {
             <Card className="border-slate-200 shadow-sm p-8">
               <div className="flex items-center justify-between mb-8">
                 <div>
-                  <h3 className="text-xl font-black text-slate-900 tracking-tight">Earnings Analysis ({timeRange})</h3>
-                  <p className="text-xs text-slate-400 font-bold uppercase tracking-tight mt-1">Comparing total revenue with order volume across the network</p>
+                  <h3 className="text-xl font-black text-slate-900 tracking-tight">How much money are we making?</h3>
+                  <p className="text-sm text-slate-500 mt-1">This chart shows your daily sales compared to how many orders were placed.</p>
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="flex items-center gap-2">
                     <div className="h-3 w-3 rounded bg-primary" />
-                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Revenue (AED)</span>
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Sales (AED)</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="h-3 w-3 rounded bg-[#e91e63]" />
-                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Orders</span>
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Order Count</span>
                   </div>
                 </div>
               </div>
@@ -154,7 +150,8 @@ export function DashboardOverview() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <Card className="border-slate-200 shadow-sm overflow-hidden flex flex-col">
                 <CardHeader className="p-8 border-b border-slate-50 bg-white">
-                  <CardTitle className="text-lg font-black text-slate-900 tracking-tight">Where is revenue coming from?</CardTitle>
+                  <CardTitle className="text-lg font-black text-slate-900 tracking-tight">How are customers buying food?</CardTitle>
+                  <p className="text-sm text-slate-500">Are people eating at the restaurant or ordering for delivery?</p>
                 </CardHeader>
                 <CardContent className="p-8">
                   <div className="space-y-6">
@@ -176,7 +173,8 @@ export function DashboardOverview() {
 
               <Card className="border-slate-200 shadow-sm overflow-hidden flex flex-col">
                 <CardHeader className="p-8 border-b border-slate-50 bg-white">
-                  <CardTitle className="text-lg font-black text-slate-900 tracking-tight">Top Performing Brands</CardTitle>
+                  <CardTitle className="text-lg font-black text-slate-900 tracking-tight">Which brands are doing best?</CardTitle>
+                  <p className="text-sm text-slate-500">The most popular restaurant brands in your network.</p>
                 </CardHeader>
                 <CardContent className="p-0">
                   {topRestaurants.slice(0, 3).map((res, i) => (
@@ -190,7 +188,7 @@ export function DashboardOverview() {
                       </div>
                       <div className="text-right">
                         <div className="font-black text-primary leading-none mb-1">{res.revenue}</div>
-                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Growth: +14%</div>
+                        <div className="text-[10px] font-bold text-green-500 uppercase tracking-widest">Doing Better +14%</div>
                       </div>
                     </div>
                   ))}
@@ -205,8 +203,8 @@ export function DashboardOverview() {
             <Card className="border-slate-200 shadow-sm p-8">
               <div className="flex items-center justify-between mb-8">
                 <div>
-                  <h3 className="text-xl font-black text-slate-900 tracking-tight">Network Activity Heatmap ({timeRange})</h3>
-                  <p className="text-xs text-slate-400 font-bold uppercase tracking-tight mt-1">Order flow trends by time of day</p>
+                  <h3 className="text-xl font-black text-slate-900 tracking-tight">When are we the busiest?</h3>
+                  <p className="text-sm text-slate-500 mt-1">Check this to see which hours of the day have the most orders.</p>
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="flex items-center gap-2">
@@ -235,8 +233,11 @@ export function DashboardOverview() {
 
             <Card className="border-slate-200 shadow-sm overflow-hidden">
               <CardHeader className="p-8 border-b border-slate-50 flex flex-row items-center justify-between bg-white">
-                <CardTitle className="text-lg font-black text-slate-900 tracking-tight">Live Global Activity</CardTitle>
-                <Button variant="link" className="text-[#e91e63] font-bold text-xs uppercase tracking-widest">Monitor All Orders <ChevronRight className="h-4 w-4" /></Button>
+                <div>
+                  <CardTitle className="text-lg font-black text-slate-900 tracking-tight">What's happening right now?</CardTitle>
+                  <p className="text-sm text-slate-500">Live list of orders being prepared and served.</p>
+                </div>
+                <Button variant="link" className="text-[#e91e63] font-bold text-xs uppercase tracking-widest">See All Live Orders <ChevronRight className="h-4 w-4" /></Button>
               </CardHeader>
               <CardContent className="p-0">
                 {liveOrders.map((order, i) => (
@@ -269,8 +270,8 @@ export function DashboardOverview() {
              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <Card className="border-slate-200 shadow-sm p-8">
                 <div className="mb-6">
-                  <h3 className="text-lg font-black text-slate-900 tracking-tight leading-none">Location Density</h3>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">Where your outlets are located globally</p>
+                  <h3 className="text-lg font-black text-slate-900 tracking-tight leading-none">Where are our restaurants?</h3>
+                  <p className="text-sm text-slate-500 mt-2">See how many shops are open in each city.</p>
                 </div>
                 <div className="h-[300px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
@@ -299,8 +300,8 @@ export function DashboardOverview() {
               </Card>
               <Card className="border-slate-200 shadow-sm p-8">
                 <div className="mb-6">
-                  <h3 className="text-lg font-black text-slate-900 tracking-tight leading-none">Onboarding Progress</h3>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">New brand and outlet setup status</p>
+                  <h3 className="text-lg font-black text-slate-900 tracking-tight leading-none">Setup progress for new places</h3>
+                  <p className="text-sm text-slate-500 mt-2">Are new restaurant brands ready to start selling?</p>
                 </div>
                 <div className="space-y-6">
                   {[
@@ -326,7 +327,8 @@ export function DashboardOverview() {
 
             <Card className="border-slate-200 shadow-sm overflow-hidden">
               <CardHeader className="p-8 border-b border-slate-50 bg-white">
-                <CardTitle className="text-lg font-black text-slate-900 tracking-tight">Active Brand Portfolio</CardTitle>
+                <CardTitle className="text-lg font-black text-slate-900 tracking-tight">Active Brand List</CardTitle>
+                <p className="text-sm text-slate-500">Every restaurant company currently using our platform.</p>
               </CardHeader>
               <CardContent className="p-0">
                 {topRestaurants.map((res, i) => (
@@ -340,12 +342,12 @@ export function DashboardOverview() {
                     </div>
                     <div className="flex items-center gap-10">
                       <div className="text-center">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase">Staff</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase">Total Staff</p>
                         <p className="text-sm font-black text-slate-900">{(i + 2) * 4}</p>
                       </div>
                       <div className="text-center">
                         <p className="text-[10px] font-bold text-slate-400 uppercase">Status</p>
-                        <Badge className="bg-green-100 text-green-600 border-none rounded-full px-3 py-0.5 text-[10px]">Active</Badge>
+                        <Badge className="bg-green-100 text-green-600 border-none rounded-full px-3 py-0.5 text-[10px]">Open</Badge>
                       </div>
                     </div>
                   </div>
@@ -360,17 +362,17 @@ export function DashboardOverview() {
             <Card className="border-slate-200 shadow-sm p-8">
               <div className="flex items-center justify-between mb-8">
                 <div>
-                  <h3 className="text-lg font-black text-slate-900 tracking-tight">Service Speed Benchmarks (min)</h3>
-                  <p className="text-xs text-slate-400 font-bold uppercase tracking-tight mt-1">Measuring how fast brands are fulfilling orders</p>
+                  <h3 className="text-lg font-black text-slate-900 tracking-tight">How fast are we serving customers?</h3>
+                  <p className="text-sm text-slate-500 mt-1">This measures how many minutes it takes to get food to customers.</p>
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="flex items-center gap-2">
                     <div className="h-2.5 w-2.5 rounded-full bg-[#e91e63]" />
-                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Current Avg.</span>
+                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Wait Time Now</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="h-2.5 w-2.5 rounded-full bg-[#f8bbd0]" />
-                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Previous Avg.</span>
+                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Wait Time Before</span>
                   </div>
                 </div>
               </div>
@@ -393,19 +395,19 @@ export function DashboardOverview() {
                 <Clock className="h-8 w-8 text-amber-500 mb-2" />
                 <h4 className="text-[11px] font-bold text-slate-400 uppercase mb-1">Peak Busy Time</h4>
                 <p className="text-2xl font-black text-slate-900">1:30 PM</p>
-                <p className="text-[10px] text-green-500 font-bold mt-1">+8% volume</p>
+                <p className="text-[10px] text-green-500 font-bold mt-1">Doing well</p>
               </Card>
               <Card className="border-slate-200 shadow-sm p-6 flex flex-col items-center justify-center text-center">
                 <Users className="h-8 w-8 text-blue-500 mb-2" />
-                <h4 className="text-[11px] font-bold text-slate-400 uppercase mb-1">Kitchen Efficiency</h4>
+                <h4 className="text-[11px] font-bold text-slate-400 uppercase mb-1">Kitchen Speed</h4>
                 <p className="text-2xl font-black text-slate-900">92.4%</p>
-                <p className="text-[10px] text-green-500 font-bold mt-1">Optimal zone</p>
+                <p className="text-[10px] text-green-500 font-bold mt-1">Very Good</p>
               </Card>
               <Card className="border-slate-200 shadow-sm p-6 flex flex-col items-center justify-center text-center">
                 <TrendingUp className="h-8 w-8 text-green-500 mb-2" />
-                <h4 className="text-[11px] font-bold text-slate-400 uppercase mb-1">Platform Reliability</h4>
-                <p className="text-2xl font-black text-slate-900">99.9%</p>
-                <p className="text-[10px] text-slate-400 font-bold mt-1">Uptime last 24h</p>
+                <h4 className="text-[11px] font-bold text-slate-400 uppercase mb-1">System Status</h4>
+                <p className="text-2xl font-black text-slate-900">Always On</p>
+                <p className="text-[10px] text-slate-400 font-bold mt-1">Everything is working</p>
               </Card>
             </div>
           </div>
@@ -421,9 +423,9 @@ export function DashboardOverview() {
           <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
             <span>DineNet Admin</span>
             <span className="opacity-50">/</span>
-            <span className="text-slate-900">Dashboard</span>
+            <span className="text-slate-900">Home Screen</span>
           </div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Overview</h1>
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight">How is the platform doing?</h1>
         </div>
         <div className="flex items-center gap-3">
           <div className="bg-white border border-slate-200 rounded-[18px] p-1.5 flex items-center gap-1 shadow-sm">
@@ -440,7 +442,7 @@ export function DashboardOverview() {
                 )}
                 onClick={() => setTimeRange(range)}
               >
-                {range}
+                {range === 'Today' ? 'Right Now' : range === '7d' ? 'Last 7 Days' : 'This Month'}
               </Button>
             ))}
           </div>
@@ -450,10 +452,10 @@ export function DashboardOverview() {
             className={cn("h-10 border-slate-200 font-bold gap-2 text-slate-600", isRefreshing && "opacity-50 pointer-events-none")}
             onClick={handleRefresh}
           >
-            <RefreshCw className={cn("h-4 w-4", isRefreshing && "animate-spin")} /> Refresh
+            <RefreshCw className={cn("h-4 w-4", isRefreshing && "animate-spin")} /> Update Now
           </Button>
           <Button size="sm" className="h-10 bg-[#e91e63] hover:bg-[#d81b60] font-bold gap-2 shadow-lg shadow-[#e91e63]/20">
-            <Share className="h-4 w-4" /> Export Data
+            <Share className="h-4 w-4" /> Save Report
           </Button>
         </div>
       </div>
@@ -492,14 +494,38 @@ export function DashboardOverview() {
                 activeTab === stat.id ? "text-primary" : "text-slate-400"
               )}>{stat.label}</p>
               <h3 className="text-2xl font-black text-slate-900 tracking-tight">{stat.value}</h3>
+              <p className="text-[10px] text-slate-400 mt-2 font-medium">{stat.desc}</p>
               
               {activeTab === stat.id && (
                 <div className="mt-4 flex items-center text-[9px] font-black text-primary uppercase tracking-widest animate-in fade-in slide-in-from-left-2">
-                  Viewing Analysis <ChevronRight className="ml-1 h-3 w-3" />
+                  Click to see details <ChevronRight className="ml-1 h-3 w-3" />
                 </div>
               )}
             </CardContent>
           </Card>
+        ))}
+      </div>
+
+      {/* Navigation for sections */}
+      <div className="flex border-b border-slate-200">
+        {[
+          { id: 'revenue', label: 'Money' },
+          { id: 'orders', label: 'Orders' },
+          { id: 'growth', label: 'Growth' },
+          { id: 'efficiency', label: 'Speed' }
+        ].map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as DashboardTab)}
+            className={cn(
+              "px-8 py-4 text-sm font-bold transition-all border-b-2",
+              activeTab === tab.id 
+                ? "border-primary text-primary" 
+                : "border-transparent text-slate-400 hover:text-slate-600"
+            )}
+          >
+            {tab.label}
+          </button>
         ))}
       </div>
 
