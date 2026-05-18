@@ -304,7 +304,7 @@ export function UserManagement({
                     <ChevronRight className="h-2.5 w-2.5 opacity-30" />
                     <span className="text-[#1a73e8] font-black">{tenant?.tenantName.toUpperCase() || "STAFF LIST"}</span>
                   </div>
-                  <SheetTitle className="text-2xl font-black text-[#1e293b] tracking-tight">{isAddingNew ? (editingUser ? `Edit ${editingUser.fullName}` : "New Enrollment") : "Platform Staff"}</SheetTitle>
+                  <SheetTitle className="text-2xl font-black text-[#1e293b] tracking-tight">{isAddingNew ? (editingUser ? `Edit ${editingUser.fullName}` : "New Enrollment") : "User Management"}</SheetTitle>
                 </div>
               </div>
               {!isAddingNew && <Button onClick={() => { setIsFormLoading(true); setIsAddingNew(true); resetForm(); setTimeout(() => setIsFormLoading(false), 400); }} className="h-10 px-6 font-black bg-[#1a73e8]"><Plus className="h-4 w-4 mr-2" /> Enroll Staff</Button>}
