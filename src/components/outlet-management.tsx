@@ -43,7 +43,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
-import { Outlet, Tenant } from "@/lib/types"
+import { Outlet, Organization } from "@/lib/types"
 import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
 import { 
@@ -75,16 +75,16 @@ const TIMEZONES = [
 ]
 
 interface OutletManagementProps {
-  tenant?: Tenant | null;
+  organization?: Organization | null;
   allOutlets: Outlet[];
   setAllOutlets: React.Dispatch<React.SetStateAction<Outlet[]>>;
-  allTenants: Tenant[];
+  allOrganizations: Organization[];
   isOpen: boolean;
   onClose: () => void;
   onViewUsers: (outlet: Outlet) => void;
 }
 
-export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants, isOpen, onClose, onViewUsers }: OutletManagementProps) {
+export function OutletManagement({ organization, allOutlets, setAllOutlets, allOrganizations, isOpen, onClose, onViewUsers }: OutletManagementProps) {
   const { toast } = useToast()
   const [searchQuery, setSearchQuery] = React.useState("")
   const [statusFilter, setStatusFilter] = React.useState<string | null>(null)
@@ -94,10 +94,10 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
   const [editingOutlet, setEditingOutlet] = React.useState<Outlet | null>(null)
   const [isFormLoading, setIsFormLoading] = React.useState(false)
 
-  const [isFormTenantPopoverOpen, setIsFormTenantPopoverOpen] = React.useState(false)
-  const [formTenantSearch, setFormTenantSearch] = React.useState("")
+  const [isFormOrganizationPopoverOpen, setIsFormOrganizationPopoverOpen] = React.useState(false)
+  const [formOrganizationSearch, setFormOrganizationSearch] = React.useState("")
 
-  const [formTenantId, setFormTenantId] = React.useState("")
+  const [formOrganizationId, setFormOrganizationId] = React.useState("")
   const [formName, setFormName] = React.useState("")
   const [formSlug, setFormSlug] = React.useState("")
   const [formPhone, setFormPhone] = React.useState("")
@@ -122,7 +122,7 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
   React.useEffect(() => {
     if (isOpen) {
       if (editingOutlet) {
-        setFormTenantId(editingOutlet.tenantId)
+        setFormOrganizationId(editingOutlet.organizationId)
         setFormName(editingOutlet.name)
         setFormSlug(editingOutlet.slug)
         setFormPhone(editingOutlet.phone)
@@ -133,7 +133,7 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
         setFormStreetAddress(editingOutlet.streetAddress || "")
         setFormZipCode(editingOutlet.zipCode || "")
       } else {
-        setFormTenantId(tenant?.id || "")
+        setFormOrganizationId(organization?.id || "")
         setFormName("")
         setFormSlug("")
         setFormPhone("")
@@ -145,7 +145,7 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
         setFormZipCode("")
       }
     }
-  }, [editingOutlet, tenant, isOpen])
+  }, [editingOutlet, organization, isOpen])
 
   const handleNameChange = (val: string) => {
     setFormName(val)
@@ -159,10 +159,10 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
       const matchesSearch = o.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             o.city.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesStatus = !statusFilter || o.status === statusFilter
-      const matchesTenant = !tenant || o.tenantId === tenant.id
-      return matchesSearch && matchesStatus && matchesTenant
+      const matchesOrganization = !organization || o.organizationId === organization.id
+      return matchesSearch && matchesStatus && matchesOrganization
     })
-  }, [allOutlets, searchQuery, statusFilter, tenant])
+  }, [allOutlets, searchQuery, statusFilter, organization])
 
   const paginatedOutlets = React.useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE
@@ -173,10 +173,10 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
 
   React.useEffect(() => {
     setCurrentPage(1)
-  }, [searchQuery, statusFilter, tenant])
+  }, [searchQuery, statusFilter, organization])
 
   const handleSaveOutlet = () => {
-    if (!formTenantId || !formName || !formSlug) {
+    if (!formOrganizationId || !formName || !formSlug) {
       toast({ title: "Validation Error", description: "Identity parameters are required.", variant: "destructive" })
       return
     }
@@ -184,7 +184,7 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
     if (editingOutlet) {
       setAllOutlets(prev => prev.map(o => o.id === editingOutlet.id ? {
         ...o,
-        tenantId: formTenantId,
+        organizationId: formOrganizationId,
         name: formName,
         slug: formSlug,
         phone: formPhone,
@@ -199,7 +199,7 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
     } else {
       const newOutlet: Outlet = {
         id: `o-${Math.random().toString(36).substr(2, 9)}`,
-        tenantId: formTenantId,
+        organizationId: formOrganizationId,
         name: formName,
         slug: formSlug,
         phone: formPhone,
@@ -219,7 +219,7 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
     setEditingOutlet(null)
   }
 
-  const getTenantName = (tid: string) => allTenants.find(t => t.id === tid)?.tenantName || "Unknown"
+  const getOrganizationName = (orgId: string) => allOrganizations.find(org => org.id === orgId)?.organizationName || "Unknown"
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
@@ -232,12 +232,12 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
               </button>
               <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                  <span className="opacity-80"><Building2 className="h-3 w-3 inline mr-1" /> TENANTS</span>
+                  <span className="opacity-80"><Building2 className="h-3 w-3 inline mr-1" /> ORGANIZATIONS</span>
                   <ChevronRight className="h-2.5 w-2.5 opacity-30" />
-                  <span className="text-primary font-black">{tenant?.tenantName.toUpperCase() || "PROPERTY NETWORK"}</span>
+                  <span className="text-primary font-black">{organization?.organizationName.toUpperCase() || "PROPERTY NETWORK"}</span>
                 </div>
                 <SheetTitle className="text-2xl font-black text-[#1e293b] tracking-tight">
-                  {isAddingNew ? (editingOutlet ? `Edit ${editingOutlet.name}` : "Outlet Registration") : `Outlet Management ${tenant?.tenantName || ""}`}
+                  {isAddingNew ? (editingOutlet ? `Edit ${editingOutlet.name}` : "Outlet Registration") : `Outlet Management ${organization?.organizationName || ""}`}
                 </SheetTitle>
               </div>
             </div>
@@ -265,19 +265,19 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
                   <div className="p-8 space-y-8">
                     <div className="space-y-2">
                       <Label className="text-[12px] font-bold text-slate-400 uppercase tracking-widest">ASSIGNED BRAND</Label>
-                      <Popover modal={true} open={isFormTenantPopoverOpen} onOpenChange={setIsFormTenantPopoverOpen}>
+                      <Popover modal={true} open={isFormOrganizationPopoverOpen} onOpenChange={setIsFormOrganizationPopoverOpen}>
                         <PopoverTrigger asChild>
                           <Button variant="outline" className="w-full h-12 justify-between bg-primary/5 text-primary font-black border-primary/10">
-                            <span className="truncate">{formTenantId ? getTenantName(formTenantId) : "Select Brand..."}</span>
+                            <span className="truncate">{formOrganizationId ? getOrganizationName(formOrganizationId) : "Select Brand..."}</span>
                             <ChevronsUpDown className="h-4 w-4 opacity-50" />
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-80 p-0 shadow-2xl z-[110]">
-                          <div className="p-2 border-b"><Input autoFocus placeholder="Search..." value={formTenantSearch} onChange={e => setFormTenantSearch(e.target.value)} className="h-10 border-none shadow-none focus-visible:ring-0" /></div>
+                          <div className="p-2 border-b"><Input autoFocus placeholder="Search..." value={formOrganizationSearch} onChange={e => setFormOrganizationSearch(e.target.value)} className="h-10 border-none shadow-none focus-visible:ring-0" /></div>
                           <ScrollArea className="h-64"><div className="p-1">
-                            {allTenants.filter(t => t.tenantName.toLowerCase().includes(formTenantSearch.toLowerCase())).map(t => (
-                              <button key={t.id} type="button" className={cn("w-full flex items-center justify-between px-3 py-2.5 rounded-md text-sm hover:bg-slate-100", formTenantId === t.id && "bg-primary/5 text-primary font-bold")} onClick={() => { setFormTenantId(t.id); setFormTenantSearch(""); setIsFormTenantPopoverOpen(false); }}>
-                                <span>{t.tenantName}</span><Check className={cn("h-4 w-4 opacity-0", formTenantId === t.id && "opacity-100")} />
+                            {allOrganizations.filter(org => org.organizationName.toLowerCase().includes(formOrganizationSearch.toLowerCase())).map(org => (
+                              <button key={org.id} type="button" className={cn("w-full flex items-center justify-between px-3 py-2.5 rounded-md text-sm hover:bg-slate-100", formOrganizationId === org.id && "bg-primary/5 text-primary font-bold")} onClick={() => { setFormOrganizationId(org.id); setFormOrganizationSearch(""); setIsFormOrganizationPopoverOpen(false); }}>
+                                <span>{org.organizationName}</span><Check className={cn("h-4 w-4 opacity-0", formOrganizationId === org.id && "opacity-100")} />
                               </button>
                             ))}
                           </div></ScrollArea>

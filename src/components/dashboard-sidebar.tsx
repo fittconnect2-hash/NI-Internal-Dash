@@ -33,7 +33,7 @@ const navGroups = [
   {
     label: "MANAGEMENT",
     items: [
-      { icon: Users, label: "Tenants", id: "tenants" },
+      { icon: Users, label: "Organizations", id: "organizations" },
       { icon: Store, label: "Outlets", id: "outlets" },
       { icon: User, label: "Users", id: "users" },
     ]

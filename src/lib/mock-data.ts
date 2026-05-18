@@ -1,17 +1,16 @@
-
-import { Tenant, Outlet, User, Gateway } from './types';
+import { Organization, Outlet, User, Gateway } from './types';
 
 const businessTypes = ['Hotel', 'Fast Food', 'Restaurant', 'Cafe', 'Catering', 'Fine Dining', 'Bakery', 'Pizzeria'];
 const statusOptions: ('Active' | 'Configuration pending' | 'Inactive')[] = ['Active', 'Configuration pending', 'Active', 'Active', 'Inactive'];
 
 /**
- * Generates mock tenants with NO payment gateways selected by default.
+ * Generates mock organizations with NO payment gateways selected by default.
  */
-function generateMockTenants(count: number): Tenant[] {
-  const tenants: Tenant[] = [
+function generateMockOrganizations(count: number): Organization[] {
+  const organizations: Organization[] = [
     {
       id: '1',
-      tenantName: 'Grand Hyatt Dining',
+      organizationName: 'Grand Hyatt Dining',
       contactName: 'Jane Doe',
       businessType: 'Hotel',
       country: 'UAE',
@@ -32,7 +31,7 @@ function generateMockTenants(count: number): Tenant[] {
     },
     {
       id: '2',
-      tenantName: 'QuickBite Express',
+      organizationName: 'QuickBite Express',
       contactName: 'John Smith',
       businessType: 'Fast Food',
       country: 'USA',
@@ -67,9 +66,9 @@ function generateMockTenants(count: number): Tenant[] {
     const type = businessTypes[i % businessTypes.length];
     const status = statusOptions[i % statusOptions.length];
     
-    tenants.push({
+    organizations.push({
       id,
-      tenantName: name,
+      organizationName: name,
       contactName: `Manager ${id}`,
       businessType: type,
       country: i % 2 === 0 ? 'UAE' : 'USA',
@@ -89,29 +88,29 @@ function generateMockTenants(count: number): Tenant[] {
     });
   }
 
-  return tenants;
+  return organizations;
 }
 
-export const initialTenants: Tenant[] = generateMockTenants(40);
+export const initialOrganizations: Organization[] = generateMockOrganizations(40);
 
-function generateMockOutlets(tenants: Tenant[]): Outlet[] {
+function generateMockOutlets(organizations: Organization[]): Outlet[] {
   const outlets: Outlet[] = [];
   
-  tenants.forEach((tenant) => {
-    const outletCount = tenant.numberOfOutlets;
+  organizations.forEach((org) => {
+    const outletCount = org.numberOfOutlets;
     for (let j = 0; j < outletCount; j++) {
       outlets.push({
-        id: `o-${tenant.id}-${j}`,
-        tenantId: tenant.id,
-        name: `${tenant.tenantName} - ${['Downtown', 'Marina', 'Airport', 'Mall', 'Harbor'][j % 5]}`,
-        slug: `${tenant.tenantName.toLowerCase().replace(/\s+/g, '-')}-${['downtown', 'marina', 'airport', 'mall', 'harbor'][j % 5]}`,
-        phone: tenant.contactPhone,
-        timezone: tenant.country === 'UAE' ? 'Asia/Dubai' : 'America/New_York',
-        city: tenant.city,
-        country: tenant.country,
-        state: tenant.state,
-        streetAddress: tenant.addressLine1,
-        zipCode: tenant.zipCode,
+        id: `o-${org.id}-${j}`,
+        organizationId: org.id,
+        name: `${org.organizationName} - ${['Downtown', 'Marina', 'Airport', 'Mall', 'Harbor'][j % 5]}`,
+        slug: `${org.organizationName.toLowerCase().replace(/\s+/g, '-')}-${['downtown', 'marina', 'airport', 'mall', 'harbor'][j % 5]}`,
+        phone: org.contactPhone,
+        timezone: org.country === 'UAE' ? 'Asia/Dubai' : 'America/New_York',
+        city: org.city,
+        country: org.country,
+        state: org.state,
+        streetAddress: org.addressLine1,
+        zipCode: org.zipCode,
         status: 'Active',
         userCount: Math.floor(Math.random() * 10) + 2,
         gatewayIds: [] // Strictly empty by default
@@ -122,17 +121,17 @@ function generateMockOutlets(tenants: Tenant[]): Outlet[] {
   return outlets;
 }
 
-export const initialOutlets: Outlet[] = generateMockOutlets(initialTenants);
+export const initialOutlets: Outlet[] = generateMockOutlets(initialOrganizations);
 
-function generateMockUsers(tenants: Tenant[], outlets: Outlet[]): User[] {
+function generateMockUsers(organizations: Organization[], outlets: Outlet[]): User[] {
   const users: User[] = [];
   
-  tenants.forEach((tenant) => {
-    const tenantOutlets = outlets.filter(o => o.tenantId === tenant.id);
-    const userCount = tenant.numberOfUsers;
+  organizations.forEach((org) => {
+    const orgOutlets = outlets.filter(o => o.organizationId === org.id);
+    const userCount = org.numberOfUsers;
     
     for (let k = 0; k < userCount; k++) {
-      const assignedOutlet = tenantOutlets[k % tenantOutlets.length];
+      const assignedOutlet = orgOutlets[k % orgOutlets.length];
       const role = 'Manager';
       const firstNames = ['John', 'Jane', 'Michael', 'Sara', 'David', 'Emily', 'Robert', 'Lisa'];
       const lastNames = ['Smith', 'Doe', 'Wilson', 'Ahmed', 'Brown', 'Davis', 'Taylor', 'Miller'];
@@ -140,13 +139,13 @@ function generateMockUsers(tenants: Tenant[], outlets: Outlet[]): User[] {
       const lastName = lastNames[k % lastNames.length];
       
       users.push({
-        id: `u-${tenant.id}-${k}`,
-        tenantId: tenant.id,
+        id: `u-${org.id}-${k}`,
+        organizationId: org.id,
         outletId: assignedOutlet?.id,
         fullName: `${firstName} ${lastName}`,
         username: `${firstName.toLowerCase()}.${lastName.toLowerCase()}${k}`,
-        email: `${firstName.toLowerCase()}.${k}@${tenant.tenantName.toLowerCase().replace(/\s+/g, '')}.com`,
-        phone: tenant.contactPhone,
+        email: `${firstName.toLowerCase()}.${k}@${org.organizationName.toLowerCase().replace(/\s+/g, '')}.com`,
+        phone: org.contactPhone,
         role: role as any,
         status: 'Active',
         lastActive: 'Just now'
@@ -157,7 +156,7 @@ function generateMockUsers(tenants: Tenant[], outlets: Outlet[]): User[] {
   return users;
 }
 
-export const initialUsers: User[] = generateMockUsers(initialTenants, initialOutlets);
+export const initialUsers: User[] = generateMockUsers(initialOrganizations, initialOutlets);
 
 export const initialGateways: Gateway[] = [
   {

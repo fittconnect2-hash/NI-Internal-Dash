@@ -1,21 +1,20 @@
-
 "use client"
 
 import * as React from "react"
 import { DashboardSidebar } from "@/components/dashboard-sidebar"
 import { DashboardHeader } from "@/components/dashboard-header"
-import { TenantCard } from "@/components/tenant-card"
-import { TenantForm } from "@/components/tenant-form"
-import { TenantConfiguration } from "@/components/tenant-configuration"
-import { TenantDetail } from "@/components/tenant-detail"
+import { OrganizationCard } from "@/components/organization-card"
+import { OrganizationForm } from "@/components/organization-form"
+import { OrganizationConfiguration } from "@/components/organization-configuration"
+import { OrganizationDetail } from "@/components/organization-detail"
 import { OutletManagement } from "@/components/outlet-management"
 import { UserManagement } from "@/components/user-management"
 import { DashboardOverview } from "@/components/dashboard-overview"
 import { OutletListView } from "@/components/outlet-list-view"
 import { UserListView } from "@/components/user-list-view"
 import { GatewayManagement } from "@/components/gateway-management"
-import { initialTenants, initialOutlets, initialUsers, initialGateways } from "@/lib/mock-data"
-import { Tenant, User, Outlet, Gateway } from "@/lib/types"
+import { initialOrganizations, initialOutlets, initialUsers, initialGateways } from "@/lib/mock-data"
+import { Organization, User, Outlet, Gateway } from "@/lib/types"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { 
   Search, 
@@ -40,16 +39,16 @@ import { useToast } from "@/hooks/use-toast"
 
 const ITEMS_PER_PAGE = 8
 const STORAGE_KEYS = {
-  TENANTS: 'network-dine-tenants-v6', // Increment to v6 to force clean defaults
-  OUTLETS: 'network-dine-outlets-v6', // Increment to v6
-  USERS: 'network-dine-users-v3',
-  GATEWAYS: 'network-dine-gateways-v6',
+  ORGANIZATIONS: 'dine-net-organizations-v6',
+  OUTLETS: 'dine-net-outlets-v6',
+  USERS: 'dine-net-users-v6',
+  GATEWAYS: 'dine-net-gateways-v6',
 }
 
 export default function DashboardPage() {
   const { toast } = useToast()
   const [activeTab, setActiveTab] = React.useState("dashboard")
-  const [tenants, setTenants] = React.useState<Tenant[]>([])
+  const [organizations, setOrganizations] = React.useState<Organization[]>([])
   const [outlets, setOutlets] = React.useState<Outlet[]>([])
   const [users, setUsers] = React.useState<User[]>([])
   const [gateways, setGateways] = React.useState<Gateway[]>([])
@@ -66,10 +65,10 @@ export default function DashboardPage() {
   const [isOutletsDrawerOpen, setIsOutletsDrawerOpen] = React.useState(false)
   const [isUsersDrawerOpen, setIsUsersDrawerOpen] = React.useState(false)
   
-  const [editingTenant, setEditingTenant] = React.useState<Tenant | null>(null)
-  const [configuringTenant, setConfiguringTenant] = React.useState<Tenant | null>(null)
-  const [viewingTenant, setViewingTenant] = React.useState<Tenant | null>(null)
-  const [selectedTenant, setSelectedTenant] = React.useState<Tenant | null>(null)
+  const [editingOrganization, setEditingOrganization] = React.useState<Organization | null>(null)
+  const [configuringOrganization, setConfiguringOrganization] = React.useState<Organization | null>(null)
+  const [viewingOrganization, setViewingOrganization] = React.useState<Organization | null>(null)
+  const [selectedOrganization, setSelectedOrganization] = React.useState<Organization | null>(null)
   const [editingUser, setEditingUser] = React.useState<User | null>(null)
   const [isAddingNewUser, setIsAddingNewUser] = React.useState(false)
 
@@ -88,13 +87,13 @@ export default function DashboardPage() {
 
   // Persistence Logic
   React.useEffect(() => {
-    const t = localStorage.getItem(STORAGE_KEYS.TENANTS)
-    const o = localStorage.getItem(STORAGE_KEYS.OUTLETS)
+    const o = localStorage.getItem(STORAGE_KEYS.ORGANIZATIONS)
+    const out = localStorage.getItem(STORAGE_KEYS.OUTLETS)
     const u = localStorage.getItem(STORAGE_KEYS.USERS)
     const g = localStorage.getItem(STORAGE_KEYS.GATEWAYS)
 
-    setTenants(t ? JSON.parse(t) : initialTenants)
-    setOutlets(o ? JSON.parse(o) : initialOutlets)
+    setOrganizations(o ? JSON.parse(o) : initialOrganizations)
+    setOutlets(out ? JSON.parse(out) : initialOutlets)
     setUsers(u ? JSON.parse(u) : initialUsers)
     setGateways(g ? JSON.parse(g) : initialGateways)
     setIsLoaded(true)
@@ -102,103 +101,103 @@ export default function DashboardPage() {
 
   React.useEffect(() => {
     if (isLoaded) {
-      localStorage.setItem(STORAGE_KEYS.TENANTS, JSON.stringify(tenants))
+      localStorage.setItem(STORAGE_KEYS.ORGANIZATIONS, JSON.stringify(organizations))
       localStorage.setItem(STORAGE_KEYS.OUTLETS, JSON.stringify(outlets))
       localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users))
       localStorage.setItem(STORAGE_KEYS.GATEWAYS, JSON.stringify(gateways))
     }
-  }, [tenants, outlets, users, gateways, isLoaded])
+  }, [organizations, outlets, users, gateways, isLoaded])
 
   // Filter logic
-  const filteredTenants = React.useMemo(() => {
-    return tenants.filter(t => {
+  const filteredOrganizations = React.useMemo(() => {
+    return organizations.filter(o => {
       const matchesSearch = 
-        t.tenantName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        t.contactEmail.toLowerCase().includes(searchQuery.toLowerCase())
+        o.organizationName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        o.contactEmail.toLowerCase().includes(searchQuery.toLowerCase())
       
-      const matchesFilter = !filterStatus || t.configurationStatus === filterStatus
+      const matchesFilter = !filterStatus || o.configurationStatus === filterStatus
       return matchesSearch && matchesFilter
     })
-  }, [tenants, searchQuery, filterStatus])
+  }, [organizations, searchQuery, filterStatus])
 
-  const totalPages = Math.ceil(filteredTenants.length / ITEMS_PER_PAGE)
-  const paginatedTenants = React.useMemo(() => {
+  const totalPages = Math.ceil(filteredOrganizations.length / ITEMS_PER_PAGE)
+  const paginatedOrganizations = React.useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE
-    return filteredTenants.slice(start, start + ITEMS_PER_PAGE)
-  }, [filteredTenants, currentPage])
+    return filteredOrganizations.slice(start, start + ITEMS_PER_PAGE)
+  }, [filteredOrganizations, currentPage])
 
   React.useEffect(() => {
     setCurrentPage(1)
   }, [searchQuery, filterStatus])
 
-  const handleAddTenant = (data: Partial<Tenant>) => {
-    if (editingTenant) {
-      setTenants(prev => prev.map(t => t.id === editingTenant.id ? { ...t, ...data } as Tenant : t))
-      toast({ title: "Tenant Updated", description: `${data.tenantName} has been successfully modified.` })
+  const handleAddOrganization = (data: Partial<Organization>) => {
+    if (editingOrganization) {
+      setOrganizations(prev => prev.map(o => o.id === editingOrganization.id ? { ...o, ...data } as Organization : o))
+      toast({ title: "Organization Updated", description: `${data.organizationName} has been successfully modified.` })
     } else {
-      const newTenant: Tenant = {
+      const newOrg: Organization = {
         ...data,
-        id: `t-${Math.random().toString(36).substr(2, 9)}`,
+        id: `org-${Math.random().toString(36).substr(2, 9)}`,
         configurationStatus: 'Configuration pending',
         isPaymentGatewayConfigured: false,
         globalGatewayIds: [],
         numberOfOutlets: 0,
         numberOfUsers: 0,
-      } as Tenant
-      setTenants(prev => [newTenant, ...prev])
-      toast({ title: "New Tenant Added", description: `${data.tenantName} is now registered on the platform.` })
+      } as Organization
+      setOrganizations(prev => [newOrg, ...prev])
+      toast({ title: "New Organization Added", description: `${data.organizationName} is now registered on the platform.` })
     }
     setIsFormOpen(false)
-    setEditingTenant(null)
+    setEditingOrganization(null)
   }
 
-  const handleDeleteTenant = (id: string) => {
-    setTenants(prev => prev.filter(t => t.id !== id))
-    setOutlets(prev => prev.filter(o => o.tenantId !== id))
-    setUsers(prev => prev.filter(u => u.tenantId !== id))
-    toast({ title: "Tenant Removed", description: "The organization and all associated data have been deleted." })
+  const handleDeleteOrganization = (id: string) => {
+    setOrganizations(prev => prev.filter(o => o.id !== id))
+    setOutlets(prev => prev.filter(out => out.organizationId !== id))
+    setUsers(prev => prev.filter(u => u.organizationId !== id))
+    toast({ title: "Organization Removed", description: "The organization and all associated data have been deleted." })
   }
 
-  const handleConfigureTenant = (tenant: Tenant) => {
-    setConfiguringTenant(tenant)
+  const handleConfigureOrganization = (org: Organization) => {
+    setConfiguringOrganization(org)
     setIsConfigOpen(true)
   }
 
-  const handleSaveConfiguration = (tenantId: string, updates: Partial<Tenant>, outletUpdates?: Record<string, string[]>) => {
-    setTenants(prev => prev.map(t => t.id === tenantId ? { ...t, ...updates } : t))
+  const handleSaveConfiguration = (orgId: string, updates: Partial<Organization>, outletUpdates?: Record<string, string[]>) => {
+    setOrganizations(prev => prev.map(o => o.id === orgId ? { ...o, ...updates } : o))
     
     if (outletUpdates) {
-      setOutlets(prev => prev.map(o => {
-        if (o.tenantId === tenantId && outletUpdates[o.id] !== undefined) {
-          return { ...o, gatewayIds: outletUpdates[o.id] }
+      setOutlets(prev => prev.map(out => {
+        if (out.organizationId === orgId && outletUpdates[out.id] !== undefined) {
+          return { ...out, gatewayIds: outletUpdates[out.id] }
         }
-        return o
+        return out
       }))
     }
 
     toast({ title: "Configuration Applied", description: "All settings and gateway assignments have been updated." })
     setIsConfigOpen(false)
-    setConfiguringTenant(null)
+    setConfiguringOrganization(null)
   }
 
-  const handleViewTenant = (tenant: Tenant) => {
-    setViewingTenant(tenant)
+  const handleViewOrganization = (org: Organization) => {
+    setViewingOrganization(org)
     setIsDetailOpen(true)
   }
 
-  const handleOutletsNavigation = (tenant: Tenant) => {
-    setSelectedTenant(tenant)
+  const handleOutletsNavigation = (org: Organization) => {
+    setSelectedOrganization(org)
     setIsOutletsDrawerOpen(true)
   }
 
-  const handleUsersNavigation = (tenant: Tenant) => {
-    setSelectedTenant(tenant)
+  const handleUsersNavigation = (org: Organization) => {
+    setSelectedOrganization(org)
     setIsUsersDrawerOpen(true)
     setIsAddingNewUser(false)
   }
 
   const handleAddUserGlobal = () => {
-    setSelectedTenant(null)
+    setSelectedOrganization(null)
     setEditingUser(null)
     setIsAddingNewUser(true)
     setIsUsersDrawerOpen(true)
@@ -207,7 +206,7 @@ export default function DashboardPage() {
   const handleUserSaved = () => {
     if (activeTab === 'users') {
       setIsUsersDrawerOpen(false)
-      setSelectedTenant(null)
+      setSelectedOrganization(null)
       setEditingUser(null)
       setIsAddingNewUser(false)
     } 
@@ -218,10 +217,10 @@ export default function DashboardPage() {
   // Sync counts
   React.useEffect(() => {
     if (isLoaded) {
-      setTenants(prev => prev.map(t => {
-        const uCount = users.filter(u => u.tenantId === t.id).length
-        const oCount = outlets.filter(o => o.tenantId === t.id).length
-        return { ...t, numberOfUsers: uCount, numberOfOutlets: oCount }
+      setOrganizations(prev => prev.map(o => {
+        const uCount = users.filter(u => u.organizationId === o.id).length
+        const oCount = outlets.filter(out => out.organizationId === o.id).length
+        return { ...o, numberOfUsers: uCount, numberOfOutlets: oCount }
       }))
     }
   }, [users.length, outlets.length, isLoaded])
@@ -235,10 +234,10 @@ export default function DashboardPage() {
       <OutletListView 
         allOutlets={outlets}
         setAllOutlets={setOutlets}
-        allTenants={tenants}
+        allOrganizations={organizations}
         onViewUsers={(outlet) => {
-          const owner = tenants.find(t => t.id === outlet.tenantId)
-          setSelectedTenant(owner || null)
+          const owner = organizations.find(o => o.id === outlet.organizationId)
+          setSelectedOrganization(owner || null)
           setIsUsersDrawerOpen(true)
           setIsAddingNewUser(false)
         }}
@@ -249,7 +248,7 @@ export default function DashboardPage() {
       <UserListView 
         allUsers={users}
         setAllUsers={setUsers}
-        allTenants={tenants}
+        allOrganizations={organizations}
         allOutlets={outlets}
         onAddUser={handleAddUserGlobal}
         onEditUser={(user) => {
@@ -267,13 +266,13 @@ export default function DashboardPage() {
       />
     )
 
-    if (activeTab === 'tenants') {
+    if (activeTab === 'organizations') {
       return (
         <div className="p-6 md:p-8 flex flex-col h-full overflow-hidden bg-[#f8f9fc]">
           <div className="max-w-7xl mx-auto w-full flex-1 flex flex-col min-h-0">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
               <div>
-                <h1 className="text-3xl font-black text-slate-900 tracking-tight">Tenant Management</h1>
+                <h1 className="text-3xl font-black text-slate-900 tracking-tight">Organization Management</h1>
                 <p className="text-sm text-slate-500 mt-1">Manage your global brand network and properties.</p>
               </div>
               <div className="flex items-center gap-2">
@@ -296,7 +295,7 @@ export default function DashboardPage() {
                   </Button>
                 </div>
                 <Button size="sm" className="h-10 px-6 font-black bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20" onClick={() => setIsFormOpen(true)}>
-                  <Plus className="h-4 w-4 mr-2" /> New Tenant
+                  <Plus className="h-4 w-4 mr-2" /> New Organization
                 </Button>
               </div>
             </div>
@@ -329,18 +328,18 @@ export default function DashboardPage() {
 
             <div className="flex-1 overflow-y-auto pr-2 scrollbar-hide">
               <div className={cn(viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-8' : 'space-y-3 pb-8')}>
-                {paginatedTenants.map((tenant) => (
-                  <TenantCard 
-                    key={tenant.id} 
-                    tenant={tenant} 
+                {paginatedOrganizations.map((org) => (
+                  <OrganizationCard 
+                    key={org.id} 
+                    organization={org} 
                     viewMode={viewMode} 
-                    onEdit={(t) => {
-                      setEditingTenant(t)
+                    onEdit={(o) => {
+                      setEditingOrganization(o)
                       setIsFormOpen(true)
                     }}
-                    onView={handleViewTenant}
-                    onConfigure={handleConfigureTenant}
-                    onDelete={handleDeleteTenant}
+                    onView={handleViewOrganization}
+                    onConfigure={handleConfigureOrganization}
+                    onDelete={handleDeleteOrganization}
                     onOutletsClick={handleOutletsNavigation}
                     onUsersClick={handleUsersNavigation}
                   />
@@ -351,7 +350,7 @@ export default function DashboardPage() {
             {totalPages > 1 && (
               <div className="mt-auto py-6 border-t border-slate-100 flex items-center justify-between">
                 <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">
-                  Showing <span className="text-primary">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to <span className="text-primary">{Math.min(currentPage * ITEMS_PER_PAGE, filteredTenants.length)}</span> of <span className="text-primary">{filteredTenants.length}</span> results
+                  Showing <span className="text-primary">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to <span className="text-primary">{Math.min(currentPage * ITEMS_PER_PAGE, filteredOrganizations.length)}</span> of <span className="text-primary">{filteredOrganizations.length}</span> results
                 </p>
                 <div className="flex items-center gap-1">
                   <Button variant="outline" size="sm" className="h-8 px-2 border-slate-200" disabled={currentPage === 1} onClick={() => setCurrentPage(p => Math.max(1, p - 1))}><ChevronLeft className="h-4 w-4" /></Button>
@@ -372,7 +371,7 @@ export default function DashboardPage() {
       <div className="flex min-h-screen w-full bg-background overflow-hidden">
         <DashboardSidebar activeTab={activeTab} onTabChange={(tab) => {
           setActiveTab(tab)
-          setSelectedTenant(null)
+          setSelectedOrganization(null)
           setEditingUser(null)
           setIsAddingNewUser(false)
         }} />
@@ -383,11 +382,11 @@ export default function DashboardPage() {
           </div>
         </main>
       </div>
-      <TenantForm isOpen={isFormOpen} onClose={() => {setIsFormOpen(false); setEditingTenant(null)}} tenant={editingTenant} onSubmit={handleAddTenant} />
-      <TenantConfiguration isOpen={isConfigOpen} onClose={() => {setIsConfigOpen(false); setConfiguringTenant(null)}} tenant={configuringTenant} allGateways={gateways} allOutlets={outlets} onSave={handleSaveConfiguration} />
-      <TenantDetail isOpen={isDetailOpen} onClose={() => {setIsDetailOpen(false); setViewingTenant(null)}} tenant={viewingTenant} />
-      <OutletManagement tenant={selectedTenant} allOutlets={outlets} setAllOutlets={setOutlets} allTenants={tenants} isOpen={isOutletsDrawerOpen} onClose={() => {setIsOutletsDrawerOpen(false); setSelectedTenant(null)}} onViewUsers={(outlet) => { setIsOutletsDrawerOpen(false); setIsUsersDrawerOpen(true); setIsAddingNewUser(false); }} />
-      <UserManagement tenant={selectedTenant} propEditingUser={editingUser} allUsers={users} setAllUsers={setUsers} allTenants={tenants} allOutlets={outlets} isOpen={isUsersDrawerOpen} defaultAdding={isAddingNewUser} onClose={() => { setIsUsersDrawerOpen(false); setSelectedTenant(null); setEditingUser(null); setIsAddingNewUser(false); }} onSaved={handleUserSaved} />
+      <OrganizationForm isOpen={isFormOpen} onClose={() => {setIsFormOpen(false); setEditingOrganization(null)}} organization={editingOrganization} onSubmit={handleAddOrganization} />
+      <OrganizationConfiguration isOpen={isConfigOpen} onClose={() => {setIsConfigOpen(false); setConfiguringOrganization(null)}} organization={configuringOrganization} allGateways={gateways} allOutlets={outlets} onSave={handleSaveConfiguration} />
+      <OrganizationDetail isOpen={isDetailOpen} onClose={() => {setIsDetailOpen(false); setViewingOrganization(null)}} organization={viewingOrganization} />
+      <OutletManagement organization={selectedOrganization} allOutlets={outlets} setAllOutlets={setOutlets} allOrganizations={organizations} isOpen={isOutletsDrawerOpen} onClose={() => {setIsOutletsDrawerOpen(false); setSelectedOrganization(null)}} onViewUsers={(outlet) => { setIsOutletsDrawerOpen(false); setIsUsersDrawerOpen(true); setIsAddingNewUser(false); }} />
+      <UserManagement organization={selectedOrganization} propEditingUser={editingUser} allUsers={users} setAllUsers={setUsers} allOrganizations={organizations} allOutlets={outlets} isOpen={isUsersDrawerOpen} defaultAdding={isAddingNewUser} onClose={() => { setIsUsersDrawerOpen(false); setSelectedOrganization(null); setEditingUser(null); setIsAddingNewUser(false); }} onSaved={handleUserSaved} />
     </SidebarProvider>
   )
 }

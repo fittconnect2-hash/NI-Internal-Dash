@@ -60,7 +60,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { User, Tenant, Outlet } from "@/lib/types"
+import { User, Organization, Outlet } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 
@@ -69,23 +69,23 @@ const ITEMS_PER_PAGE = 10
 interface UserListViewProps {
   allUsers: User[];
   setAllUsers: React.Dispatch<React.SetStateAction<User[]>>;
-  allTenants: Tenant[];
+  allOrganizations: Organization[];
   allOutlets: Outlet[];
   onAddUser: () => void;
   onEditUser: (user: User) => void;
 }
 
-export function UserListView({ allUsers, setAllUsers, allTenants, allOutlets, onAddUser, onEditUser }: UserListViewProps) {
+export function UserListView({ allUsers, setAllUsers, allOrganizations, allOutlets, onAddUser, onEditUser }: UserListViewProps) {
   const { toast } = useToast()
   const [searchQuery, setSearchQuery] = React.useState("")
-  const [tenantFilter, setTenantFilter] = React.useState<string | null>(null)
+  const [organizationFilter, setOrganizationFilter] = React.useState<string | null>(null)
   const [outletFilter, setOutletFilter] = React.useState<string | null>(null)
   const [roleFilter, setRoleFilter] = React.useState<string | null>(null)
   const [statusFilter, setStatusFilter] = React.useState<string | null>(null)
   const [currentPage, setCurrentPage] = React.useState(1)
   
-  const [tenantSearch, setTenantSearch] = React.useState("")
-  const [isTenantPopoverOpen, setIsTenantPopoverOpen] = React.useState(false)
+  const [organizationSearch, setOrganizationSearch] = React.useState("")
+  const [isOrganizationPopoverOpen, setIsOrganizationPopoverOpen] = React.useState(false)
 
   // Dialog states
   const [confirmSuspend, setConfirmSuspend] = React.useState<User | null>(null)
@@ -104,23 +104,23 @@ export function UserListView({ allUsers, setAllUsers, allTenants, allOutlets, on
     }
   }, [confirmSuspend, confirmReset, confirmReactivate, confirmDelete]);
 
-  const tenantsWithCounts = React.useMemo(() => {
-    return allTenants.map(t => ({
-      ...t,
-      count: allUsers.filter(u => u.tenantId === t.id).length
-    })).filter(t => t.count > 0)
-  }, [allUsers, allTenants])
+  const organizationsWithCounts = React.useMemo(() => {
+    return allOrganizations.map(org => ({
+      ...org,
+      count: allUsers.filter(u => u.organizationId === org.id).length
+    })).filter(org => org.count > 0)
+  }, [allUsers, allOrganizations])
 
-  const filteredTenantsForDropdown = React.useMemo(() => {
-    return tenantsWithCounts.filter(t => 
-      t.tenantName.toLowerCase().includes(tenantSearch.toLowerCase())
+  const filteredOrganizationsForDropdown = React.useMemo(() => {
+    return organizationsWithCounts.filter(org => 
+      org.organizationName.toLowerCase().includes(organizationSearch.toLowerCase())
     )
-  }, [tenantsWithCounts, tenantSearch])
+  }, [organizationsWithCounts, organizationSearch])
 
   const availableOutlets = React.useMemo(() => {
-    if (!tenantFilter) return allOutlets
-    return allOutlets.filter(o => o.tenantId === tenantFilter)
-  }, [allOutlets, tenantFilter])
+    if (!organizationFilter) return allOutlets
+    return allOutlets.filter(o => o.organizationId === organizationFilter)
+  }, [allOutlets, organizationFilter])
 
   const filteredUsers = React.useMemo(() => {
     return allUsers.filter(user => {
@@ -129,14 +129,14 @@ export function UserListView({ allUsers, setAllUsers, allTenants, allOutlets, on
         user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
         user.email.toLowerCase().includes(searchQuery.toLowerCase())
       
-      const matchesTenant = !tenantFilter || user.tenantId === tenantFilter
+      const matchesOrganization = !organizationFilter || user.organizationId === organizationFilter
       const matchesOutlet = !outletFilter || user.outletId === outletFilter
       const matchesRole = !roleFilter || user.role === roleFilter
       const matchesStatus = !statusFilter || user.status === statusFilter
       
-      return matchesSearch && matchesTenant && matchesOutlet && matchesRole && matchesStatus
+      return matchesSearch && matchesOrganization && matchesOutlet && matchesRole && matchesStatus
     })
-  }, [allUsers, searchQuery, tenantFilter, outletFilter, roleFilter, statusFilter])
+  }, [allUsers, searchQuery, organizationFilter, outletFilter, roleFilter, statusFilter])
 
   const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE)
   const paginatedUsers = React.useMemo(() => {
@@ -146,10 +146,10 @@ export function UserListView({ allUsers, setAllUsers, allTenants, allOutlets, on
 
   React.useEffect(() => {
     setCurrentPage(1)
-  }, [searchQuery, tenantFilter, outletFilter, roleFilter, statusFilter])
+  }, [searchQuery, organizationFilter, outletFilter, roleFilter, statusFilter])
 
-  const getTenantName = (tenantId: string) => {
-    return allTenants.find(t => t.id === tenantId)?.tenantName || "Unknown Tenant"
+  const getOrganizationName = (organizationId: string) => {
+    return allOrganizations.find(org => org.id === organizationId)?.organizationName || "Unknown Organization"
   }
 
   const getOutletName = (outletId?: string) => {
@@ -159,11 +159,11 @@ export function UserListView({ allUsers, setAllUsers, allTenants, allOutlets, on
 
   const resetFilters = () => {
     setSearchQuery("")
-    setTenantFilter(null)
+    setOrganizationFilter(null)
     setOutletFilter(null)
     setRoleFilter(null)
     setStatusFilter(null)
-    setTenantSearch("")
+    setOrganizationSearch("")
   }
 
   const handleResetPassword = (user: User) => {
@@ -195,7 +195,7 @@ export function UserListView({ allUsers, setAllUsers, allTenants, allOutlets, on
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-black text-slate-900 tracking-tight">User Management</h1>
-            <p className="text-sm text-slate-500 mt-1">Manage platform administrators, brand managers, and outlet staff.</p>
+            <p className="text-sm text-slate-500 mt-1">Manage platform administrators, organization managers, and outlet staff.</p>
           </div>
           <Button size="sm" className="h-10 px-6 font-black bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20" onClick={onAddUser}>
             <Plus className="h-4 w-4 mr-2" /> Add New User
@@ -213,26 +213,26 @@ export function UserListView({ allUsers, setAllUsers, allTenants, allOutlets, on
             </div>
 
             <div className="space-y-2.5">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Tenant</label>
-              <Popover open={isTenantPopoverOpen} onOpenChange={setIsTenantPopoverOpen}>
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Organization</label>
+              <Popover open={isOrganizationPopoverOpen} onOpenChange={setIsOrganizationPopoverOpen}>
                 <PopoverTrigger asChild>
                   <Button variant="outline" role="combobox" className="w-full h-11 justify-between bg-white border-slate-200 text-sm font-medium px-3">
-                    <span className="truncate">{tenantFilter ? getTenantName(tenantFilter) : "All Tenants"}</span>
+                    <span className="truncate">{organizationFilter ? getOrganizationName(organizationFilter) : "All Organizations"}</span>
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-80 p-0 shadow-2xl border-slate-200" align="start">
                   <div className="flex items-center border-b px-3">
                     <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-                    <Input className="flex h-11 w-full border-none shadow-none focus-visible:ring-0 bg-transparent py-3 text-sm outline-none" placeholder="Search..." value={tenantSearch} onChange={(e) => setTenantSearch(e.target.value)} />
+                    <Input className="flex h-11 w-full border-none shadow-none focus-visible:ring-0 bg-transparent py-3 text-sm outline-none" placeholder="Search..." value={organizationSearch} onChange={(e) => setOrganizationSearch(e.target.value)} />
                   </div>
                   <ScrollArea className="h-60">
                     <div className="p-1">
-                      <Button variant="ghost" className="w-full justify-start font-normal text-sm h-10" onClick={() => { setTenantFilter(null); setOutletFilter(null); setIsTenantPopoverOpen(false); }}>All Tenants</Button>
-                      {filteredTenantsForDropdown.map((t) => (
-                        <Button key={t.id} variant="ghost" className="w-full justify-start font-normal text-sm h-10 group" onClick={() => { setTenantFilter(t.id); setOutletFilter(null); setIsTenantPopoverOpen(false); }}>
-                          <span className="truncate flex-1 text-left">{t.tenantName}</span>
-                          <span className="ml-auto text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded group-hover:bg-white transition-colors">{t.count} Staff</span>
+                      <Button variant="ghost" className="w-full justify-start font-normal text-sm h-10" onClick={() => { setOrganizationFilter(null); setOutletFilter(null); setIsOrganizationPopoverOpen(false); }}>All Organizations</Button>
+                      {filteredOrganizationsForDropdown.map((org) => (
+                        <Button key={org.id} variant="ghost" className="w-full justify-start font-normal text-sm h-10 group" onClick={() => { setOrganizationFilter(org.id); setOutletFilter(null); setIsOrganizationPopoverOpen(false); }}>
+                          <span className="truncate flex-1 text-left">{org.organizationName}</span>
+                          <span className="ml-auto text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded group-hover:bg-white transition-colors">{org.count} Staff</span>
                         </Button>
                       ))}
                     </div>
@@ -297,7 +297,7 @@ export function UserListView({ allUsers, setAllUsers, allTenants, allOutlets, on
                 <TableRow className="hover:bg-transparent border-b border-slate-100">
                   <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-8 uppercase tracking-widest">Username</TableHead>
                   <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">Contact</TableHead>
-                  <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">Role & Brand</TableHead>
+                  <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">Role & Organization</TableHead>
                   <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest text-center">Status</TableHead>
                   <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-8 text-right uppercase tracking-widest">Actions</TableHead>
                 </TableRow>
@@ -315,7 +315,7 @@ export function UserListView({ allUsers, setAllUsers, allTenants, allOutlets, on
                     </TableCell>
                     <TableCell className="px-4">
                       <Badge className="bg-slate-100 text-slate-600 border-none px-2 py-0.5 text-[10px] font-bold uppercase rounded-md mb-1">{user.role}</Badge>
-                      <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-bold uppercase"><Building2 className="h-3 w-3" /> {getTenantName(user.tenantId)}</div>
+                      <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-bold uppercase"><Building2 className="h-3 w-3" /> {getOrganizationName(user.organizationId)}</div>
                     </TableCell>
                     <TableCell className="px-4 text-center">
                       <Badge className={cn("rounded-full px-4 py-1 text-[10px] font-bold border uppercase", user.status === 'Active' ? "bg-[#e1f9ef] text-[#22c55e] border-[#e1f9ef]" : user.status === 'Suspended' ? "bg-rose-100 text-rose-500 border-rose-200" : "bg-slate-100 text-slate-500 border-slate-200")}>{user.status}</Badge>

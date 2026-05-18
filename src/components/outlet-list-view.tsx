@@ -48,7 +48,7 @@ import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Label } from "@/components/ui/label"
-import { Outlet, Tenant } from "@/lib/types"
+import { Outlet, Organization } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 
@@ -71,28 +71,28 @@ const TIMEZONES = [
 interface OutletListViewProps {
   allOutlets: Outlet[];
   setAllOutlets: React.Dispatch<React.SetStateAction<Outlet[]>>;
-  allTenants: Tenant[];
+  allOrganizations: Organization[];
   onViewUsers: (outlet: Outlet) => void;
 }
 
-export function OutletListView({ allOutlets, setAllOutlets, allTenants, onViewUsers }: OutletListViewProps) {
+export function OutletListView({ allOutlets, setAllOutlets, allOrganizations, onViewUsers }: OutletListViewProps) {
   const { toast } = useToast()
   const [searchQuery, setSearchQuery] = React.useState("")
-  const [tenantFilter, setTenantFilter] = React.useState<string | null>(null)
+  const [organizationFilter, setOrganizationFilter] = React.useState<string | null>(null)
   const [statusFilter, setStatusFilter] = React.useState<string | null>(null)
   const [currentPage, setCurrentPage] = React.useState(1)
   
-  const [tenantSearch, setTenantSearch] = React.useState("")
-  const [isTenantPopoverOpen, setIsTenantPopoverOpen] = React.useState(false)
+  const [organizationSearch, setOrganizationSearch] = React.useState("")
+  const [isOrganizationPopoverOpen, setIsOrganizationPopoverOpen] = React.useState(false)
 
-  const [isFormTenantPopoverOpen, setIsFormTenantPopoverOpen] = React.useState(false)
-  const [formTenantSearch, setFormTenantSearch] = React.useState("")
+  const [isFormOrganizationPopoverOpen, setIsFormOrganizationPopoverOpen] = React.useState(false)
+  const [formOrganizationSearch, setFormOrganizationSearch] = React.useState("")
 
   const [editingOutlet, setEditingOutlet] = React.useState<Outlet | null>(null)
   const [isFormVisible, setIsFormVisible] = React.useState(false)
   const [isFormLoading, setIsFormLoading] = React.useState(false)
 
-  const [formTenantId, setFormTenantId] = React.useState("")
+  const [formOrganizationId, setFormOrganizationId] = React.useState("")
   const [formName, setFormName] = React.useState("")
   const [formSlug, setFormSlug] = React.useState("")
   const [formPhone, setFormPhone] = React.useState("")
@@ -105,7 +105,7 @@ export function OutletListView({ allOutlets, setAllOutlets, allTenants, onViewUs
 
   React.useEffect(() => {
     if (editingOutlet) {
-      setFormTenantId(editingOutlet.tenantId)
+      setFormOrganizationId(editingOutlet.organizationId)
       setFormName(editingOutlet.name)
       setFormSlug(editingOutlet.slug)
       setFormPhone(editingOutlet.phone)
@@ -116,7 +116,7 @@ export function OutletListView({ allOutlets, setAllOutlets, allTenants, onViewUs
       setFormStreetAddress(editingOutlet.streetAddress || "")
       setFormZipCode(editingOutlet.zipCode || "")
     } else {
-      setFormTenantId(tenantFilter || "")
+      setFormOrganizationId(organizationFilter || "")
       setFormName("")
       setFormSlug("")
       setFormPhone("")
@@ -127,8 +127,8 @@ export function OutletListView({ allOutlets, setAllOutlets, allTenants, onViewUs
       setFormStreetAddress("")
       setFormZipCode("")
     }
-    setFormTenantSearch("")
-  }, [editingOutlet, tenantFilter, isFormVisible])
+    setFormOrganizationSearch("")
+  }, [editingOutlet, organizationFilter, isFormVisible])
 
   const handleNameChange = (val: string) => {
     setFormName(val)
@@ -137,35 +137,35 @@ export function OutletListView({ allOutlets, setAllOutlets, allTenants, onViewUs
     }
   }
 
-  const tenantsWithCounts = React.useMemo(() => {
-    return allTenants.map(tenant => ({
-      ...tenant,
-      count: allOutlets.filter(o => o.tenantId === tenant.id).length
-    })).filter(tenant => tenant.count > 0)
-  }, [allOutlets, allTenants])
+  const organizationsWithCounts = React.useMemo(() => {
+    return allOrganizations.map(org => ({
+      ...org,
+      count: allOutlets.filter(o => o.organizationId === org.id).length
+    })).filter(org => org.count > 0)
+  }, [allOutlets, allOrganizations])
 
-  const filteredTenantsForDropdown = React.useMemo(() => {
-    return tenantsWithCounts.filter(t => 
-      t.tenantName.toLowerCase().includes(tenantSearch.toLowerCase())
+  const filteredOrganizationsForDropdown = React.useMemo(() => {
+    return organizationsWithCounts.filter(org => 
+      org.organizationName.toLowerCase().includes(organizationSearch.toLowerCase())
     )
-  }, [tenantsWithCounts, tenantSearch])
+  }, [organizationsWithCounts, organizationSearch])
 
-  const filteredTenantsForForm = React.useMemo(() => {
-    return allTenants.filter(t => 
-      t.tenantName.toLowerCase().includes(formTenantSearch.toLowerCase())
+  const filteredOrganizationsForForm = React.useMemo(() => {
+    return allOrganizations.filter(org => 
+      org.organizationName.toLowerCase().includes(formOrganizationSearch.toLowerCase())
     )
-  }, [allTenants, formTenantSearch])
+  }, [allOrganizations, formOrganizationSearch])
 
   const filteredOutlets = React.useMemo(() => {
     return allOutlets.filter(outlet => {
       const matchesSearch = outlet.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            outlet.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            outlet.phone.includes(searchQuery)
-      const matchesTenant = !tenantFilter || outlet.tenantId === tenantFilter
+      const matchesOrganization = !organizationFilter || outlet.organizationId === organizationFilter
       const matchesStatus = !statusFilter || outlet.status === statusFilter
-      return matchesSearch && matchesTenant && matchesStatus
+      return matchesSearch && matchesOrganization && matchesStatus
     })
-  }, [allOutlets, searchQuery, tenantFilter, statusFilter])
+  }, [allOutlets, searchQuery, organizationFilter, statusFilter])
 
   const totalPages = Math.ceil(filteredOutlets.length / ITEMS_PER_PAGE)
   const paginatedOutlets = React.useMemo(() => {
@@ -175,7 +175,7 @@ export function OutletListView({ allOutlets, setAllOutlets, allTenants, onViewUs
 
   React.useEffect(() => {
     setCurrentPage(1)
-  }, [searchQuery, tenantFilter, statusFilter])
+  }, [searchQuery, organizationFilter, statusFilter])
 
   const handleEdit = (outlet: Outlet) => {
     setEditingOutlet(outlet)
@@ -197,7 +197,7 @@ export function OutletListView({ allOutlets, setAllOutlets, allTenants, onViewUs
   }
 
   const handleSaveOutlet = () => {
-    if (!formTenantId || !formName || !formSlug) {
+    if (!formOrganizationId || !formName || !formSlug) {
       toast({ title: "Validation Error", description: "All core identity fields are required.", variant: "destructive" })
       return
     }
@@ -205,7 +205,7 @@ export function OutletListView({ allOutlets, setAllOutlets, allTenants, onViewUs
     if (editingOutlet) {
       setAllOutlets(prev => prev.map(o => o.id === editingOutlet.id ? {
         ...o,
-        tenantId: formTenantId,
+        organizationId: formOrganizationId,
         name: formName,
         slug: formSlug,
         phone: formPhone,
@@ -220,7 +220,7 @@ export function OutletListView({ allOutlets, setAllOutlets, allTenants, onViewUs
     } else {
       const newOutlet: Outlet = {
         id: `o-${Math.random().toString(36).substr(2, 9)}`,
-        tenantId: formTenantId,
+        organizationId: formOrganizationId,
         name: formName,
         slug: formSlug,
         phone: formPhone,
@@ -241,9 +241,9 @@ export function OutletListView({ allOutlets, setAllOutlets, allTenants, onViewUs
 
   const resetFilters = () => {
     setSearchQuery("")
-    setTenantFilter(null)
+    setOrganizationFilter(null)
     setStatusFilter(null)
-    setTenantSearch("")
+    setOrganizationSearch("")
   }
 
   return (
@@ -269,11 +269,11 @@ export function OutletListView({ allOutlets, setAllOutlets, allTenants, onViewUs
               </div>
             </div>
             <div className="space-y-2.5">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Tenant Filter</label>
-              <Popover open={isTenantPopoverOpen} onOpenChange={setIsTenantPopoverOpen}>
-                <PopoverTrigger asChild><Button variant="outline" className="w-full h-11 justify-between bg-white px-3"><span className="truncate">{tenantFilter ? allTenants.find(t => t.id === tenantFilter)?.tenantName : "All Tenants"}</span><ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" /></Button></PopoverTrigger>
-                <PopoverContent className="w-80 p-0 shadow-2xl"><div className="flex items-center border-b px-3"><Search className="mr-2 h-4 w-4 opacity-50" /><Input className="flex h-11 w-full border-none shadow-none focus-visible:ring-0 bg-transparent" placeholder="Search..." value={tenantSearch} onChange={(e) => setTenantSearch(e.target.value)} /></div>
-                  <ScrollArea className="h-72"><div className="p-1"><Button variant="ghost" className="w-full justify-start h-10" onClick={() => { setTenantFilter(null); setIsTenantPopoverOpen(false); }}>All Tenants</Button>{filteredTenantsForDropdown.map((t) => (<Button key={t.id} variant="ghost" className="w-full justify-start h-10 group" onClick={() => { setTenantFilter(t.id); setIsTenantPopoverOpen(false); }}><span className="truncate flex-1 text-left">{t.tenantName}</span><span className="ml-auto text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded group-hover:bg-white">{t.count} Outlets</span></Button>))}</div></ScrollArea>
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Organization Filter</label>
+              <Popover open={isOrganizationPopoverOpen} onOpenChange={setIsOrganizationPopoverOpen}>
+                <PopoverTrigger asChild><Button variant="outline" className="w-full h-11 justify-between bg-white px-3"><span className="truncate">{organizationFilter ? allOrganizations.find(org => org.id === organizationFilter)?.organizationName : "All Organizations"}</span><ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" /></Button></PopoverTrigger>
+                <PopoverContent className="w-80 p-0 shadow-2xl"><div className="flex items-center border-b px-3"><Search className="mr-2 h-4 w-4 opacity-50" /><Input className="flex h-11 w-full border-none shadow-none focus-visible:ring-0 bg-transparent" placeholder="Search..." value={organizationSearch} onChange={(e) => setOrganizationSearch(e.target.value)} /></div>
+                  <ScrollArea className="h-72"><div className="p-1"><Button variant="ghost" className="w-full justify-start h-10" onClick={() => { setOrganizationFilter(null); setIsOrganizationPopoverOpen(false); }}>All Organizations</Button>{filteredOrganizationsForDropdown.map((org) => (<Button key={org.id} variant="ghost" className="w-full justify-start h-10 group" onClick={() => { setOrganizationFilter(org.id); setIsOrganizationPopoverOpen(false); }}><span className="truncate flex-1 text-left">{org.organizationName}</span><span className="ml-auto text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded group-hover:bg-white">{org.count} Outlets</span></Button>))}</div></ScrollArea>
                 </PopoverContent>
               </Popover>
             </div>
@@ -301,12 +301,12 @@ export function OutletListView({ allOutlets, setAllOutlets, allTenants, onViewUs
               <ScrollArea className="flex-1">
                 {isFormLoading ? <div className="flex flex-col items-center justify-center h-full py-24"><Loader2 className="h-10 w-10 animate-spin text-primary" /></div> : (
                   <div className="px-8 py-6 space-y-6">
-                    <div className="space-y-2.5"><Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">PARENT TENANT</Label>
-                      <Popover modal={true} open={isFormTenantPopoverOpen} onOpenChange={setIsFormTenantPopoverOpen}>
-                        <PopoverTrigger asChild><Button variant="outline" className="w-full h-12 justify-between bg-slate-50/50 text-sm font-medium px-3"><span className="truncate">{formTenantId ? allTenants.find(t => t.id === formTenantId)?.tenantName : "Select Tenant"}</span><ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" /></Button></PopoverTrigger>
+                    <div className="space-y-2.5"><Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">PARENT ORGANIZATION</Label>
+                      <Popover modal={true} open={isFormOrganizationPopoverOpen} onOpenChange={setIsFormOrganizationPopoverOpen}>
+                        <PopoverTrigger asChild><Button variant="outline" className="w-full h-12 justify-between bg-slate-50/50 text-sm font-medium px-3"><span className="truncate">{formOrganizationId ? allOrganizations.find(org => org.id === formOrganizationId)?.organizationName : "Select Organization"}</span><ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" /></Button></PopoverTrigger>
                         <PopoverContent className="w-80 p-0 z-[110] shadow-2xl" align="start">
-                          <div className="flex items-center border-b px-3"><Search className="mr-2 h-4 w-4 opacity-50" /><Input className="flex h-11 w-full border-none shadow-none focus-visible:ring-0 bg-transparent" placeholder="Search..." value={formTenantSearch} onChange={(e) => setFormTenantSearch(e.target.value)} /></div>
-                          <ScrollArea className="h-60"><div className="p-1">{filteredTenantsForForm.map((t) => (<button key={t.id} type="button" className={cn("w-full flex items-center justify-between px-3 py-2.5 rounded-md text-sm hover:bg-slate-100", formTenantId === t.id && "bg-primary/5 text-primary font-bold")} onClick={() => { setFormTenantId(t.id); setIsFormTenantPopoverOpen(false); }}><span className="truncate flex-1 text-left">{t.tenantName}</span><Check className={cn("h-4 w-4 opacity-0", formTenantId === t.id && "opacity-100")} /></button>))}</div></ScrollArea>
+                          <div className="flex items-center border-b px-3"><Search className="mr-2 h-4 w-4 opacity-50" /><Input className="flex h-11 w-full border-none shadow-none focus-visible:ring-0 bg-transparent" placeholder="Search..." value={formOrganizationSearch} onChange={(e) => setFormOrganizationSearch(e.target.value)} /></div>
+                          <ScrollArea className="h-60"><div className="p-1">{filteredOrganizationsForForm.map((org) => (<button key={org.id} type="button" className={cn("w-full flex items-center justify-between px-3 py-2.5 rounded-md text-sm hover:bg-slate-100", formOrganizationId === org.id && "bg-primary/5 text-primary font-bold")} onClick={() => { setFormOrganizationId(org.id); setIsFormOrganizationPopoverOpen(false); }}><span className="truncate flex-1 text-left">{org.organizationName}</span><Check className={cn("h-4 w-4 opacity-0", formOrganizationId === org.id && "opacity-100")} /></button>))}</div></ScrollArea>
                         </PopoverContent>
                       </Popover>
                     </div>

@@ -47,7 +47,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
-import { User, Tenant, Outlet } from "@/lib/types"
+import { User, Organization, Outlet } from "@/lib/types"
 import { Badge } from "@/components/ui/badge"
 import { 
   Select, 
@@ -86,11 +86,11 @@ interface UserAssignment {
 }
 
 interface UserManagementProps {
-  tenant?: Tenant | null;
+  organization?: Organization | null;
   propEditingUser?: User | null;
   allUsers: User[];
   setAllUsers: React.Dispatch<React.SetStateAction<User[]>>;
-  allTenants: Tenant[];
+  allOrganizations: Organization[];
   allOutlets: Outlet[];
   isOpen: boolean;
   defaultAdding?: boolean;
@@ -99,11 +99,11 @@ interface UserManagementProps {
 }
 
 export function UserManagement({ 
-  tenant, 
+  organization, 
   propEditingUser, 
   allUsers, 
   setAllUsers, 
-  allTenants, 
+  allOrganizations, 
   allOutlets, 
   isOpen, 
   defaultAdding = false, 
@@ -112,7 +112,7 @@ export function UserManagement({
 }: UserManagementProps) {
   const { toast } = useToast()
   const [userFilter, setUserFilter] = React.useState("")
-  const [tenantFilter, setTenantFilter] = React.useState<string | null>(null)
+  const [organizationFilter, setOrganizationFilter] = React.useState<string | null>(null)
   const [statusFilter, setStatusFilter] = React.useState<string | null>(null)
   const [roleFilter, setRoleFilter] = React.useState<string | null>(null)
   const [outletFilter, setOutletFilter] = React.useState<string | null>(null)
@@ -122,10 +122,10 @@ export function UserManagement({
   const [editingUser, setEditingUser] = React.useState<User | null>(null)
   const [isFormLoading, setIsFormLoading] = React.useState(false)
   
-  const [tenantSearch, setTenantSearch] = React.useState("")
-  const [isTenantPopoverOpen, setIsTenantPopoverOpen] = React.useState(false)
-  const [isFormTenantPopoverOpen, setIsFormTenantPopoverOpen] = React.useState(false)
-  const [formTenantSearch, setFormTenantSearch] = React.useState("")
+  const [organizationSearch, setOrganizationSearch] = React.useState("")
+  const [isOrganizationPopoverOpen, setIsOrganizationPopoverOpen] = React.useState(false)
+  const [isFormOrganizationPopoverOpen, setIsFormOrganizationPopoverOpen] = React.useState(false)
+  const [formOrganizationSearch, setFormOrganizationSearch] = React.useState("")
 
   const [confirmSuspend, setConfirmSuspend] = React.useState<User | null>(null)
   const [confirmReset, setConfirmReset] = React.useState<User | null>(null)
@@ -135,13 +135,13 @@ export function UserManagement({
   const [formUsername, setFormUsername] = React.useState("")
   const [formEmail, setFormEmail] = React.useState("")
   const [formPhone, setFormPhone] = React.useState("")
-  const [formTenantId, setFormTenantId] = React.useState("")
+  const [formOrganizationId, setFormOrganizationId] = React.useState("")
   const [formPassword, setFormPassword] = React.useState("")
   const [formConfirmPassword, setFormConfirmPassword] = React.useState("")
   const [showPassword, setShowPassword] = React.useState(false)
   const [assignments, setAssignments] = React.useState<UserAssignment[]>([{ id: '1', outletId: "all", role: "Manager" }])
 
-  const getTenantName = (tid: string) => allTenants.find(t => t.id === tid)?.tenantName || "Unknown"
+  const getOrganizationName = (orgId: string) => allOrganizations.find(org => org.id === orgId)?.organizationName || "Unknown"
   const getOutletName = (oid?: string) => {
     if (!oid) return "Global Access"
     return allOutlets.find(o => o.id === oid)?.name || "Unknown"
@@ -151,13 +151,13 @@ export function UserManagement({
     setFormUsername("")
     setFormEmail("")
     setFormPhone("")
-    setFormTenantId(tenant?.id || "")
+    setFormOrganizationId(organization?.id || "")
     setFormPassword("")
     setFormConfirmPassword("")
     setShowPassword(false)
     setAssignments([{ id: '1', outletId: "all", role: "Manager" }])
-    setFormTenantSearch("")
-  }, [tenant])
+    setFormOrganizationSearch("")
+  }, [organization])
 
   React.useEffect(() => {
     if (isOpen) {
@@ -167,7 +167,7 @@ export function UserManagement({
         setFormUsername(propEditingUser.username)
         setFormEmail(propEditingUser.email)
         setFormPhone(propEditingUser.phone)
-        setFormTenantId(propEditingUser.tenantId)
+        setFormOrganizationId(propEditingUser.organizationId)
         setAssignments([{ id: '1', outletId: propEditingUser.outletId || "all", role: propEditingUser.role }])
       } else if (defaultAdding) {
         setIsAddingNew(true)
@@ -183,26 +183,26 @@ export function UserManagement({
   const ITEMS_PER_PAGE = 10
   
   const availableOutletsForFilter = React.useMemo(() => {
-    const activeTid = tenant?.id || tenantFilter
-    if (!activeTid) return allOutlets
-    return allOutlets.filter(o => o.tenantId === activeTid)
-  }, [tenant, tenantFilter, allOutlets])
+    const activeOrgId = organization?.id || organizationFilter
+    if (!activeOrgId) return allOutlets
+    return allOutlets.filter(o => o.organizationId === activeOrgId)
+  }, [organization, organizationFilter, allOutlets])
 
-  const tenantOutletsForForm = React.useMemo(() => {
-    const activeTid = formTenantId || tenant?.id
-    return allOutlets.filter(o => !activeTid || o.tenantId === activeTid)
-  }, [formTenantId, tenant, allOutlets])
+  const organizationOutletsForForm = React.useMemo(() => {
+    const activeOrgId = formOrganizationId || organization?.id
+    return allOutlets.filter(o => !activeOrgId || o.organizationId === activeOrgId)
+  }, [formOrganizationId, organization, allOutlets])
 
   const filteredUsers = React.useMemo(() => {
     return allUsers.filter(u => {
-      const matchesTenant = tenant ? u.tenantId === tenant.id : (!tenantFilter || u.tenantId === tenantFilter)
+      const matchesOrganization = organization ? u.organizationId === organization.id : (!organizationFilter || u.organizationId === organizationFilter)
       const matchesUser = !userFilter || u.fullName.toLowerCase().includes(userFilter.toLowerCase()) || u.email.toLowerCase().includes(userFilter.toLowerCase())
       const matchesStatus = !statusFilter || u.status === statusFilter
       const matchesRole = !roleFilter || u.role === roleFilter
       const matchesOutlet = !outletFilter || u.outletId === outletFilter
-      return matchesTenant && matchesUser && matchesStatus && matchesRole && matchesOutlet
+      return matchesOrganization && matchesUser && matchesStatus && matchesRole && matchesOutlet
     })
-  }, [allUsers, tenant, tenantFilter, userFilter, statusFilter, roleFilter, outletFilter])
+  }, [allUsers, organization, organizationFilter, userFilter, statusFilter, roleFilter, outletFilter])
 
   const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE)
   const paginatedUsers = React.useMemo(() => {
@@ -212,7 +212,7 @@ export function UserManagement({
 
   React.useEffect(() => {
     setCurrentPage(1)
-  }, [userFilter, tenantFilter, statusFilter, roleFilter, outletFilter])
+  }, [userFilter, organizationFilter, statusFilter, roleFilter, outletFilter])
 
   const isFormValid = React.useMemo(() => {
     const passwordsMatch = editingUser || (formPassword !== "" && formPassword === formConfirmPassword)
@@ -220,11 +220,11 @@ export function UserManagement({
     return (
       formUsername.trim() !== "" &&
       formEmail.trim() !== "" &&
-      formTenantId !== "" &&
+      formOrganizationId !== "" &&
       hasRole &&
       passwordsMatch
     )
-  }, [formUsername, formEmail, formTenantId, assignments, formPassword, formConfirmPassword, editingUser])
+  }, [formUsername, formEmail, formOrganizationId, assignments, formPassword, formConfirmPassword, editingUser])
 
   const handleEditUser = (user: User) => {
     setIsFormLoading(true)
@@ -233,7 +233,7 @@ export function UserManagement({
     setFormUsername(user.username)
     setFormEmail(user.email)
     setFormPhone(user.phone)
-    setFormTenantId(user.tenantId)
+    setFormOrganizationId(user.organizationId)
     setAssignments([{ id: '1', outletId: user.outletId || "all", role: user.role }])
     setTimeout(() => setIsFormLoading(false), 500)
   }
@@ -249,7 +249,7 @@ export function UserManagement({
         email: formEmail,
         phone: formPhone,
         role: (firstA?.role || "Manager") as any,
-        tenantId: formTenantId,
+        organizationId: formOrganizationId,
         outletId: (!firstA || firstA.outletId === "all") ? undefined : firstA.outletId
       } : u))
       toast({ title: "Profile Updated" })
@@ -261,7 +261,7 @@ export function UserManagement({
         email: formEmail,
         phone: formPhone,
         role: (firstA?.role || "Manager") as any,
-        tenantId: formTenantId,
+        organizationId: formOrganizationId,
         outletId: (!firstA || firstA.outletId === "all") ? undefined : firstA.outletId,
         status: 'Active',
         lastActive: 'Just now'
@@ -313,9 +313,9 @@ export function UserManagement({
                 </button>
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                    <span className="opacity-80"><Building2 className="h-3 w-3 inline mr-1" /> TENANTS</span>
+                    <span className="opacity-80"><Building2 className="h-3 w-3 inline mr-1" /> ORGANIZATIONS</span>
                     <ChevronRight className="h-2.5 w-2.5 opacity-30" />
-                    <span className="text-primary font-black">{tenant?.tenantName.toUpperCase() || "STAFF LIST"}</span>
+                    <span className="text-primary font-black">{organization?.organizationName.toUpperCase() || "STAFF LIST"}</span>
                   </div>
                   <SheetTitle className="text-2xl font-black text-[#1e293b] tracking-tight">{isAddingNew ? (editingUser ? `Edit ${editingUser.fullName}` : "New Staff Member") : "User Management"}</SheetTitle>
                 </div>
@@ -485,14 +485,14 @@ export function UserManagement({
                         <div className="space-y-6">
                           <div className="space-y-2">
                             <Label className="text-[13px] font-bold text-slate-700">Assign Organization <span className="text-red-500">*</span></Label>
-                            <Popover modal={true} open={isFormTenantPopoverOpen} onOpenChange={setIsFormTenantPopoverOpen}>
-                              <PopoverTrigger asChild><Button variant="outline" className="w-full h-12 justify-between bg-primary/5 text-primary font-black"><span className="truncate">{formTenantId ? getTenantName(formTenantId) : "Select Tenant..."}</span><ChevronsUpDown className="h-4 w-4 opacity-50" /></Button></PopoverTrigger>
+                            <Popover modal={true} open={isFormOrganizationPopoverOpen} onOpenChange={setIsFormOrganizationPopoverOpen}>
+                              <PopoverTrigger asChild><Button variant="outline" className="w-full h-12 justify-between bg-primary/5 text-primary font-black"><span className="truncate">{formOrganizationId ? getOrganizationName(formOrganizationId) : "Select Organization..."}</span><ChevronsUpDown className="h-4 w-4 opacity-50" /></Button></PopoverTrigger>
                               <PopoverContent className="w-80 p-0 shadow-2xl z-[110]" onPointerDownOutside={e => e.preventDefault()} onInteractOutside={e => e.preventDefault()}>
-                                <div className="p-2 border-b"><Input autoFocus placeholder="Search brands..." value={formTenantSearch} onChange={e => setFormTenantSearch(e.target.value)} /></div>
+                                <div className="p-2 border-b"><Input autoFocus placeholder="Search brands..." value={formOrganizationSearch} onChange={e => setFormOrganizationSearch(e.target.value)} /></div>
                                 <ScrollArea className="h-64"><div className="p-1 space-y-0.5">
-                                  {allTenants.filter(t => t.tenantName.toLowerCase().includes(formTenantSearch.toLowerCase())).map(t => (
-                                    <button key={t.id} type="button" className={cn("w-full flex items-center justify-between px-3 py-2.5 rounded-md text-sm hover:bg-slate-100", formTenantId === t.id && "bg-primary/5 text-primary font-bold")} onClick={() => { setFormTenantId(t.id); setFormTenantSearch(""); setIsFormTenantPopoverOpen(false); }}>
-                                      <span>{t.tenantName}</span><span className="text-[10px] font-bold text-slate-400">{t.numberOfOutlets} Outlets</span>
+                                  {allOrganizations.filter(org => org.organizationName.toLowerCase().includes(formOrganizationSearch.toLowerCase())).map(org => (
+                                    <button key={org.id} type="button" className={cn("w-full flex items-center justify-between px-3 py-2.5 rounded-md text-sm hover:bg-slate-100", formOrganizationId === org.id && "bg-primary/5 text-primary font-bold")} onClick={() => { setFormOrganizationId(org.id); setFormOrganizationSearch(""); setIsFormOrganizationPopoverOpen(false); }}>
+                                      <span>{org.organizationName}</span><span className="text-[10px] font-bold text-slate-400">{org.numberOfOutlets} Outlets</span>
                                     </button>
                                   ))}
                                 </div></ScrollArea>
@@ -527,7 +527,7 @@ export function UserManagement({
                       
                       <div className="space-y-10 border-l border-dashed pl-16">
                         <div><h3 className="text-2xl font-black">Mapping & Access</h3><p className="text-sm text-slate-400">Control location-specific assignment.</p></div>
-                        {!formTenantId ? (
+                        {!formOrganizationId ? (
                           <div className="py-20 text-center bg-slate-50 rounded-2xl border-2 border-dashed">
                             <Building2 className="mx-auto h-8 w-8 text-slate-300 mb-4" />
                             <p className="text-sm font-bold text-slate-400">Select an organization to assign outlets</p>
@@ -542,7 +542,7 @@ export function UserManagement({
                                     <SelectTrigger className="h-12 font-bold bg-white"><SelectValue /></SelectTrigger>
                                     <SelectContent>
                                       <SelectItem value="all" className="font-bold text-primary">Global Access</SelectItem>
-                                      {tenantOutletsForForm.map(o => <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}
+                                      {organizationOutletsForForm.map(o => <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}
                                     </SelectContent>
                                   </Select>
                                 </div>

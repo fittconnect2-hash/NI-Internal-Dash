@@ -1,6 +1,6 @@
-export interface Tenant {
+export interface Organization {
   id: string;
-  tenantName: string; // Business Name
+  organizationName: string; // Business Name
   contactName: string;
   contactEmail: string;
   contactPhone: string;
@@ -25,7 +25,7 @@ export interface Tenant {
 
 export interface Outlet {
   id: string;
-  tenantId: string;
+  organizationId: string;
   name: string;
   slug: string;
   phone: string;
@@ -42,7 +42,7 @@ export interface Outlet {
 
 export interface User {
   id: string;
-  tenantId: string;
+  organizationId: string;
   outletId?: string;
   fullName: string;
   username: string;

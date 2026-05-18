@@ -2,8 +2,8 @@
 
 import * as React from "react"
 import { Sparkles, AlertCircle, CheckCircle2, Loader2, Info } from "lucide-react"
-import { tenantIssueAssistant, type TenantIssueAssistantOutput } from "@/ai/flows/tenant-issue-assistant"
-import { Tenant } from "@/lib/types"
+import { organizationIssueAssistant, type OrganizationIssueAssistantOutput } from "@/ai/flows/organization-issue-assistant"
+import { Organization } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import {
   Popover,
@@ -14,28 +14,28 @@ import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
 interface AIStatusAssistantProps {
-  tenant: Tenant;
+  organization: Organization;
 }
 
-export function AIStatusAssistant({ tenant }: AIStatusAssistantProps) {
+export function AIStatusAssistant({ organization }: AIStatusAssistantProps) {
   const [loading, setLoading] = React.useState(false)
-  const [result, setResult] = React.useState<TenantIssueAssistantOutput | null>(null)
+  const [result, setResult] = React.useState<OrganizationIssueAssistantOutput | null>(null)
   const [isOpen, setIsOpen] = React.useState(false)
 
-  const analyzeTenant = async () => {
+  const analyzeOrganization = async () => {
     setLoading(true)
     try {
-      const output = await tenantIssueAssistant({
-        tenantName: tenant.tenantName,
-        configurationStatus: tenant.configurationStatus,
-        contactEmail: tenant.contactEmail,
-        contactPhone: tenant.contactPhone,
-        lastLoginDate: tenant.lastLoginDate,
-        isPaymentGatewayConfigured: tenant.isPaymentGatewayConfigured,
-        numberOfOutlets: tenant.numberOfOutlets,
-        numberOfUsers: tenant.numberOfUsers,
-        merchantId: tenant.merchantId,
-        additionalNotes: tenant.additionalNotes,
+      const output = await organizationIssueAssistant({
+        organizationName: organization.organizationName,
+        configurationStatus: organization.configurationStatus,
+        contactEmail: organization.contactEmail,
+        contactPhone: organization.contactPhone,
+        lastLoginDate: organization.lastLoginDate,
+        isPaymentGatewayConfigured: organization.isPaymentGatewayConfigured,
+        numberOfOutlets: organization.numberOfOutlets,
+        numberOfUsers: organization.numberOfUsers,
+        merchantId: organization.merchantId,
+        additionalNotes: organization.additionalNotes,
       })
       setResult(output)
     } catch (error) {
@@ -47,7 +47,7 @@ export function AIStatusAssistant({ tenant }: AIStatusAssistantProps) {
 
   React.useEffect(() => {
     if (isOpen && !result && !loading) {
-      analyzeTenant()
+      analyzeOrganization()
     }
   }, [isOpen])
 
@@ -73,7 +73,7 @@ export function AIStatusAssistant({ tenant }: AIStatusAssistantProps) {
             {loading && <Loader2 className="h-4 w-4 animate-spin opacity-70" />}
           </div>
           <p className="text-xs text-primary-foreground/80 mt-1">
-            Analyzing {tenant.tenantName} configuration...
+            Analyzing {organization.organizationName} configuration...
           </p>
         </div>
 
@@ -107,12 +107,12 @@ export function AIStatusAssistant({ tenant }: AIStatusAssistantProps) {
               </div>
               <div className="space-y-1">
                 <p className="font-bold text-sm">Everything looks great!</p>
-                <p className="text-xs text-muted-foreground">No configuration issues were detected for this tenant.</p>
+                <p className="text-xs text-muted-foreground">No configuration issues were detected for this organization.</p>
               </div>
             </div>
           ) : (
             <div className="py-10 text-center">
-              <Button variant="ghost" size="sm" onClick={analyzeTenant}>Retry Analysis</Button>
+              <Button variant="ghost" size="sm" onClick={analyzeOrganization}>Retry Analysis</Button>
             </div>
           )}
         </ScrollArea>
