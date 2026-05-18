@@ -30,6 +30,9 @@ export interface Outlet {
   timezone: string;
   city: string;
   country: string;
+  state: string;
+  streetAddress: string;
+  zipCode: string;
   status: 'Active' | 'Inactive';
   userCount: number;
 }

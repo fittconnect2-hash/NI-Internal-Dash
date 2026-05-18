@@ -101,6 +101,9 @@ function generateMockOutlets(tenants: Tenant[]): Outlet[] {
         timezone: tenant.country === 'UAE' ? 'Asia/Dubai' : 'America/New_York',
         city: tenant.city,
         country: tenant.country,
+        state: tenant.state,
+        streetAddress: tenant.addressLine1,
+        zipCode: tenant.zipCode,
         status: 'Active',
         userCount: Math.floor(Math.random() * 10) + 2
       });
