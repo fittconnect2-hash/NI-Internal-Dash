@@ -10,8 +10,6 @@ import {
   Mail,
   Key,
   Building2,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
@@ -24,15 +22,8 @@ import {
   SidebarMenuItem,
   SidebarGroup,
   SidebarGroupLabel,
-  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 
 const navGroups = [
   {
@@ -65,7 +56,7 @@ interface DashboardSidebarProps {
 }
 
 export function DashboardSidebar({ activeTab, onTabChange }: DashboardSidebarProps) {
-  const { state, toggleSidebar } = useSidebar()
+  const { state } = useSidebar()
   const isCollapsed = state === "collapsed"
 
   return (
@@ -81,9 +72,6 @@ export function DashboardSidebar({ activeTab, onTabChange }: DashboardSidebarPro
             </span>
           )}
         </div>
-        {!isCollapsed && (
-          <SidebarTrigger className="h-8 w-8 p-0 border border-slate-200 bg-white hover:bg-slate-50 shadow-sm" />
-        )}
       </SidebarHeader>
 
       <SidebarContent className="px-2">
@@ -133,11 +121,6 @@ export function DashboardSidebar({ activeTab, onTabChange }: DashboardSidebarPro
             </div>
           )}
         </div>
-        {isCollapsed && (
-          <div className="mt-4 flex justify-center">
-            <SidebarTrigger className="h-8 w-8 p-0 border border-slate-200 bg-white hover:bg-slate-50 shadow-sm" />
-          </div>
-        )}
       </SidebarFooter>
     </Sidebar>
   )
