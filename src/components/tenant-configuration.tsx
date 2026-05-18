@@ -604,6 +604,29 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
                 </div>
               )}
 
+              {activeTab === "Penalties" && (
+                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-400">
+                  <div className="bg-rose-50/50 border border-rose-100 p-6 rounded-2xl flex items-start gap-4">
+                    <Info className="h-5 w-5 text-rose-500 mt-1 shrink-0" />
+                    <div>
+                      <h4 className="font-bold text-slate-900">Penalty Charges</h4>
+                      <p className="text-sm text-slate-600 mt-1">Configure fees for when customers don't show up or cancel their bookings late.</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <Label className="text-[13px] font-bold text-slate-900">No-Show Fee Rate (%)</Label>
+                      <Input defaultValue="0" type="number" className="h-12 bg-white border-slate-200 text-lg font-bold" />
+                    </div>
+                    <div className="space-y-3">
+                      <Label className="text-[13px] font-bold text-slate-900">Cancellation Fee Rate (%)</Label>
+                      <Input defaultValue="0" type="number" className="h-12 bg-white border-slate-200 text-lg font-bold" />
+                    </div>
+                  </div>
+                </div>
+              )}
+
             </div>
           </ScrollArea>
 
