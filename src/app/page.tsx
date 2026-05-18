@@ -42,7 +42,7 @@ const STORAGE_KEYS = {
   TENANTS: 'network-dine-tenants-v1',
   OUTLETS: 'network-dine-outlets-v1',
   USERS: 'network-dine-users-v1',
-  GATEWAYS: 'network-dine-gateways-v2', // Incremented key to force refresh
+  GATEWAYS: 'network-dine-gateways-v3', // Incremented key to force refresh
 }
 
 export default function DashboardPage() {
@@ -253,7 +253,7 @@ export default function DashboardPage() {
       return (
         <GatewayManagement 
           allGateways={gateways}
-          setAllGateways={setAllGateways}
+          setAllGateways={setGateways}
         />
       )
     }
