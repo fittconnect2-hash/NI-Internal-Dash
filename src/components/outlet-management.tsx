@@ -15,6 +15,7 @@ import {
   FilterX,
   Users as UsersIcon,
   Edit2,
+  Trash2,
   Loader2,
   ChevronLeft,
   Check
