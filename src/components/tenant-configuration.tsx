@@ -33,7 +33,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select"
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
@@ -47,6 +47,76 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Checkbox } from "@/components/ui/checkbox"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
+
+interface MultiGatewaySelectorProps {
+  allGateways: Gateway[];
+  selectedIds: string[];
+  onToggle: (id: string) => void;
+}
+
+function MultiGatewaySelector({ allGateways, selectedIds, onToggle }: MultiGatewaySelectorProps) {
+  const activeGateways = allGateways.filter(g => g.isEnabled)
+  
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline" className="w-full h-12 justify-between bg-white border-slate-200 text-sm font-bold shadow-sm hover:border-primary/30 transition-colors">
+          <span className="truncate">
+            {selectedIds.length === 0 
+              ? "Choose payment systems..." 
+              : `${selectedIds.length} systems selected`}
+          </span>
+          <Plus className="h-4 w-4 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-80 p-0 shadow-2xl rounded-2xl overflow-hidden border-slate-200" align="start">
+        <div className="bg-slate-50/80 p-3 border-b border-slate-100">
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Options</p>
+        </div>
+        <ScrollArea className="h-[320px]">
+          <div className="p-2 space-y-1">
+            {activeGateways.map(g => {
+              const isSelected = selectedIds.includes(g.id);
+              return (
+                <div 
+                  key={g.id} 
+                  className={cn(
+                    "flex items-center gap-3 p-3 hover:bg-slate-50 rounded-xl cursor-pointer transition-all group active:scale-[0.98]",
+                    isSelected && "bg-primary/5"
+                  )}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onToggle(g.id);
+                  }}
+                >
+                  <Checkbox 
+                    checked={isSelected}
+                    onCheckedChange={() => onToggle(g.id)}
+                    className="h-5 w-5 rounded-full border-slate-300 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                  <div className="flex flex-col min-w-0">
+                    <span className={cn(
+                      "text-[14px] font-extrabold truncate transition-colors leading-tight",
+                      isSelected ? "text-slate-900" : "text-slate-600 group-hover:text-slate-900"
+                    )}>{g.name}</span>
+                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tight mt-0.5">{g.provider}</span>
+                  </div>
+                </div>
+              );
+            })}
+            {activeGateways.length === 0 && (
+              <div className="p-10 text-center flex flex-col items-center justify-center gap-3">
+                <Info className="h-8 w-8 text-slate-200" />
+                <p className="text-xs font-bold text-slate-400 italic">No active systems found</p>
+              </div>
+            )}
+          </div>
+        </ScrollArea>
+      </PopoverContent>
+    </Popover>
+  )
+}
 
 interface TenantConfigurationProps {
   tenant: Tenant | null;
@@ -82,7 +152,6 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
   const [globalGwIds, setGlobalGwIds] = React.useState<string[]>([])
   const [outletGwMap, setOutletGwMap] = React.useState<Record<string, string[]>>({})
 
-  // Scroll identification state
   const scrollContainerRef = React.useRef<HTMLDivElement>(null)
   const [showRightScrollIndicator, setShowRightScrollIndicator] = React.useState(true)
 
@@ -107,7 +176,6 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
       })
       setOutletGwMap(initialMap)
       
-      // Reset scroll indicator
       setTimeout(() => {
         if (scrollContainerRef.current) {
           const target = scrollContainerRef.current
@@ -160,69 +228,6 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
     }
 
     onSave(tenant.id, updates, outletGwMap)
-  }
-
-  const MultiGatewaySelector = ({ selectedIds, onToggle }: { selectedIds: string[], onToggle: (id: string) => void }) => {
-    const activeGateways = allGateways.filter(g => g.isEnabled)
-    
-    return (
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button variant="outline" className="w-full h-12 justify-between bg-white border-slate-200 text-sm font-bold shadow-sm">
-            <span className="truncate">
-              {selectedIds.length === 0 
-                ? "Choose payment systems..." 
-                : `${selectedIds.length} systems selected`}
-            </span>
-            <Plus className="h-4 w-4 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-80 p-0 shadow-2xl rounded-2xl overflow-hidden border-slate-200" align="start">
-          <div className="bg-slate-50/80 p-3 border-b border-slate-100">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Options</p>
-          </div>
-          <ScrollArea className="h-[320px]">
-            <div className="p-2 space-y-1">
-              {activeGateways.map(g => {
-                const isSelected = selectedIds.includes(g.id);
-                return (
-                  <div 
-                    key={g.id} 
-                    className={cn(
-                      "flex items-center gap-4 p-3.5 hover:bg-slate-50 rounded-xl cursor-pointer transition-all group active:scale-[0.98]",
-                      isSelected && "bg-primary/5"
-                    )}
-                    onClick={() => onToggle(g.id)}
-                  >
-                    <div className={cn(
-                      "h-6 w-6 rounded-full border-2 flex items-center justify-center transition-all shrink-0",
-                      isSelected 
-                        ? "bg-primary border-primary text-white shadow-md shadow-primary/20" 
-                        : "border-slate-200 bg-white group-hover:border-primary/30"
-                    )}>
-                      {isSelected && <Check className="h-3.5 w-3.5 stroke-[4]" />}
-                    </div>
-                    <div className="flex flex-col min-w-0">
-                      <span className={cn(
-                        "text-[14px] font-extrabold truncate transition-colors leading-tight",
-                        isSelected ? "text-slate-900" : "text-slate-600 group-hover:text-slate-900"
-                      )}>{g.name}</span>
-                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tight mt-0.5">{g.provider}</span>
-                    </div>
-                  </div>
-                );
-              })}
-              {activeGateways.length === 0 && (
-                <div className="p-10 text-center flex flex-col items-center justify-center gap-3">
-                  <Info className="h-8 w-8 text-slate-200" />
-                  <p className="text-xs font-bold text-slate-400 italic">No active systems found</p>
-                </div>
-              )}
-            </div>
-          </ScrollArea>
-        </PopoverContent>
-      </Popover>
-    )
   }
 
   if (!tenant) return null
@@ -413,6 +418,7 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
                       <div className="space-y-4">
                         <Label className="text-[13px] font-bold text-slate-900">Choose Global Payment Providers</Label>
                         <MultiGatewaySelector 
+                          allGateways={allGateways}
                           selectedIds={globalGwIds} 
                           onToggle={handleToggleGlobalGw} 
                         />
@@ -433,6 +439,7 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
                                 </div>
                                 <div className="w-full md:w-[320px]">
                                   <MultiGatewaySelector 
+                                    allGateways={allGateways}
                                     selectedIds={outletGwMap[o.id] || []} 
                                     onToggle={(gwId) => handleToggleOutletGw(o.id, gwId)} 
                                   />
