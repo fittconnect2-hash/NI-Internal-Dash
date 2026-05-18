@@ -12,8 +12,9 @@ import { UserManagement } from "@/components/user-management"
 import { DashboardOverview } from "@/components/dashboard-overview"
 import { OutletListView } from "@/components/outlet-list-view"
 import { UserListView } from "@/components/user-list-view"
-import { initialTenants, initialOutlets, initialUsers } from "@/lib/mock-data"
-import { Tenant, User, Outlet } from "@/lib/types"
+import { GatewayManagement } from "@/components/gateway-management"
+import { initialTenants, initialOutlets, initialUsers, initialGateways } from "@/lib/mock-data"
+import { Tenant, User, Outlet, Gateway } from "@/lib/types"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { 
   Search, 
@@ -41,6 +42,7 @@ const STORAGE_KEYS = {
   TENANTS: 'network-dine-tenants-v1',
   OUTLETS: 'network-dine-outlets-v1',
   USERS: 'network-dine-users-v1',
+  GATEWAYS: 'network-dine-gateways-v1',
 }
 
 export default function DashboardPage() {
@@ -49,6 +51,7 @@ export default function DashboardPage() {
   const [tenants, setTenants] = React.useState<Tenant[]>([])
   const [outlets, setOutlets] = React.useState<Outlet[]>([])
   const [users, setUsers] = React.useState<User[]>([])
+  const [gateways, setGateways] = React.useState<Gateway[]>([])
   const [isLoaded, setIsLoaded] = React.useState(false)
 
   const [searchQuery, setSearchQuery] = React.useState("")
@@ -87,10 +90,12 @@ export default function DashboardPage() {
     const t = localStorage.getItem(STORAGE_KEYS.TENANTS)
     const o = localStorage.getItem(STORAGE_KEYS.OUTLETS)
     const u = localStorage.getItem(STORAGE_KEYS.USERS)
+    const g = localStorage.getItem(STORAGE_KEYS.GATEWAYS)
 
     setTenants(t ? JSON.parse(t) : initialTenants)
     setOutlets(o ? JSON.parse(o) : initialOutlets)
     setUsers(u ? JSON.parse(u) : initialUsers)
+    setGateways(g ? JSON.parse(g) : initialGateways)
     setIsLoaded(true)
   }, [])
 
@@ -99,8 +104,9 @@ export default function DashboardPage() {
       localStorage.setItem(STORAGE_KEYS.TENANTS, JSON.stringify(tenants))
       localStorage.setItem(STORAGE_KEYS.OUTLETS, JSON.stringify(outlets))
       localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users))
+      localStorage.setItem(STORAGE_KEYS.GATEWAYS, JSON.stringify(gateways))
     }
-  }, [tenants, outlets, users, isLoaded])
+  }, [tenants, outlets, users, gateways, isLoaded])
 
   // Filter logic
   const filteredTenants = React.useMemo(() => {
@@ -239,6 +245,15 @@ export default function DashboardPage() {
             setIsAddingNewUser(false)
             setIsUsersDrawerOpen(true)
           }}
+        />
+      )
+    }
+
+    if (activeTab === 'gateways') {
+      return (
+        <GatewayManagement 
+          allGateways={gateways}
+          setAllGateways={setGateways}
         />
       )
     }

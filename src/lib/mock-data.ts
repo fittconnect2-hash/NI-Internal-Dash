@@ -1,4 +1,4 @@
-import { Tenant, Outlet, User } from './types';
+import { Tenant, Outlet, User, Gateway } from './types';
 
 const businessTypes = ['Hotel', 'Fast Food', 'Restaurant', 'Cafe', 'Catering', 'Fine Dining', 'Bakery', 'Pizzeria'];
 const statusOptions: ('Active' | 'Configuration pending' | 'Inactive')[] = ['Active', 'Configuration pending', 'Active', 'Active', 'Inactive'];
@@ -150,6 +150,45 @@ function generateMockUsers(tenants: Tenant[], outlets: Outlet[]): User[] {
 }
 
 export const initialUsers: User[] = generateMockUsers(initialTenants, initialOutlets);
+
+export const initialGateways: Gateway[] = [
+  {
+    id: 'g-1',
+    name: 'Stripe Connect',
+    description: 'The standard for online payments. Optimized for conversion and fraud protection.',
+    isEnabled: true,
+    provider: 'Stripe',
+    type: 'Credit Card',
+    supportedCurrencies: ['AED', 'USD', 'EUR', 'GBP']
+  },
+  {
+    id: 'g-2',
+    name: 'PayPal Global',
+    description: 'Accept PayPal and Venmo globally. Trusted by millions of customers.',
+    isEnabled: true,
+    provider: 'PayPal',
+    type: 'Digital Wallet',
+    supportedCurrencies: ['USD', 'EUR', 'GBP', 'AUD']
+  },
+  {
+    id: 'g-3',
+    name: 'Adyen Unified',
+    description: 'A single platform to accept every payment anywhere your customers are.',
+    isEnabled: false,
+    provider: 'Adyen',
+    type: 'Bank Transfer',
+    supportedCurrencies: ['AED', 'USD', 'EUR', 'SGD']
+  },
+  {
+    id: 'g-4',
+    name: 'Square Terminal',
+    description: 'Integrated hardware and software for in-person restaurant transactions.',
+    isEnabled: false,
+    provider: 'Square',
+    type: 'Credit Card',
+    supportedCurrencies: ['USD', 'CAD', 'GBP']
+  }
+];
 
 export const servingPerformance = [
   { time: '6am', selected: 24, previous: 20 },

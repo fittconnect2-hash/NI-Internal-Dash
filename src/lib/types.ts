@@ -49,3 +49,13 @@ export interface User {
   status: 'Active' | 'Inactive' | 'Suspended';
   lastActive?: string;
 }
+
+export interface Gateway {
+  id: string;
+  name: string;
+  description: string;
+  isEnabled: boolean;
+  provider: string;
+  type: 'Credit Card' | 'Digital Wallet' | 'Bank Transfer';
+  supportedCurrencies: string[];
+}
