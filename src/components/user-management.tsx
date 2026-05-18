@@ -139,7 +139,8 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
     return initialTenants.find(t => t.id === tid)?.tenantName || "Unknown Tenant"
   }
 
-  const forceInteractivity = React.useCallback(() => {
+  // Restore interactivity to body when drawer closes
+  const restoreInteractivity = React.useCallback(() => {
     document.body.style.pointerEvents = 'auto';
     document.body.style.overflow = 'auto';
   }, []);
@@ -186,9 +187,9 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
         setEditingUser(null)
       }
     } else {
-      forceInteractivity()
+      restoreInteractivity()
     }
-  }, [propEditingUser, defaultAdding, isOpen, resetForm, forceInteractivity])
+  }, [propEditingUser, defaultAdding, isOpen, resetForm, restoreInteractivity])
 
   const ITEMS_PER_PAGE = 10
   const tenantOutlets = React.useMemo(() => {
@@ -292,25 +293,25 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
     setUsers(prev => prev.map(usr => usr.id === u.id ? { ...usr, status: 'Suspended' } : usr))
     toast({ title: "User Suspended", description: `${u.fullName}'s access revoked.` })
     setConfirmSuspend(null)
-    forceInteractivity()
+    restoreInteractivity()
   }
 
   const handleReactivateUser = (u: User) => {
     setUsers(prev => prev.map(usr => usr.id === u.id ? { ...usr, status: 'Active' } : usr))
     toast({ title: "User Reactivated", description: `${u.fullName}'s access restored.` })
     setConfirmReactivate(null)
-    forceInteractivity()
+    restoreInteractivity()
   }
 
   const handleResetPassword = (u: User) => {
     toast({ title: "Password Reset Sent", description: `Reset link sent to ${u.email}.` })
     setConfirmReset(null)
-    forceInteractivity()
+    restoreInteractivity()
   }
 
   return (
     <>
-      <Sheet open={isOpen} onOpenChange={(val) => { if (!val) { onClose(); forceInteractivity(); } }}>
+      <Sheet open={isOpen} onOpenChange={(val) => { if (!val) { onClose(); restoreInteractivity(); } }}>
         <SheetContent side="right" className="w-full sm:max-w-[1200px] p-0 border-l border-slate-200 bg-[#f8f9fc] flex flex-col">
           <SheetHeader className="px-8 py-6 bg-white border-b border-slate-100 flex-shrink-0">
             <div className="flex items-center justify-between">
@@ -352,17 +353,22 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                     {!tenant && (
                       <div className="space-y-2.5">
                         <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tenant</Label>
-                        <Popover modal={false} open={isTenantPopoverOpen} onOpenChange={setIsTenantPopoverOpen}>
+                        <Popover open={isTenantPopoverOpen} onOpenChange={setIsTenantPopoverOpen}>
                           <PopoverTrigger asChild>
                             <Button variant="outline" className="w-full h-11 justify-between bg-white border-slate-200 text-sm font-medium px-3">
                               <span className="truncate">{tenantFilter ? getTenantName(tenantFilter) : "All Tenants"}</span>
                               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                             </Button>
                           </PopoverTrigger>
-                          <PopoverContent className="w-80 p-0 shadow-2xl border-slate-200 z-[100]" align="start">
+                          <PopoverContent className="w-80 p-0 shadow-2xl border-slate-200" align="start">
                             <div className="flex items-center border-b px-3">
                               <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-                              <input className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none" placeholder="Search..." value={tenantSearch} onChange={(e) => setTenantSearch(e.target.value)} />
+                              <Input 
+                                className="flex h-11 w-full border-none shadow-none focus-visible:ring-0 bg-transparent py-3 text-sm outline-none" 
+                                placeholder="Search..." 
+                                value={tenantSearch} 
+                                onChange={(e) => setTenantSearch(e.target.value)} 
+                              />
                             </div>
                             <ScrollArea className="h-60">
                               <div className="p-1">
@@ -495,7 +501,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                                 <Label className="text-[13px] font-bold text-slate-700">Step 1: Parent Tenant <span className="text-red-500">*</span></Label>
                                 <HelpCircle className="h-3.5 w-3.5 text-slate-300 cursor-help" />
                               </div>
-                              <Popover modal={false} open={isFormTenantPopoverOpen} onOpenChange={setIsFormTenantPopoverOpen}>
+                              <Popover open={isFormTenantPopoverOpen} onOpenChange={setIsFormTenantPopoverOpen}>
                                 <PopoverTrigger asChild>
                                   <Button variant="outline" className="w-full h-12 justify-between bg-[#1a73e8]/5 border-[#1a73e8]/20 font-black text-[#1a73e8] px-3">
                                     <span className="truncate">{formTenantId ? getTenantName(formTenantId) : "Select Parent Organization"}</span>
@@ -509,9 +515,9 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                                   <div className="p-2 border-b bg-slate-50/50">
                                     <div className="relative">
                                       <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                                      <input 
+                                      <Input 
                                         autoFocus
-                                        className="h-10 w-full pl-9 pr-3 rounded-md bg-white border border-slate-200 text-sm outline-none focus:ring-1 ring-primary/20 pointer-events-auto" 
+                                        className="h-10 w-full pl-9 pr-3 rounded-md bg-white border border-slate-200 text-sm focus-visible:ring-1 ring-primary/20" 
                                         placeholder="Search tenants..." 
                                         value={formTenantSearch} 
                                         onChange={(e) => setFormTenantSearch(e.target.value)} 
@@ -546,13 +552,16 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                                 <div className="space-y-2">
                                   <Label className="text-[13px] font-bold text-slate-700">Password</Label>
                                   <div className="relative">
-                                    <Input type={showPassword ? "text" : "password"} value={formPassword} onChange={(e) => setFormPassword(e.target.value)} className="h-12 border-slate-200" />
-                                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">{showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button>
+                                    <Input type={showPassword ? "text" : "password"} value={formPassword} onChange={(e) => setFormPassword(e.target.value)} className="h-12 border-slate-200 pr-10" />
+                                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">{showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button>
                                   </div>
                                 </div>
                                 <div className="space-y-2">
                                   <Label className="text-[13px] font-bold text-slate-700">Confirm</Label>
-                                  <Input type={showConfirmPassword ? "text" : "password"} value={formConfirmPassword} onChange={(e) => setFormConfirmPassword(e.target.value)} className="h-12 border-slate-200" />
+                                  <div className="relative">
+                                    <Input type={showConfirmPassword ? "text" : "password"} value={formConfirmPassword} onChange={(e) => setFormConfirmPassword(e.target.value)} className="h-12 border-slate-200 pr-10" />
+                                    <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">{showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button>
+                                  </div>
                                 </div>
                               </div>
                             )}
@@ -572,7 +581,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                             <div className="flex flex-col items-center justify-center py-24 text-center bg-slate-50/50 rounded-3xl border-2 border-dashed border-slate-100 p-8">
                               <Building2 className="h-8 w-8 text-slate-200 mb-6" />
                               <h4 className="font-extrabold text-[#1e293b] text-lg">Parent Tenant Required</h4>
-                              <p className="text-xs text-slate-400 mt-2 max-w-[280px]">Select an organization in Step 1.</p>
+                              <p className="text-xs text-slate-400 mt-2 max-w-[280px]">Select an organization in Step 1 to unlock location mapping.</p>
                             </div>
                           ) : (
                             <div className="space-y-6">
@@ -600,7 +609,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                                           </SelectContent>
                                         </Select>
                                       </TableCell>
-                                      <TableCell className="p-1 pb-4 text-right"><button className="h-12 w-12 rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-100 flex items-center justify-center" onClick={() => setAssignments(assignments.filter(a => a.id !== assignment.id))}><Trash2 className="h-5 w-5" /></button></TableCell>
+                                      <TableCell className="p-1 pb-4 text-right"><button className="h-12 w-12 rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-100 flex items-center justify-center transition-colors" onClick={() => setAssignments(assignments.filter(a => a.id !== assignment.id))}><Trash2 className="h-5 w-5" /></button></TableCell>
                                     </TableRow>
                                   ))}
                                 </TableBody>
@@ -613,8 +622,8 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                     )}
                   </ScrollArea>
                   <div className="p-8 border-t border-slate-100 flex justify-end gap-4 bg-slate-50/30 flex-shrink-0">
-                    <Button variant="outline" className="h-12 px-8 font-black text-slate-500 border-slate-200" onClick={() => { setIsAddingNew(false); setEditingUser(null); forceInteractivity(); }}>Cancel</Button>
-                    <Button className="h-12 px-10 font-black bg-[#1a73e8] hover:bg-[#1557b0] text-white border-none shadow-lg shadow-[#1a73e8]/20" onClick={handleSaveUser}>{editingUser ? "Save Profile Changes" : "Finalize Staff Enrollment"}</Button>
+                    <Button variant="outline" className="h-12 px-8 font-black text-slate-500 border-slate-200" onClick={() => { setIsAddingNew(false); setEditingUser(null); restoreInteractivity(); }}>Cancel</Button>
+                    <Button className="h-12 px-10 font-black bg-[#1a73e8] hover:bg-[#1557b0] text-white border-none shadow-lg shadow-[#1a73e8]/20 active:scale-95 transition-all" onClick={handleSaveUser}>{editingUser ? "Save Profile Changes" : "Finalize Staff Enrollment"}</Button>
                   </div>
                 </div>
               </div>
@@ -623,24 +632,25 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
         </SheetContent>
       </Sheet>
 
-      <AlertDialog open={!!confirmSuspend} onOpenChange={(o) => { if (!o) { setConfirmSuspend(null); forceInteractivity(); } }}>
+      {/* Confirmation Dialogs moved outside Sheet structure to prevent focus conflicts */}
+      <AlertDialog open={!!confirmSuspend} onOpenChange={(o) => { if (!o) { setConfirmSuspend(null); restoreInteractivity(); } }}>
         <AlertDialogContent>
           <AlertDialogHeader><AlertDialogTitle>Suspend Access?</AlertDialogTitle><AlertDialogDescription>Revoke access for <strong>{confirmSuspend?.fullName}</strong>?</AlertDialogDescription></AlertDialogHeader>
-          <AlertDialogFooter><AlertDialogCancel onClick={forceInteractivity}>Cancel</AlertDialogCancel><AlertDialogAction className="bg-rose-500" onClick={() => confirmSuspend && handleSuspendUser(confirmSuspend)}>Confirm Suspension</AlertDialogAction></AlertDialogFooter>
+          <AlertDialogFooter><AlertDialogCancel onClick={restoreInteractivity}>Cancel</AlertDialogCancel><AlertDialogAction className="bg-rose-500" onClick={() => confirmSuspend && handleSuspendUser(confirmSuspend)}>Confirm Suspension</AlertDialogAction></AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={!!confirmReactivate} onOpenChange={(o) => { if (!o) { setConfirmReactivate(null); forceInteractivity(); } }}>
+      <AlertDialog open={!!confirmReactivate} onOpenChange={(o) => { if (!o) { setConfirmReactivate(null); restoreInteractivity(); } }}>
         <AlertDialogContent>
           <AlertDialogHeader><AlertDialogTitle>Reactivate Access?</AlertDialogTitle><AlertDialogDescription>Restore access for <strong>{confirmReactivate?.fullName}</strong>?</AlertDialogDescription></AlertDialogHeader>
-          <AlertDialogFooter><AlertDialogCancel onClick={forceInteractivity}>Cancel</AlertDialogCancel><AlertDialogAction className="bg-green-600" onClick={() => confirmReactivate && handleReactivateUser(confirmReactivate)}>Confirm</AlertDialogAction></AlertDialogFooter>
+          <AlertDialogFooter><AlertDialogCancel onClick={restoreInteractivity}>Cancel</AlertDialogCancel><AlertDialogAction className="bg-green-600" onClick={() => confirmReactivate && handleReactivateUser(confirmReactivate)}>Confirm</AlertDialogAction></AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={!!confirmReset} onOpenChange={(o) => { if (!o) { setConfirmReset(null); forceInteractivity(); } }}>
+      <AlertDialog open={!!confirmReset} onOpenChange={(o) => { if (!o) { setConfirmReset(null); restoreInteractivity(); } }}>
         <AlertDialogContent>
           <AlertDialogHeader><AlertDialogTitle>Reset Password?</AlertDialogTitle><AlertDialogDescription>Send link to <strong>{confirmReset?.email}</strong>?</AlertDialogDescription></AlertDialogHeader>
-          <AlertDialogFooter><AlertDialogCancel onClick={forceInteractivity}>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => confirmReset && handleResetPassword(confirmReset)}>Send Link</AlertDialogAction></AlertDialogFooter>
+          <AlertDialogFooter><AlertDialogCancel onClick={restoreInteractivity}>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => confirmReset && handleResetPassword(confirmReset)}>Send Link</AlertDialogAction></AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </>
