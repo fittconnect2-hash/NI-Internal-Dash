@@ -1,3 +1,4 @@
+
 import { Tenant, Outlet, User, Gateway } from './types';
 
 const businessTypes = ['Hotel', 'Fast Food', 'Restaurant', 'Cafe', 'Catering', 'Fine Dining', 'Bakery', 'Pizzeria'];
@@ -21,7 +22,7 @@ function generateMockTenants(count: number): Tenant[] {
       lastLoginDate: '2024-05-15',
       isPaymentGatewayConfigured: false,
       paymentGatewayMode: 'global',
-      globalGatewayIds: [], // Start empty by default
+      globalGatewayIds: [], // Strictly empty by default
       numberOfOutlets: 2,
       numberOfUsers: 12,
       merchantId: 'M-78291',
@@ -40,7 +41,7 @@ function generateMockTenants(count: number): Tenant[] {
       contactEmail: 'setup@quickbite.io',
       contactPhone: '+1 555 987 6543',
       isPaymentGatewayConfigured: false,
-      globalGatewayIds: [], // Start empty by default
+      globalGatewayIds: [], // Strictly empty by default
       numberOfOutlets: 1,
       numberOfUsers: 3,
     }
@@ -77,8 +78,8 @@ function generateMockTenants(count: number): Tenant[] {
       contactEmail: `contact@${name.toLowerCase().replace(/\s+/g, '')}.com`,
       contactPhone: `+971 50 ${1000000 + i}`,
       lastLoginDate: '2024-05-20',
-      isPaymentGatewayConfigured: false, // Ensure unconfigured state
-      globalGatewayIds: [], // Start empty by default
+      isPaymentGatewayConfigured: false,
+      globalGatewayIds: [], // Strictly empty by default
       numberOfOutlets: (i % 5) + 1,
       numberOfUsers: (i % 15) + 3,
       merchantId: status === 'Active' ? `M-${10000 + i}` : undefined,
@@ -110,7 +111,7 @@ function generateMockOutlets(tenants: Tenant[]): Outlet[] {
         zipCode: tenant.zipCode,
         status: 'Active',
         userCount: Math.floor(Math.random() * 10) + 2,
-        gatewayIds: [] // Start empty by default
+        gatewayIds: [] // Strictly empty by default
       });
     }
   });
@@ -129,8 +130,7 @@ function generateMockUsers(tenants: Tenant[], outlets: Outlet[]): User[] {
     
     for (let k = 0; k < userCount; k++) {
       const assignedOutlet = tenantOutlets[k % tenantOutlets.length];
-      const roles: ('Organization Admin' | 'Manager' | 'Partner Admin')[] = ['Organization Admin', 'Manager', 'Partner Admin', 'Manager', 'Partner Admin'];
-      const role = roles[k % roles.length];
+      const role = 'Manager';
       const firstNames = ['John', 'Jane', 'Michael', 'Sara', 'David', 'Emily', 'Robert', 'Lisa'];
       const lastNames = ['Smith', 'Doe', 'Wilson', 'Ahmed', 'Brown', 'Davis', 'Taylor', 'Miller'];
       const firstName = firstNames[k % firstNames.length];
@@ -141,12 +141,12 @@ function generateMockUsers(tenants: Tenant[], outlets: Outlet[]): User[] {
         tenantId: tenant.id,
         outletId: assignedOutlet?.id,
         fullName: `${firstName} ${lastName}`,
-        username: `@${firstName.toLowerCase()}.${lastName.toLowerCase()}${k}`,
+        username: `${firstName.toLowerCase()}.${lastName.toLowerCase()}${k}`,
         email: `${firstName.toLowerCase()}.${k}@${tenant.tenantName.toLowerCase().replace(/\s+/g, '')}.com`,
         phone: tenant.contactPhone,
-        role: role,
-        status: k % 10 === 0 ? 'Inactive' : 'Active',
-        lastActive: `2024-05-${Math.floor(Math.random() * 20) + 1} ${Math.floor(Math.random() * 12) + 10}:00`
+        role: role as any,
+        status: 'Active',
+        lastActive: 'Just now'
       });
     }
   });

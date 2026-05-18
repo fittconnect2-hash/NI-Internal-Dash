@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -39,10 +40,10 @@ import { useToast } from "@/hooks/use-toast"
 
 const ITEMS_PER_PAGE = 8
 const STORAGE_KEYS = {
-  TENANTS: 'network-dine-tenants-v2', // Incremented for multi-gw
-  OUTLETS: 'network-dine-outlets-v2', // Incremented for multi-gw
-  USERS: 'network-dine-users-v1',
-  GATEWAYS: 'network-dine-gateways-v3',
+  TENANTS: 'network-dine-tenants-v5', // Increment to v5 to force reset to empty defaults
+  OUTLETS: 'network-dine-outlets-v5', // Increment to v5 to force reset
+  USERS: 'network-dine-users-v2',
+  GATEWAYS: 'network-dine-gateways-v5',
 }
 
 export default function DashboardPage() {
@@ -72,7 +73,7 @@ export default function DashboardPage() {
   const [editingUser, setEditingUser] = React.useState<User | null>(null)
   const [isAddingNewUser, setIsAddingNewUser] = React.useState(false)
 
-  // Robust Global Interaction Safeguard
+  // Interaction Safeguard
   React.useEffect(() => {
     const isAnyOverlayOpen = isFormOpen || isConfigOpen || isDetailOpen || isOutletsDrawerOpen || isUsersDrawerOpen;
     if (!isAnyOverlayOpen) {
@@ -120,14 +121,12 @@ export default function DashboardPage() {
     })
   }, [tenants, searchQuery, filterStatus])
 
-  // Pagination logic
   const totalPages = Math.ceil(filteredTenants.length / ITEMS_PER_PAGE)
   const paginatedTenants = React.useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE
     return filteredTenants.slice(start, start + ITEMS_PER_PAGE)
   }, [filteredTenants, currentPage])
 
-  // Reset page when filtering/searching
   React.useEffect(() => {
     setCurrentPage(1)
   }, [searchQuery, filterStatus])
@@ -142,6 +141,7 @@ export default function DashboardPage() {
         id: `t-${Math.random().toString(36).substr(2, 9)}`,
         configurationStatus: 'Configuration pending',
         isPaymentGatewayConfigured: false,
+        globalGatewayIds: [],
         numberOfOutlets: 0,
         numberOfUsers: 0,
       } as Tenant
@@ -229,51 +229,43 @@ export default function DashboardPage() {
   const renderContent = () => {
     if (!isLoaded) return <div className="flex-1 flex items-center justify-center"><p className="text-sm font-bold text-slate-400 animate-pulse">Initializing Data...</p></div>
 
-    if (activeTab === 'dashboard') {
-      return <DashboardOverview />
-    }
+    if (activeTab === 'dashboard') return <DashboardOverview />
+    
+    if (activeTab === 'outlets') return (
+      <OutletListView 
+        allOutlets={outlets}
+        setAllOutlets={setOutlets}
+        allTenants={tenants}
+        onViewUsers={(outlet) => {
+          const owner = tenants.find(t => t.id === outlet.tenantId)
+          setSelectedTenant(owner || null)
+          setIsUsersDrawerOpen(true)
+          setIsAddingNewUser(false)
+        }}
+      />
+    )
 
-    if (activeTab === 'outlets') {
-      return (
-        <OutletListView 
-          allOutlets={outlets}
-          setAllOutlets={setOutlets}
-          allTenants={tenants}
-          onViewUsers={(outlet) => {
-            const owner = tenants.find(t => t.id === outlet.tenantId)
-            setSelectedTenant(owner || null)
-            setIsUsersDrawerOpen(true)
-            setIsAddingNewUser(false)
-          }}
-        />
-      )
-    }
+    if (activeTab === 'users') return (
+      <UserListView 
+        allUsers={users}
+        setAllUsers={setUsers}
+        allTenants={tenants}
+        allOutlets={outlets}
+        onAddUser={handleAddUserGlobal}
+        onEditUser={(user) => {
+          setEditingUser(user)
+          setIsAddingNewUser(false)
+          setIsUsersDrawerOpen(true)
+        }}
+      />
+    )
 
-    if (activeTab === 'users') {
-      return (
-        <UserListView 
-          allUsers={users}
-          setAllUsers={setUsers}
-          allTenants={tenants}
-          allOutlets={outlets}
-          onAddUser={handleAddUserGlobal}
-          onEditUser={(user) => {
-            setEditingUser(user)
-            setIsAddingNewUser(false)
-            setIsUsersDrawerOpen(true)
-          }}
-        />
-      )
-    }
-
-    if (activeTab === 'gateways') {
-      return (
-        <GatewayManagement 
-          allGateways={gateways}
-          setAllGateways={setGateways}
-        />
-      )
-    }
+    if (activeTab === 'gateways') return (
+      <GatewayManagement 
+        allGateways={gateways}
+        setAllGateways={setGateways}
+      />
+    )
 
     if (activeTab === 'tenants') {
       return (
@@ -353,11 +345,6 @@ export default function DashboardPage() {
                     onUsersClick={handleUsersNavigation}
                   />
                 ))}
-                {filteredTenants.length === 0 && (
-                  <div className="col-span-full py-20 text-center">
-                    <p className="text-slate-400 font-bold uppercase tracking-widest">No tenants match your search criteria.</p>
-                  </div>
-                )}
               </div>
             </div>
 
@@ -367,45 +354,8 @@ export default function DashboardPage() {
                   Showing <span className="text-primary">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to <span className="text-primary">{Math.min(currentPage * ITEMS_PER_PAGE, filteredTenants.length)}</span> of <span className="text-primary">{filteredTenants.length}</span> results
                 </p>
                 <div className="flex items-center gap-1">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="h-8 px-2 border-slate-200"
-                    disabled={currentPage === 1}
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  
-                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    let pageNum = i + 1;
-                    if (totalPages > 5 && currentPage > 3) {
-                      pageNum = currentPage - 2 + i;
-                      if (pageNum > totalPages) pageNum = totalPages - (4 - i);
-                    }
-                    
-                    return (
-                      <Button
-                        key={pageNum}
-                        variant={currentPage === pageNum ? "default" : "outline"}
-                        size="sm"
-                        className={cn("h-8 w-8 p-0 text-[11px] font-black border-slate-200", currentPage === pageNum ? "bg-primary border-primary text-white" : "text-slate-500")}
-                        onClick={() => setCurrentPage(pageNum)}
-                      >
-                        {pageNum}
-                      </Button>
-                    );
-                  })}
-                  
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="h-8 px-2 border-slate-200"
-                    disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
+                  <Button variant="outline" size="sm" className="h-8 px-2 border-slate-200" disabled={currentPage === 1} onClick={() => setCurrentPage(p => Math.max(1, p - 1))}><ChevronLeft className="h-4 w-4" /></Button>
+                  <Button variant="outline" size="sm" className="h-8 px-2 border-slate-200" disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}><ChevronRight className="h-4 w-4" /></Button>
                 </div>
               </div>
             )}
@@ -414,15 +364,7 @@ export default function DashboardPage() {
       )
     }
 
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-6">
-        <div className="h-16 w-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-4">
-          <LayoutDashboard className="h-8 w-8 text-primary" />
-        </div>
-        <h2 className="text-2xl font-black text-slate-900 mb-1 tracking-tight">Access Restricted</h2>
-        <p className="text-sm text-slate-500">This feature is currently under active development.</p>
-      </div>
-    )
+    return null
   }
 
   return (
@@ -441,55 +383,11 @@ export default function DashboardPage() {
           </div>
         </main>
       </div>
-      <TenantForm 
-        isOpen={isFormOpen} 
-        onClose={() => {setIsFormOpen(false); setEditingTenant(null)}} 
-        tenant={editingTenant} 
-        onSubmit={handleAddTenant} 
-      />
-      <TenantConfiguration
-        isOpen={isConfigOpen}
-        onClose={() => {setIsConfigOpen(false); setConfiguringTenant(null)}}
-        tenant={configuringTenant}
-        allGateways={gateways}
-        allOutlets={outlets}
-        onSave={handleSaveConfiguration}
-      />
-      <TenantDetail
-        isOpen={isDetailOpen}
-        onClose={() => {setIsDetailOpen(false); setViewingTenant(null)}}
-        tenant={viewingTenant}
-      />
-      <OutletManagement
-        tenant={selectedTenant}
-        allOutlets={outlets}
-        setAllOutlets={setOutlets}
-        allTenants={tenants}
-        isOpen={isOutletsDrawerOpen}
-        onClose={() => {setIsOutletsDrawerOpen(false); setSelectedTenant(null)}}
-        onViewUsers={(outlet) => {
-          setIsOutletsDrawerOpen(false)
-          setIsUsersDrawerOpen(true)
-          setIsAddingNewUser(false)
-        }}
-      />
-      <UserManagement
-        tenant={selectedTenant}
-        propEditingUser={editingUser}
-        allUsers={users}
-        setAllUsers={setUsers}
-        allTenants={tenants}
-        allOutlets={outlets}
-        isOpen={isUsersDrawerOpen}
-        defaultAdding={isAddingNewUser}
-        onClose={() => {
-          setIsUsersDrawerOpen(false); 
-          setSelectedTenant(null); 
-          setEditingUser(null);
-          setIsAddingNewUser(false);
-        }}
-        onSaved={handleUserSaved}
-      />
+      <TenantForm isOpen={isFormOpen} onClose={() => {setIsFormOpen(false); setEditingTenant(null)}} tenant={editingTenant} onSubmit={handleAddTenant} />
+      <TenantConfiguration isOpen={isConfigOpen} onClose={() => {setIsConfigOpen(false); setConfiguringTenant(null)}} tenant={configuringTenant} allGateways={gateways} allOutlets={outlets} onSave={handleSaveConfiguration} />
+      <TenantDetail isOpen={isDetailOpen} onClose={() => {setIsDetailOpen(false); setViewingTenant(null)}} tenant={viewingTenant} />
+      <OutletManagement tenant={selectedTenant} allOutlets={outlets} setAllOutlets={setOutlets} allTenants={tenants} isOpen={isOutletsDrawerOpen} onClose={() => {setIsOutletsDrawerOpen(false); setSelectedTenant(null)}} onViewUsers={(outlet) => { setIsOutletsDrawerOpen(false); setIsUsersDrawerOpen(true); setIsAddingNewUser(false); }} />
+      <UserManagement tenant={selectedTenant} propEditingUser={editingUser} allUsers={users} setAllUsers={setUsers} allTenants={tenants} allOutlets={outlets} isOpen={isUsersDrawerOpen} defaultAdding={isAddingNewUser} onClose={() => { setIsUsersDrawerOpen(false); setSelectedTenant(null); setEditingUser(null); setIsAddingNewUser(false); }} onSaved={handleUserSaved} />
     </SidebarProvider>
   )
 }
