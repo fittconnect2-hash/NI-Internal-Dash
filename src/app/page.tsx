@@ -69,6 +69,22 @@ export default function DashboardPage() {
   const [editingUser, setEditingUser] = React.useState<User | null>(null)
   const [isAddingNewUser, setIsAddingNewUser] = React.useState(false)
 
+  // Robust Global Interaction Safeguard
+  // This effect runs whenever a drawer or major UI state changes to ensure the body is interactive
+  React.useEffect(() => {
+    const isAnyOverlayOpen = isFormOpen || isConfigOpen || isDetailOpen || isOutletsDrawerOpen || isUsersDrawerOpen;
+    if (!isAnyOverlayOpen) {
+      // Small delay to allow Radix exit animations to settle before force-clearing body locks
+      const timer = setTimeout(() => {
+        document.body.style.pointerEvents = 'auto';
+        document.body.style.overflow = 'auto';
+        // Remove any residual class names that might be locking the UI
+        document.documentElement.style.pointerEvents = 'auto';
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [isFormOpen, isConfigOpen, isDetailOpen, isOutletsDrawerOpen, isUsersDrawerOpen]);
+
   // Persistence Logic
   React.useEffect(() => {
     const t = localStorage.getItem(STORAGE_KEYS.TENANTS)
@@ -166,6 +182,21 @@ export default function DashboardPage() {
     setEditingUser(null)
     setIsAddingNewUser(true)
     setIsUsersDrawerOpen(true)
+  }
+
+  const handleUserSaved = () => {
+    // Close drawer
+    setIsUsersDrawerOpen(false)
+    setSelectedTenant(null)
+    setEditingUser(null)
+    setIsAddingNewUser(false)
+    
+    // Switch to main users page
+    setActiveTab('users')
+    
+    // Explicitly restore interactivity
+    document.body.style.pointerEvents = 'auto';
+    document.body.style.overflow = 'auto';
   }
 
   const updateTenantCounts = (tid: string) => {
@@ -440,6 +471,7 @@ export default function DashboardPage() {
           setEditingUser(null);
           setIsAddingNewUser(false);
         }}
+        onSaved={handleUserSaved}
       />
     </SidebarProvider>
   )

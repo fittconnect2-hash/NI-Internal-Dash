@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -95,9 +96,21 @@ interface UserManagementProps {
   isOpen: boolean;
   defaultAdding?: boolean;
   onClose: () => void;
+  onSaved?: () => void;
 }
 
-export function UserManagement({ tenant, editingUser: propEditingUser, allUsers, setAllUsers, allTenants, allOutlets, isOpen, defaultAdding = false, onClose }: UserManagementProps) {
+export function UserManagement({ 
+  tenant, 
+  editingUser: propEditingUser, 
+  allUsers, 
+  setAllUsers, 
+  allTenants, 
+  allOutlets, 
+  isOpen, 
+  defaultAdding = false, 
+  onClose,
+  onSaved
+}: UserManagementProps) {
   const { toast } = useToast()
   const [userFilter, setUserFilter] = React.useState("")
   const [tenantFilter, setTenantFilter] = React.useState<string | null>(null)
@@ -132,19 +145,6 @@ export function UserManagement({ tenant, editingUser: propEditingUser, allUsers,
 
   const getTenantName = (tid: string) => allTenants.find(t => t.id === tid)?.tenantName || "Unknown"
   const getOutletName = (oid: string) => allOutlets.find(o => o.id === oid)?.name || "Unknown"
-
-  // CRITICAL: Robust Safety Cleanup to restore interactivity when any modal is closed
-  React.useEffect(() => {
-    const isAnyModalOpen = isOpen || !!confirmSuspend || !!confirmReset || !!confirmReactivate || !!confirmDelete;
-    if (!isAnyModalOpen) {
-      // Force clean up of any residual body styles from Radix/react-remove-scroll
-      const timer = setTimeout(() => {
-        document.body.style.pointerEvents = '';
-        document.body.style.overflow = '';
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen, confirmSuspend, confirmReset, confirmReactivate, confirmDelete]);
 
   const resetForm = React.useCallback(() => {
     setFormFullName("")
@@ -254,8 +254,15 @@ export function UserManagement({ tenant, editingUser: propEditingUser, allUsers,
       setAllUsers(prev => [newUser, ...prev])
       toast({ title: "Staff Enrolled" })
     }
+    
+    // Notify parent and reset state
     setIsAddingNew(false)
     setEditingUser(null)
+    if (onSaved) {
+      onSaved()
+    } else {
+      onClose()
+    }
   }
 
   const handleSuspendUser = (u: User) => {
