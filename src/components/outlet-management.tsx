@@ -15,7 +15,8 @@ import {
   Users as UsersIcon,
   Edit2,
   Loader2,
-  ChevronLeft
+  ChevronLeft,
+  Check
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -53,6 +54,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 const ITEMS_PER_PAGE = 10
 
@@ -79,6 +81,10 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
   const [isAddingNew, setIsAddingNew] = React.useState(false)
   const [editingOutlet, setEditingOutlet] = React.useState<Outlet | null>(null)
   const [isFormLoading, setIsFormLoading] = React.useState(false)
+
+  // Search states for Form Parent Tenant Selection
+  const [isFormTenantPopoverOpen, setIsFormTenantPopoverOpen] = React.useState(false)
+  const [formTenantSearch, setFormTenantSearch] = React.useState("")
 
   // Form State
   const [formTenantId, setFormTenantId] = React.useState("")
@@ -117,6 +123,7 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
       setFormCity("")
       setFormCountry("")
     }
+    setFormTenantSearch("")
   }, [editingOutlet, tenant, isAddingNew])
 
   const filteredOutlets = React.useMemo(() => {
@@ -127,6 +134,12 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
       return matchesSearch && matchesStatus && matchesTenant
     })
   }, [outlets, searchQuery, statusFilter, tenant])
+
+  const filteredTenantsForForm = React.useMemo(() => {
+    return initialTenants.filter(t => 
+      t.tenantName.toLowerCase().includes(formTenantSearch.toLowerCase())
+    )
+  }, [formTenantSearch])
 
   // Pagination logic
   const totalPages = Math.ceil(filteredOutlets.length / ITEMS_PER_PAGE)
@@ -243,7 +256,9 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                   <span className="opacity-80">OUTLETS</span>
                 </div>
                 <SheetTitle className="text-2xl font-black text-[#1e293b] tracking-tight">
-                  {tenant ? `Outlet Management of ${tenant.tenantName}` : "Outlet Management"}
+                  {isAddingNew 
+                    ? (selectedTenantName ? `Add New Outlet to ${selectedTenantName}` : "Add New Outlet")
+                    : tenant ? `Outlet Management of ${tenant.tenantName}` : "Outlet Management"}
                 </SheetTitle>
               </div>
             </div>
@@ -289,16 +304,56 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                   <div className="px-8 py-6 space-y-8">
                     <div className="space-y-2.5">
                       <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">PARENT TENANT</Label>
-                      <Select value={formTenantId} onValueChange={setFormTenantId}>
-                        <SelectTrigger className="h-12 bg-slate-50/50 border-slate-200">
-                          <SelectValue placeholder="Select Parent Tenant" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {initialTenants.map(t => (
-                            <SelectItem key={t.id} value={t.id}>{t.tenantName}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      
+                      <Popover open={isFormTenantPopoverOpen} onOpenChange={setIsFormTenantPopoverOpen}>
+                        <PopoverTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            role="combobox"
+                            className="w-full h-12 justify-between bg-slate-50/50 border-slate-200 text-sm font-medium px-3"
+                          >
+                            <span className="truncate">
+                              {formTenantId 
+                                ? initialTenants.find(t => t.id === formTenantId)?.tenantName 
+                                : "Select Parent Tenant"}
+                            </span>
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                          <div className="flex items-center border-b px-3">
+                            <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                            <input
+                              className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground"
+                              placeholder="Search tenants..."
+                              value={formTenantSearch}
+                              onChange={(e) => setFormTenantSearch(e.target.value)}
+                            />
+                          </div>
+                          <ScrollArea className="h-60">
+                            <div className="p-1">
+                              {filteredTenantsForForm.map((t) => (
+                                <Button
+                                  key={t.id}
+                                  variant="ghost"
+                                  className="w-full justify-start font-normal text-sm h-10"
+                                  onClick={() => {
+                                    setFormTenantId(t.id);
+                                    setIsFormTenantPopoverOpen(false);
+                                    setFormTenantSearch("");
+                                  }}
+                                >
+                                  <Check className={cn("mr-2 h-4 w-4 text-[#1a73e8]", formTenantId === t.id ? "opacity-100" : "opacity-0")} />
+                                  <span className="truncate flex-1 text-left">{t.tenantName}</span>
+                                </Button>
+                              ))}
+                              {filteredTenantsForForm.length === 0 && (
+                                <div className="py-6 text-center text-xs text-slate-400">No organizations found.</div>
+                              )}
+                            </div>
+                          </ScrollArea>
+                        </PopoverContent>
+                      </Popover>
                     </div>
 
                     <div className="space-y-2.5">

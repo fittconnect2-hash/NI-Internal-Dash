@@ -119,6 +119,10 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
   const [tenantSearch, setTenantSearch] = React.useState("")
   const [isTenantPopoverOpen, setIsTenantPopoverOpen] = React.useState(false)
 
+  // Search states for the Form
+  const [isFormTenantPopoverOpen, setIsFormTenantPopoverOpen] = React.useState(false)
+  const [formTenantSearch, setFormTenantSearch] = React.useState("")
+
   // Dialog states
   const [confirmSuspend, setConfirmSuspend] = React.useState<User | null>(null)
   const [confirmReset, setConfirmReset] = React.useState<User | null>(null)
@@ -155,6 +159,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
     setShowPassword(false)
     setShowConfirmPassword(false)
     setAssignments([])
+    setFormTenantSearch("")
   }, [tenant])
 
   const restoreUI = React.useCallback(() => {
@@ -221,6 +226,12 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
       t.tenantName.toLowerCase().includes(tenantSearch.toLowerCase())
     )
   }, [tenantsWithCounts, tenantSearch])
+
+  const filteredTenantsForForm = React.useMemo(() => {
+    return initialTenants.filter(t => 
+      t.tenantName.toLowerCase().includes(formTenantSearch.toLowerCase())
+    )
+  }, [formTenantSearch])
 
   const handleClearFilters = () => {
     setUserFilter("")
@@ -806,16 +817,58 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                                   </Tooltip>
                                 </TooltipProvider>
                               </div>
-                              <Select value={formTenantId} onValueChange={(val) => { setFormTenantId(val); setAssignments([]); }}>
-                                <SelectTrigger className="h-12 bg-[#1a73e8]/5 border-[#1a73e8]/20 font-black text-[#1a73e8]">
-                                  <SelectValue placeholder="Select Parent Organization" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {initialTenants.map(t => (
-                                    <SelectItem key={t.id} value={t.id}>{t.tenantName}</SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
+                              
+                              <Popover open={isFormTenantPopoverOpen} onOpenChange={setIsFormTenantPopoverOpen}>
+                                <PopoverTrigger asChild>
+                                  <Button 
+                                    variant="outline" 
+                                    role="combobox"
+                                    className="w-full h-12 justify-between bg-[#1a73e8]/5 border-[#1a73e8]/20 font-black text-[#1a73e8] px-3 hover:bg-[#1a73e8]/10 hover:text-[#1a73e8]"
+                                  >
+                                    <span className="truncate">
+                                      {formTenantId 
+                                        ? initialTenants.find(t => t.id === formTenantId)?.tenantName 
+                                        : "Select Parent Organization"}
+                                    </span>
+                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                                  <div className="flex items-center border-b px-3">
+                                    <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                                    <input
+                                      className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground"
+                                      placeholder="Search tenants..."
+                                      value={formTenantSearch}
+                                      onChange={(e) => setFormTenantSearch(e.target.value)}
+                                    />
+                                  </div>
+                                  <ScrollArea className="h-60">
+                                    <div className="p-1">
+                                      {filteredTenantsForForm.map((t) => (
+                                        <Button
+                                          key={t.id}
+                                          variant="ghost"
+                                          className="w-full justify-start font-normal text-sm h-10"
+                                          onClick={() => {
+                                            setFormTenantId(t.id);
+                                            setAssignments([]);
+                                            setIsFormTenantPopoverOpen(false);
+                                            setFormTenantSearch("");
+                                          }}
+                                        >
+                                          <Check className={cn("mr-2 h-4 w-4 text-[#1a73e8]", formTenantId === t.id ? "opacity-100" : "opacity-0")} />
+                                          <span className="truncate flex-1 text-left">{t.tenantName}</span>
+                                        </Button>
+                                      ))}
+                                      {filteredTenantsForForm.length === 0 && (
+                                        <div className="py-6 text-center text-xs text-slate-400">No organizations found.</div>
+                                      )}
+                                    </div>
+                                  </ScrollArea>
+                                </PopoverContent>
+                              </Popover>
+                              
                               <p className="text-[11px] text-[#1a73e8] font-bold uppercase tracking-tight mt-1">This user will belong to this organization.</p>
                             </div>
 
