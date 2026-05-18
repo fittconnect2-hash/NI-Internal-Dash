@@ -144,7 +144,10 @@ export function UserManagement({
   const [assignments, setAssignments] = React.useState<UserAssignment[]>([])
 
   const getTenantName = (tid: string) => allTenants.find(t => t.id === tid)?.tenantName || "Unknown"
-  const getOutletName = (oid: string) => allOutlets.find(o => o.id === oid)?.name || "Unknown"
+  const getOutletName = (oid?: string) => {
+    if (!oid) return "Global Access"
+    return allOutlets.find(o => o.id === oid)?.name || "Unknown"
+  }
 
   const resetForm = React.useCallback(() => {
     setFormFullName("")
@@ -255,11 +258,9 @@ export function UserManagement({
       toast({ title: "Staff Enrolled" })
     }
     
-    // Toggle back to list inside the drawer
     setIsAddingNew(false)
     setEditingUser(null)
     
-    // Notify parent to handle additional logic (e.g. switching tabs if context allows)
     if (onSaved) {
       onSaved()
     }
@@ -337,13 +338,49 @@ export function UserManagement({
                <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
                   <ScrollArea className="flex-1">
                     <Table>
-                      <TableHeader className="bg-slate-50/50"><TableRow className="h-12 uppercase text-[10px] font-bold text-slate-400"><TableHead className="px-8">User</TableHead><TableHead>Role</TableHead><TableHead className="text-center">Status</TableHead><TableHead className="text-right px-8">Actions</TableHead></TableRow></TableHeader>
+                      <TableHeader className="bg-slate-50/50">
+                        <TableRow className="h-12 uppercase text-[10px] font-bold text-slate-400">
+                          <TableHead className="px-8">username</TableHead>
+                          <TableHead>Email Address</TableHead>
+                          <TableHead>Phone</TableHead>
+                          <TableHead>Where Outlet</TableHead>
+                          <TableHead>Role & Assignment</TableHead>
+                          <TableHead className="text-center">Status</TableHead>
+                          <TableHead>last Login</TableHead>
+                          <TableHead className="text-right px-8">Action</TableHead>
+                        </TableRow>
+                      </TableHeader>
                       <TableBody>
                         {paginatedUsers.map(u => (
                           <TableRow key={u.id} className="cursor-pointer group hover:bg-slate-50/50" onClick={() => handleEditUser(u)}>
-                            <TableCell className="py-5 px-8"><div className="font-extrabold text-[#1e293b]">{u.fullName}</div><div className="text-[11px] text-slate-400 font-bold">@{u.username}</div></TableCell>
-                            <TableCell><Badge className="bg-slate-100 text-slate-600 border-none font-bold text-[10px] uppercase">{u.role}</Badge></TableCell>
-                            <TableCell className="text-center"><Badge className={cn("rounded-full px-4 py-1 text-[10px] font-bold uppercase", u.status === 'Active' ? "bg-green-100 text-green-600" : "bg-rose-100 text-rose-500")}>{u.status}</Badge></TableCell>
+                            <TableCell className="py-5 px-8">
+                              <div className="font-extrabold text-[#1e293b]">{u.fullName}</div>
+                              <div className="text-[11px] text-slate-400 font-bold">@{u.username}</div>
+                            </TableCell>
+                            <TableCell className="text-[13px] font-medium text-slate-600">{u.email}</TableCell>
+                            <TableCell className="text-[13px] font-bold text-slate-700">{u.phone}</TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-900">
+                                <Store className="h-3 w-3 text-[#1a73e8]" />
+                                {getOutletName(u.outletId)}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge className="bg-slate-100 text-slate-600 border-none font-bold text-[10px] uppercase">
+                                {u.role}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Badge className={cn(
+                                "rounded-full px-4 py-1 text-[10px] font-bold uppercase",
+                                u.status === 'Active' ? "bg-green-100 text-green-600" : "bg-rose-100 text-rose-500"
+                              )}>
+                                {u.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-[11px] font-bold text-slate-400 uppercase">
+                              {u.lastActive || "Never"}
+                            </TableCell>
                             <TableCell className="text-right px-8">
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="text-slate-400" onClick={e => e.stopPropagation()}><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
