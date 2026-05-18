@@ -14,6 +14,8 @@ export interface Tenant {
   configurationStatus: 'Active' | 'Inactive' | 'Configuration pending';
   lastLoginDate?: string;
   isPaymentGatewayConfigured: boolean;
+  paymentGatewayMode?: 'global' | 'by-outlet';
+  globalGatewayId?: string;
   numberOfOutlets: number;
   numberOfUsers: number;
   merchantId?: string;
@@ -35,6 +37,7 @@ export interface Outlet {
   zipCode: string;
   status: 'Active' | 'Inactive';
   userCount: number;
+  gatewayId?: string;
 }
 
 export interface User {

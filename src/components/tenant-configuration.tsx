@@ -1,8 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { ArrowLeft, Minus, Plus, Calendar as CalendarIcon } from "lucide-react"
-import { Tenant } from "@/lib/types"
+import { ArrowLeft, Minus, Plus, Calendar as CalendarIcon, ShieldCheck, Globe, Store } from "lucide-react"
+import { Tenant, Gateway, Outlet } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import {
   Sheet,
@@ -29,27 +29,52 @@ import {
   PopoverTrigger 
 } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 
 interface TenantConfigurationProps {
   tenant: Tenant | null;
+  allGateways: Gateway[];
+  allOutlets: Outlet[];
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: any) => void;
+  onSave: (tenantId: string, updates: Partial<Tenant>, outletUpdates?: Record<string, string>) => void;
 }
 
 const configTabs = [
-  "Currency", "Commission", "Tips", "Contract", "Payouts", "Fees", "Penalties", "Platform", "Small Order"
+  "Currency", "Commission", "Tips", "Contract", "Gateways", "Payouts", "Fees", "Penalties", "Platform", "Small Order"
 ]
 
-export function TenantConfiguration({ tenant, isOpen, onClose, onSave }: TenantConfigurationProps) {
+export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, onClose, onSave }: TenantConfigurationProps) {
   const [activeTab, setActiveTab] = React.useState("Currency")
   const [tipsEnabled, setTipsEnabled] = React.useState(true)
   const [suggestedTipRates, setSuggestedTipRates] = React.useState([5, 10, 20])
   
   const [startDate, setStartDate] = React.useState<Date | undefined>(new Date("2026-05-13"))
   const [endDate, setEndDate] = React.useState<Date | undefined>(new Date("2027-05-13"))
+
+  // Gateway state
+  const [gwMode, setGwMode] = React.useState<'global' | 'by-outlet'>('global')
+  const [globalGwId, setGlobalGwId] = React.useState<string>("")
+  const [outletGwMap, setOutletGwMap] = React.useState<Record<string, string>>({})
+
+  const tenantOutlets = React.useMemo(() => {
+    return allOutlets.filter(o => o.tenantId === tenant?.id)
+  }, [allOutlets, tenant?.id])
+
+  React.useEffect(() => {
+    if (tenant && isOpen) {
+      setGwMode(tenant.paymentGatewayMode || 'global')
+      setGlobalGwId(tenant.globalGatewayId || "")
+      
+      const initialMap: Record<string, string> = {}
+      tenantOutlets.forEach(o => {
+        initialMap[o.id] = o.gatewayId || ""
+      })
+      setOutletGwMap(initialMap)
+    }
+  }, [tenant, isOpen, tenantOutlets])
 
   const handleAddTipRate = () => {
     setSuggestedTipRates([...suggestedTipRates, 0])
@@ -63,6 +88,18 @@ export function TenantConfiguration({ tenant, isOpen, onClose, onSave }: TenantC
     const newRates = [...suggestedTipRates]
     newRates[index] = parseFloat(value) || 0
     setSuggestedTipRates(newRates)
+  }
+
+  const handleSave = () => {
+    if (!tenant) return
+    
+    const updates: Partial<Tenant> = {
+      paymentGatewayMode: gwMode,
+      globalGatewayId: globalGwId,
+      isPaymentGatewayConfigured: (gwMode === 'global' && !!globalGwId) || (gwMode === 'by-outlet' && Object.values(outletGwMap).some(id => !!id))
+    }
+
+    onSave(tenant.id, updates, outletGwMap)
   }
 
   if (!tenant) return null
@@ -80,11 +117,11 @@ export function TenantConfiguration({ tenant, isOpen, onClose, onSave }: TenantC
                 <ArrowLeft className="h-5 w-5 text-slate-600" />
               </button>
               <div>
-                <SheetTitle className="text-xl font-bold text-slate-900">
-                  Tenant Configuration
+                <SheetTitle className="text-xl font-black text-slate-900 tracking-tight">
+                  Configuration: {tenant.tenantName}
                 </SheetTitle>
-                <SheetDescription className="text-sm text-slate-500">
-                  Update tenant configuration.
+                <SheetDescription className="text-sm font-medium text-slate-500">
+                  Manage brand settings and payment integrations.
                 </SheetDescription>
               </div>
             </div>
@@ -99,10 +136,10 @@ export function TenantConfiguration({ tenant, isOpen, onClose, onSave }: TenantC
                     variant={activeTab === tab ? "default" : "ghost"}
                     onClick={() => setActiveTab(tab)}
                     className={cn(
-                      "text-sm font-medium",
+                      "text-[12px] font-black uppercase tracking-widest px-6 h-9 transition-all",
                       activeTab === tab 
-                        ? "bg-white text-slate-900 border border-slate-200 shadow-sm hover:bg-white" 
-                        : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+                        ? "bg-primary text-white shadow-md hover:bg-primary/90" 
+                        : "text-slate-400 hover:text-slate-900 hover:bg-slate-100"
                     )}
                     size="sm"
                   >
@@ -115,7 +152,7 @@ export function TenantConfiguration({ tenant, isOpen, onClose, onSave }: TenantC
           </div>
 
           <ScrollArea className="flex-1">
-            <div className="p-8 max-w-4xl space-y-8">
+            <div className="p-10 max-w-4xl space-y-10">
               {activeTab === "Currency" && (
                 <div className="space-y-6">
                   <div className="space-y-2">
@@ -158,6 +195,98 @@ export function TenantConfiguration({ tenant, isOpen, onClose, onSave }: TenantC
                         <SelectItem value="America/New_York">America/New_York (GMT-05:00)</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "Gateways" && (
+                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <div className="bg-slate-50 border border-slate-200 p-6 rounded-2xl flex items-start gap-4">
+                    <ShieldCheck className="h-6 w-6 text-primary mt-1" />
+                    <div>
+                      <h4 className="font-black text-slate-900 text-[15px]">Payment Distribution Strategy</h4>
+                      <p className="text-sm text-slate-500 mt-1">Determine how payment gateways are assigned across your brand network.</p>
+                    </div>
+                  </div>
+
+                  <RadioGroup value={gwMode} onValueChange={(val) => setGwMode(val as any)} className="grid grid-cols-2 gap-4">
+                    <Label
+                      htmlFor="gw-global"
+                      className={cn(
+                        "flex flex-col items-center justify-between rounded-xl border-2 border-muted bg-popover p-6 hover:bg-accent hover:text-accent-foreground cursor-pointer transition-all",
+                        gwMode === 'global' && "border-primary ring-2 ring-primary/10"
+                      )}
+                    >
+                      <RadioGroupItem value="global" id="gw-global" className="sr-only" />
+                      <Globe className="mb-3 h-6 w-6 text-primary" />
+                      <div className="text-center">
+                        <p className="font-black text-[13px] uppercase tracking-wider">Global Application</p>
+                        <p className="text-xs text-slate-400 mt-1">Same gateway for all outlets</p>
+                      </div>
+                    </Label>
+                    <Label
+                      htmlFor="gw-outlet"
+                      className={cn(
+                        "flex flex-col items-center justify-between rounded-xl border-2 border-muted bg-popover p-6 hover:bg-accent hover:text-accent-foreground cursor-pointer transition-all",
+                        gwMode === 'by-outlet' && "border-primary ring-2 ring-primary/10"
+                      )}
+                    >
+                      <RadioGroupItem value="by-outlet" id="gw-outlet" className="sr-only" />
+                      <Store className="mb-3 h-6 w-6 text-primary" />
+                      <div className="text-center">
+                        <p className="font-black text-[13px] uppercase tracking-wider">Specific by Outlet</p>
+                        <p className="text-xs text-slate-400 mt-1">Configure each branch individually</p>
+                      </div>
+                    </Label>
+                  </RadioGroup>
+
+                  <div className="space-y-6 pt-4">
+                    {gwMode === 'global' ? (
+                      <div className="space-y-3">
+                        <Label className="text-[12px] font-black text-slate-400 uppercase tracking-widest">Select Global Provider</Label>
+                        <Select value={globalGwId} onValueChange={setGlobalGwId}>
+                          <SelectTrigger className="h-12 border-slate-200 bg-white">
+                            <SelectValue placeholder="Choose a payment gateway..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {allGateways.filter(g => g.isEnabled).map(g => (
+                              <SelectItem key={g.id} value={g.id} className="py-3">
+                                <div className="flex flex-col">
+                                  <span className="font-bold">{g.name}</span>
+                                  <span className="text-[10px] text-slate-400 uppercase font-black">{g.provider} • {g.type}</span>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <p className="text-[11px] text-slate-400 font-medium italic">This gateway will process transactions for all {tenantOutlets.length} active outlets.</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                         <Label className="text-[12px] font-black text-slate-400 uppercase tracking-widest">Outlet Mapping ({tenantOutlets.length} Branches)</Label>
+                         <div className="grid gap-3">
+                            {tenantOutlets.map(o => (
+                              <div key={o.id} className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-xl shadow-sm hover:border-primary/20 transition-all group">
+                                <div>
+                                  <p className="font-extrabold text-[14px] text-slate-900 leading-none">{o.name}</p>
+                                  <p className="text-[10px] text-slate-400 font-bold uppercase mt-1.5">{o.city}, {o.country}</p>
+                                </div>
+                                <Select value={outletGwMap[o.id] || "none"} onValueChange={(val) => setOutletGwMap({...outletGwMap, [o.id]: val})}>
+                                  <SelectTrigger className="w-[300px] h-10 border-slate-200">
+                                    <SelectValue placeholder="Assign Gateway..." />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="none">None (Disabled)</SelectItem>
+                                    {allGateways.filter(g => g.isEnabled).map(g => (
+                                      <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            ))}
+                         </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -391,15 +520,15 @@ export function TenantConfiguration({ tenant, isOpen, onClose, onSave }: TenantC
             </div>
           </ScrollArea>
 
-          <SheetFooter className="p-6 bg-white border-t border-slate-200 flex sm:justify-end gap-3">
-            <Button variant="outline" onClick={onClose} className="px-6 h-10 font-medium text-slate-600 border-slate-200">
+          <SheetFooter className="p-8 bg-white border-t border-slate-200 flex sm:justify-end gap-4 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)]">
+            <Button variant="outline" onClick={onClose} className="px-8 h-12 font-black text-slate-500 border-slate-200 hover:bg-slate-50">
               Cancel
             </Button>
             <Button 
-              onClick={() => onSave({})}
-              className="px-6 h-10 font-medium bg-[#1a73e8] hover:bg-[#1557b0] text-white border-none rounded-md"
+              onClick={handleSave}
+              className="px-10 h-12 font-black bg-primary hover:bg-primary/90 text-white border-none rounded-xl shadow-lg shadow-primary/20 transition-all active:scale-95"
             >
-              Save Tenant Configuration
+              Apply Configuration
             </Button>
           </SheetFooter>
         </div>

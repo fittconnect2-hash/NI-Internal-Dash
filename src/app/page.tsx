@@ -164,6 +164,24 @@ export default function DashboardPage() {
     setIsConfigOpen(true)
   }
 
+  const handleSaveConfiguration = (tenantId: string, updates: Partial<Tenant>, outletUpdates?: Record<string, string>) => {
+    setTenants(prev => prev.map(t => t.id === tenantId ? { ...t, ...updates } : t))
+    
+    if (outletUpdates) {
+      setOutlets(prev => prev.map(o => {
+        if (o.tenantId === tenantId && outletUpdates[o.id] !== undefined) {
+          const val = outletUpdates[o.id]
+          return { ...o, gatewayId: val === 'none' ? undefined : val }
+        }
+        return o
+      }))
+    }
+
+    toast({ title: "Configuration Applied", description: "All settings and gateway assignments have been updated." })
+    setIsConfigOpen(false)
+    setConfiguringTenant(null)
+  }
+
   const handleViewTenant = (tenant: Tenant) => {
     setViewingTenant(tenant)
     setIsDetailOpen(true)
@@ -434,7 +452,9 @@ export default function DashboardPage() {
         isOpen={isConfigOpen}
         onClose={() => {setIsConfigOpen(false); setConfiguringTenant(null)}}
         tenant={configuringTenant}
-        onSave={() => setIsConfigOpen(false)}
+        allGateways={gateways}
+        allOutlets={outlets}
+        onSave={handleSaveConfiguration}
       />
       <TenantDetail
         isOpen={isDetailOpen}
