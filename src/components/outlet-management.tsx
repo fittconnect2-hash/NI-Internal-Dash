@@ -207,7 +207,7 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
                   <span className="text-[#1a73e8] font-black">{tenant?.tenantName.toUpperCase() || "PROPERTY NETWORK"}</span>
                 </div>
                 <SheetTitle className="text-2xl font-black text-[#1e293b] tracking-tight">
-                  {isAddingNew ? (editingOutlet ? `Edit ${editingOutlet.name}` : "Branch Registration") : "Network Management"}
+                  {isAddingNew ? (editingOutlet ? `Edit ${editingOutlet.name}` : "Branch Registration") : `Outlet Management ${tenant?.tenantName || "Property Network"}`}
                 </SheetTitle>
               </div>
             </div>
