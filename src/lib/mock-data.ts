@@ -154,39 +154,39 @@ export const initialUsers: User[] = generateMockUsers(initialTenants, initialOut
 export const initialGateways: Gateway[] = [
   {
     id: 'g-1',
-    name: 'Stripe Connect',
-    description: 'The standard for online payments. Optimized for conversion and fraud protection.',
+    name: 'DPO (Direct Pay Online) - Live',
+    description: 'DPO (3G Direct Pay) live environment. Supports cards, mobile money, and bank transfers across Africa and...',
     isEnabled: true,
-    provider: 'Stripe',
+    provider: 'DPO',
     type: 'Credit Card',
     supportedCurrencies: ['AED', 'USD', 'EUR', 'GBP']
   },
   {
     id: 'g-2',
-    name: 'PayPal Global',
-    description: 'Accept PayPal and Venmo globally. Trusted by millions of customers.',
+    name: 'Network International (NGenius) - Live KSA',
+    description: 'Network International (NGenius) KSA live environment. Uses Saudi-specific endpoint and defaults.',
     isEnabled: true,
-    provider: 'PayPal',
-    type: 'Digital Wallet',
-    supportedCurrencies: ['USD', 'EUR', 'GBP', 'AUD']
+    provider: 'NGenius',
+    type: 'Credit Card',
+    supportedCurrencies: ['SAR']
   },
   {
     id: 'g-3',
-    name: 'Adyen Unified',
-    description: 'A single platform to accept every payment anywhere your customers are.',
-    isEnabled: false,
-    provider: 'Adyen',
-    type: 'Bank Transfer',
-    supportedCurrencies: ['AED', 'USD', 'EUR', 'SGD']
+    name: 'Network International (NGenius) - Live UAE',
+    description: 'Network International (NGenius) live environment for UAE. Supports cards, ApplePay, Samsung Pay, and...',
+    isEnabled: true,
+    provider: 'NGenius',
+    type: 'Credit Card',
+    supportedCurrencies: ['AED']
   },
   {
     id: 'g-4',
-    name: 'Square Terminal',
-    description: 'Integrated hardware and software for in-person restaurant transactions.',
-    isEnabled: false,
-    provider: 'Square',
+    name: 'Network International (NGenius) - Sandbox',
+    description: 'Network International (NGenius) sandbox environment for testing payments. Supports cards, ApplePay,...',
+    isEnabled: true,
+    provider: 'NGenius',
     type: 'Credit Card',
-    supportedCurrencies: ['USD', 'CAD', 'GBP']
+    supportedCurrencies: ['AED', 'SAR']
   }
 ];
 
