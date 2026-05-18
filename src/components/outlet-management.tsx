@@ -27,6 +27,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 import {
   Table,
@@ -275,7 +276,7 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
                                 >
                                   <span className="truncate flex-1">{t.tenantName}</span>
                                   <div className="flex items-center gap-2">
-                                    <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded group-hover:bg-white transition-colors">{t.numberOfOutlets}</span>
+                                    <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded group-hover:bg-white transition-colors">{t.numberOfOutlets} Outlets</span>
                                     {formTenantId === t.id && <Check className="h-3.5 w-3.5" />}
                                   </div>
                                 </button>
