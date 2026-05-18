@@ -215,6 +215,15 @@ export function UserManagement({
 
   const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE)
 
+  const isFormValid = React.useMemo(() => {
+    return (
+      formFullName.trim() !== "" &&
+      formUsername.trim() !== "" &&
+      formEmail.trim() !== "" &&
+      formTenantId !== ""
+    )
+  }, [formFullName, formUsername, formEmail, formTenantId])
+
   const handleEditUser = (user: User) => {
     setIsFormLoading(true)
     setEditingUser(user)
@@ -230,10 +239,8 @@ export function UserManagement({
   }
 
   const handleSaveUser = () => {
-    if (!formFullName || !formUsername || !formEmail || !formTenantId) {
-      toast({ title: "Validation Error", description: "Required fields missing.", variant: "destructive" })
-      return
-    }
+    if (!isFormValid) return
+
     const firstA = assignments[0];
     if (editingUser) {
       setAllUsers(prev => prev.map(u => u.id === editingUser.id ? {
@@ -480,7 +487,13 @@ export function UserManagement({
                 </ScrollArea>
                 <div className="p-8 border-t border-slate-100 flex justify-end gap-4 bg-slate-50/30">
                   <Button variant="outline" className="h-12 px-8 font-black" onClick={() => { setIsAddingNew(false); setEditingUser(null); }}>Cancel</Button>
-                  <Button className="h-12 px-10 font-black bg-[#1a73e8]" onClick={handleSaveUser}>{editingUser ? "Update Profile" : "Finalize Enrollment"}</Button>
+                  <Button 
+                    className="h-12 px-10 font-black bg-[#1a73e8]" 
+                    onClick={handleSaveUser}
+                    disabled={!isFormValid}
+                  >
+                    {editingUser ? "Update Profile" : "Add user"}
+                  </Button>
                 </div>
               </div>
             </div>
