@@ -82,6 +82,7 @@ import { useToast } from "@/hooks/use-toast"
 interface UserAssignment {
   id: string;
   outletId: string;
+  role: string;
 }
 
 interface UserManagementProps {
@@ -134,7 +135,6 @@ export function UserManagement({
   const [formUsername, setFormUsername] = React.useState("")
   const [formEmail, setFormEmail] = React.useState("")
   const [formPhone, setFormPhone] = React.useState("")
-  const [formRole, setFormRole] = React.useState<string>("Manager")
   const [formTenantId, setFormTenantId] = React.useState("")
   const [formPassword, setFormPassword] = React.useState("")
   const [formConfirmPassword, setFormConfirmPassword] = React.useState("")
@@ -151,12 +151,11 @@ export function UserManagement({
     setFormUsername("")
     setFormEmail("")
     setFormPhone("")
-    setFormRole('Manager')
     setFormTenantId(tenant?.id || "")
     setFormPassword("")
     setFormConfirmPassword("")
     setShowPassword(false)
-    setAssignments([])
+    setAssignments([{ id: '1', outletId: "all", role: "Manager" }])
     setFormTenantSearch("")
   }, [tenant])
 
@@ -168,9 +167,8 @@ export function UserManagement({
         setFormUsername(propEditingUser.username)
         setFormEmail(propEditingUser.email)
         setFormPhone(propEditingUser.phone)
-        setFormRole(propEditingUser.role)
         setFormTenantId(propEditingUser.tenantId)
-        setAssignments(propEditingUser.outletId ? [{ id: '1', outletId: propEditingUser.outletId }] : [])
+        setAssignments([{ id: '1', outletId: propEditingUser.outletId || "all", role: propEditingUser.role }])
       } else if (defaultAdding) {
         setIsAddingNew(true)
         setEditingUser(null)
@@ -215,14 +213,15 @@ export function UserManagement({
 
   const isFormValid = React.useMemo(() => {
     const passwordsMatch = editingUser || (formPassword !== "" && formPassword === formConfirmPassword)
+    const hasRole = assignments.length > 0 && assignments[0].role !== ""
     return (
       formUsername.trim() !== "" &&
       formEmail.trim() !== "" &&
       formTenantId !== "" &&
-      formRole !== "" &&
+      hasRole &&
       passwordsMatch
     )
-  }, [formUsername, formEmail, formTenantId, formRole, formPassword, formConfirmPassword, editingUser])
+  }, [formUsername, formEmail, formTenantId, assignments, formPassword, formConfirmPassword, editingUser])
 
   const handleEditUser = (user: User) => {
     setIsFormLoading(true)
@@ -231,9 +230,8 @@ export function UserManagement({
     setFormUsername(user.username)
     setFormEmail(user.email)
     setFormPhone(user.phone)
-    setFormRole(user.role)
     setFormTenantId(user.tenantId)
-    setAssignments(user.outletId ? [{ id: '1', outletId: user.outletId }] : [])
+    setAssignments([{ id: '1', outletId: user.outletId || "all", role: user.role }])
     setTimeout(() => setIsFormLoading(false), 500)
   }
 
@@ -244,11 +242,10 @@ export function UserManagement({
     if (editingUser) {
       setAllUsers(prev => prev.map(u => u.id === editingUser.id ? {
         ...u,
-        fullName: u.fullName, // Keep existing for mock data
         username: formUsername,
         email: formEmail,
         phone: formPhone,
-        role: formRole as any,
+        role: (firstA?.role || "Manager") as any,
         tenantId: formTenantId,
         outletId: (!firstA || firstA.outletId === "all") ? undefined : firstA.outletId
       } : u))
@@ -256,11 +253,11 @@ export function UserManagement({
     } else {
       const newUser: User = {
         id: `u-${Math.random().toString(36).substr(2, 9)}`,
-        fullName: formUsername, // Fallback for mock display
+        fullName: formUsername,
         username: formUsername,
         email: formEmail,
         phone: formPhone,
-        role: formRole as any,
+        role: (firstA?.role || "Manager") as any,
         tenantId: formTenantId,
         outletId: (!firstA || firstA.outletId === "all") ? undefined : firstA.outletId,
         status: 'Active',
@@ -349,7 +346,7 @@ export function UserManagement({
                     <div className="space-y-2.5">
                       <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Role</Label>
                       <Select onValueChange={(v) => setRoleFilter(v === 'all' ? null : v)} value={roleFilter || 'all'}><SelectTrigger className="h-11"><SelectValue placeholder="Roles" /></SelectTrigger>
-                        <SelectContent><SelectItem value="all">All Roles</SelectItem><SelectItem value="Manager">Manager</SelectItem><SelectItem value="Organization Admin">Organization Admin</SelectItem></SelectContent>
+                        <SelectContent><SelectItem value="all">All Roles</SelectItem><SelectItem value="Manager">Manager</SelectItem><SelectItem value="Organization Admin">Organization Admin</SelectItem><SelectItem value="Partner Admin">Partner Admin</SelectItem></SelectContent>
                       </Select>
                     </div>
                     <div className="space-y-2.5">
@@ -473,20 +470,7 @@ export function UserManagement({
                             </div>
                           )}
 
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2"><Label>Phone Number</Label><Input value={formPhone} onChange={e => setFormPhone(e.target.value)} placeholder="Phone Number" className="h-12" /></div>
-                            <div className="space-y-2">
-                              <Label>Role <span className="text-red-500">*</span></Label>
-                              <Select value={formRole} onValueChange={setFormRole}>
-                                <SelectTrigger className="h-12 font-bold"><SelectValue placeholder="Select Role" /></SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="Organization Admin">Organization Admin</SelectItem>
-                                  <SelectItem value="Manager">Manager</SelectItem>
-                                  <SelectItem value="Partner Admin">Partner Admin</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
+                          <div className="space-y-2"><Label>Phone Number</Label><Input value={formPhone} onChange={e => setFormPhone(e.target.value)} placeholder="Phone Number" className="h-12" /></div>
                         </div>
                       </div>
                       
@@ -500,14 +484,25 @@ export function UserManagement({
                         ) : (
                           <div className="space-y-6">
                             {assignments.map(a => (
-                              <div key={a.id} className="flex gap-4 items-end">
-                                <div className="flex-1 space-y-1.5">
-                                  <Label className="text-[10px] uppercase font-bold text-slate-400">Select Outlet</Label>
+                              <div key={a.id} className="flex gap-4 items-end bg-slate-50/50 p-4 rounded-xl border border-slate-100">
+                                <div className="flex-[2] space-y-1.5">
+                                  <Label className="text-[10px] uppercase font-bold text-slate-400">Outlet</Label>
                                   <Select value={a.outletId} onValueChange={v => setAssignments(assignments.map(as => as.id === a.id ? { ...as, outletId: v } : as))}>
-                                    <SelectTrigger className="h-12 font-bold"><SelectValue /></SelectTrigger>
+                                    <SelectTrigger className="h-12 font-bold bg-white"><SelectValue /></SelectTrigger>
                                     <SelectContent>
-                                      <SelectItem value="all" className="font-bold text-primary">Global Access (All Outlets)</SelectItem>
+                                      <SelectItem value="all" className="font-bold text-primary">Global Access</SelectItem>
                                       {tenantOutletsForForm.map(o => <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                <div className="flex-1 space-y-1.5">
+                                  <Label className="text-[10px] uppercase font-bold text-slate-400">Role</Label>
+                                  <Select value={a.role} onValueChange={v => setAssignments(assignments.map(as => as.id === a.id ? { ...as, role: v } : as))}>
+                                    <SelectTrigger className="h-12 font-bold bg-white"><SelectValue /></SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="Organization Admin">Org Admin</SelectItem>
+                                      <SelectItem value="Manager">Manager</SelectItem>
+                                      <SelectItem value="Partner Admin">Partner Admin</SelectItem>
                                     </SelectContent>
                                   </Select>
                                 </div>
@@ -517,8 +512,8 @@ export function UserManagement({
                               </div>
                             ))}
                             {assignments.length === 0 && (
-                              <Button variant="outline" className="w-full h-14 border-2 border-dashed border-primary/20 text-primary font-black rounded-2xl" onClick={() => setAssignments([{ id: '1', outletId: "all" }])}>
-                                <PlusCircle className="h-5 w-5 mr-3" /> Assign to Outlet
+                              <Button variant="outline" className="w-full h-14 border-2 border-dashed border-primary/20 text-primary font-black rounded-2xl" onClick={() => setAssignments([{ id: Math.random().toString(), outletId: "all", role: "Manager" }])}>
+                                <PlusCircle className="h-5 w-5 mr-3" /> Add Assignment
                               </Button>
                             )}
                           </div>
@@ -530,7 +525,7 @@ export function UserManagement({
                 <div className="p-8 border-t border-slate-100 flex justify-end gap-4 bg-slate-50/30">
                   <Button variant="outline" className="h-12 px-8 font-black" onClick={() => { setIsAddingNew(false); setEditingUser(null); }}>Cancel</Button>
                   <Button 
-                    className="h-12 px-10 font-black bg-[#1a73e8] hover:bg-[#1557b0] transition-all disabled:opacity-50 disabled:cursor-not-allowed" 
+                    className="h-12 px-10 font-black bg-[#1a73e8] hover:bg-[#1557b0] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#1a73e8]/20" 
                     onClick={handleSaveUser}
                     disabled={!isFormValid}
                   >
