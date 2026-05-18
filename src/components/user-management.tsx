@@ -314,7 +314,7 @@ export function UserManagement({
                   <SheetTitle className="text-2xl font-black text-[#1e293b] tracking-tight">{isAddingNew ? (editingUser ? `Edit ${editingUser.fullName}` : "New Staff Member") : "User Management"}</SheetTitle>
                 </div>
               </div>
-              {!isAddingNew && <Button onClick={() => { setIsFormLoading(true); setIsAddingNew(true); resetForm(); setTimeout(() => setIsFormLoading(false), 400); }} className="h-10 px-6 font-black bg-[#1a73e8]"><Plus className="h-4 w-4 mr-2" /> Enroll Staff</Button>}
+              {!isAddingNew && <Button onClick={() => { setIsFormLoading(true); setIsAddingNew(true); resetForm(); setTimeout(() => setIsFormLoading(false), 400); }} className="h-10 px-6 font-black bg-[#1a73e8]"><Plus className="h-4 w-4 mr-2" /> New User</Button>}
             </div>
           </SheetHeader>
 
