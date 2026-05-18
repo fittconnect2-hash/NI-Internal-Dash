@@ -43,29 +43,27 @@ interface TenantConfigurationProps {
   onSave: (tenantId: string, updates: Partial<Tenant>, outletUpdates?: Record<string, string[]>) => void;
 }
 
-// Simple names for the tabs
 const configTabs = [
-  "Money & Time", 
-  "Our Sales Fees", 
-  "Tips", 
-  "Agreement Dates", 
-  "Payment Systems", 
-  "Getting Paid", 
-  "Extra Charges", 
-  "Cancellations", 
-  "System Costs", 
-  "Small Orders"
+  "General Settings", 
+  "Service Fees", 
+  "Gratuity Settings", 
+  "Contract Dates", 
+  "Payment Gateways", 
+  "Payout Settings", 
+  "Additional Charges", 
+  "Cancellation Policies", 
+  "SaaS Fees", 
+  "Small Order Fees"
 ]
 
 export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, onClose, onSave }: TenantConfigurationProps) {
-  const [activeTab, setActiveTab] = React.useState("Money & Time")
+  const [activeTab, setActiveTab] = React.useState("General Settings")
   const [tipsEnabled, setTipsEnabled] = React.useState(true)
   const [suggestedTipRates, setSuggestedTipRates] = React.useState([5, 10, 20])
   
   const [startDate, setStartDate] = React.useState<Date | undefined>(new Date("2026-05-13"))
   const [endDate, setEndDate] = React.useState<Date | undefined>(new Date("2027-05-13"))
 
-  // Gateway state
   const [gwMode, setGwMode] = React.useState<'global' | 'by-outlet'>('global')
   const [globalGwIds, setGlobalGwIds] = React.useState<string[]>([])
   const [outletGwMap, setOutletGwMap] = React.useState<Record<string, string[]>>({})
@@ -223,7 +221,7 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
           <ScrollArea className="flex-1">
             <div className="p-10 max-w-4xl mx-auto space-y-12">
               
-              {activeTab === "Money & Time" && (
+              {activeTab === "General Settings" && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-400">
                   <div className="bg-blue-50/50 border border-blue-100 p-6 rounded-2xl flex items-start gap-4">
                     <Info className="h-5 w-5 text-blue-500 mt-1 shrink-0" />
@@ -279,7 +277,7 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
                 </div>
               )}
 
-              {activeTab === "Payment Systems" && (
+              {activeTab === "Payment Gateways" && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-400">
                   <div className="bg-primary/5 border border-primary/10 p-6 rounded-2xl flex items-start gap-4">
                     <ShieldCheck className="h-6 w-6 text-primary mt-1 shrink-0" />
@@ -358,7 +356,7 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
                 </div>
               )}
 
-              {activeTab === "Our Sales Fees" && (
+              {activeTab === "Service Fees" && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-400">
                   <div className="bg-amber-50/50 border border-amber-100 p-6 rounded-2xl flex items-start gap-4">
                     <Info className="h-5 w-5 text-amber-500 mt-1 shrink-0" />
@@ -389,7 +387,7 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
                 </div>
               )}
 
-              {activeTab === "Tips" && (
+              {activeTab === "Gratuity Settings" && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-400">
                    <div className="bg-green-50/50 border border-green-100 p-6 rounded-2xl flex items-start gap-4">
                     <Info className="h-5 w-5 text-green-500 mt-1 shrink-0" />
@@ -458,7 +456,7 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
                 </div>
               )}
 
-              {activeTab === "Agreement Dates" && (
+              {activeTab === "Contract Dates" && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-400">
                   <div className="bg-slate-50 border border-slate-200 p-6 rounded-2xl flex items-start gap-4">
                     <CalendarIcon className="h-5 w-5 text-slate-500 mt-1 shrink-0" />
@@ -523,7 +521,7 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
                 </div>
               )}
 
-              {activeTab === "Getting Paid" && (
+              {activeTab === "Payout Settings" && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-400">
                   <div className="bg-emerald-50/50 border border-emerald-100 p-6 rounded-2xl flex items-start gap-4">
                     <Info className="h-5 w-5 text-emerald-500 mt-1 shrink-0" />
