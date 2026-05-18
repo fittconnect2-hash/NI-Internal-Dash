@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ArrowLeft, Minus, Plus, Calendar as CalendarIcon, ShieldCheck, Globe, Store, Check, Info } from "lucide-react"
+import { ArrowLeft, Minus, Plus, Calendar as CalendarIcon, ShieldCheck, Globe, Store, Check, Info, Layout } from "lucide-react"
 import { Tenant, Gateway, Outlet } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import {
@@ -622,6 +622,31 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
                     <div className="space-y-3">
                       <Label className="text-[13px] font-bold text-slate-900">Cancellation Fee Rate (%)</Label>
                       <Input defaultValue="0" type="number" className="h-12 bg-white border-slate-200 text-lg font-bold" />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "Platform" && (
+                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-400">
+                  <div className="bg-slate-50 border border-slate-200 p-6 rounded-2xl flex items-start gap-4">
+                    <Layout className="h-5 w-5 text-slate-500 mt-1 shrink-0" />
+                    <div>
+                      <h4 className="font-bold text-slate-900">Platform Access Fees</h4>
+                      <p className="text-sm text-slate-600 mt-1">Set the recurring costs for using the platform. These are usually billed separately from order commissions.</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-8">
+                    <div className="space-y-3">
+                      <Label className="text-[13px] font-bold text-slate-900">Annual Platform Fee</Label>
+                      <Input defaultValue="0" type="number" className="h-12 bg-white border-slate-200 text-lg font-bold" />
+                      <p className="text-[11px] text-slate-400 font-medium italic">Charged once a year for platform maintenance and updates.</p>
+                    </div>
+                    <div className="space-y-3">
+                      <Label className="text-[13px] font-bold text-slate-900">Monthly Platform Fee</Label>
+                      <Input defaultValue="0" type="number" className="h-12 bg-white border-slate-200 text-lg font-bold" />
+                      <p className="text-[11px] text-slate-400 font-medium italic">Charged every month for hosting and support services.</p>
                     </div>
                   </div>
                 </div>
