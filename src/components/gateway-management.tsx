@@ -48,7 +48,7 @@ export function GatewayManagement({ allGateways, setAllGateways }: GatewayManage
   }
 
   return (
-    <div className="p-6 md:p-10 flex flex-col h-full overflow-hidden bg-[#f8f9fc]">
+    <div className="p-6 md:p-10 flex flex-col h-full overflow-y-auto bg-[#f8f9fc]">
       <div className="max-w-[1400px] w-full mx-auto flex-1 flex flex-col min-h-0">
         <div className="mb-10">
           <h1 className="text-3xl font-black text-slate-900 tracking-tight">Payment Gateways</h1>
@@ -74,7 +74,7 @@ export function GatewayManagement({ allGateways, setAllGateways }: GatewayManage
                   <Switch 
                     checked={gateway.isEnabled} 
                     onCheckedChange={() => handleToggle(gateway.id, gateway.isEnabled)}
-                    className="data-[state=checked]:bg-primary"
+                    className="data-[state=checked]:bg-[#0069B1]"
                   />
                 </div>
 
@@ -92,10 +92,10 @@ export function GatewayManagement({ allGateways, setAllGateways }: GatewayManage
           ))}
         </div>
 
-        <div className="mt-12 bg-white rounded-3xl border border-slate-200 p-8 shadow-sm max-w-2xl">
+        <div className="mt-12 bg-white rounded-3xl border border-slate-200 p-8 shadow-sm max-w-2xl mb-10">
           <div className="flex items-start gap-4">
-            <div className="h-10 w-10 rounded-full bg-primary/5 flex items-center justify-center shrink-0">
-              <ShieldCheck className="h-5 w-5 text-primary" />
+            <div className="h-10 w-10 rounded-full bg-[#0069B1]/5 flex items-center justify-center shrink-0">
+              <ShieldCheck className="h-5 w-5 text-[#0069B1]" />
             </div>
             <div>
               <h3 className="text-lg font-black text-slate-900 leading-none">Security & Compliance</h3>
