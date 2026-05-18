@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ArrowLeft, Minus, Plus, Calendar as CalendarIcon, ShieldCheck, Globe, Store, Check } from "lucide-react"
+import { ArrowLeft, Minus, Plus, Calendar as CalendarIcon, ShieldCheck, Globe, Store, Check, Info } from "lucide-react"
 import { Tenant, Gateway, Outlet } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import {
@@ -43,12 +43,22 @@ interface TenantConfigurationProps {
   onSave: (tenantId: string, updates: Partial<Tenant>, outletUpdates?: Record<string, string[]>) => void;
 }
 
+// Simple names for the tabs
 const configTabs = [
-  "Currency", "Commission", "Tips", "Contract", "Gateways", "Payouts", "Fees", "Penalties", "Platform", "Small Order"
+  "Money & Time", 
+  "Our Sales Fees", 
+  "Tips", 
+  "Agreement Dates", 
+  "Payment Systems", 
+  "Getting Paid", 
+  "Extra Charges", 
+  "Cancellations", 
+  "System Costs", 
+  "Small Orders"
 ]
 
 export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, onClose, onSave }: TenantConfigurationProps) {
-  const [activeTab, setActiveTab] = React.useState("Currency")
+  const [activeTab, setActiveTab] = React.useState("Money & Time")
   const [tipsEnabled, setTipsEnabled] = React.useState(true)
   const [suggestedTipRates, setSuggestedTipRates] = React.useState([5, 10, 20])
   
@@ -121,27 +131,28 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
     onSave(tenant.id, updates, outletGwMap)
   }
 
-  const MultiGatewaySelector = ({ selectedIds, onToggle, label }: { selectedIds: string[], onToggle: (id: string) => void, label?: string }) => {
+  const MultiGatewaySelector = ({ selectedIds, onToggle }: { selectedIds: string[], onToggle: (id: string) => void }) => {
     const activeGateways = allGateways.filter(g => g.isEnabled)
     
     return (
       <Popover>
         <PopoverTrigger asChild>
-          <Button variant="outline" className="w-full h-12 justify-between bg-white border-slate-200">
+          <Button variant="outline" className="w-full h-12 justify-between bg-white border-slate-200 text-sm">
             <span className="truncate">
               {selectedIds.length === 0 
-                ? "Select Gateways..." 
-                : `${selectedIds.length} Gateways selected`}
+                ? "Click to choose systems..." 
+                : `${selectedIds.length} systems chosen`}
             </span>
             <Plus className="h-4 w-4 opacity-50" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-80 p-2 shadow-2xl" align="start">
           <div className="space-y-1">
+            <p className="px-2 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active Options</p>
             {activeGateways.map(g => (
               <div 
                 key={g.id} 
-                className="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg cursor-pointer transition-colors"
+                className="flex items-center gap-3 p-3 hover:bg-slate-50 rounded-lg cursor-pointer transition-colors"
                 onClick={() => onToggle(g.id)}
               >
                 <Checkbox checked={selectedIds.includes(g.id)} onCheckedChange={() => onToggle(g.id)} />
@@ -152,7 +163,7 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
               </div>
             ))}
             {activeGateways.length === 0 && (
-              <p className="p-4 text-center text-xs text-slate-400 font-bold uppercase">No active gateways found</p>
+              <p className="p-4 text-center text-xs text-slate-400">No active systems found</p>
             )}
           </div>
         </PopoverContent>
@@ -166,26 +177,26 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <SheetContent side="right" className="w-full sm:max-w-[1000px] p-0 border-l border-slate-200 bg-white">
         <div className="flex flex-col h-full">
-          <SheetHeader className="p-6 bg-white border-b border-slate-200 space-y-0">
-            <div className="flex items-center gap-4">
+          <SheetHeader className="p-8 bg-white border-b border-slate-200 space-y-0">
+            <div className="flex items-center gap-6">
               <button 
                 onClick={onClose}
-                className="p-1 hover:bg-slate-100 rounded-md transition-colors"
+                className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
               >
-                <ArrowLeft className="h-5 w-5 text-slate-600" />
+                <ArrowLeft className="h-6 w-6 text-slate-400" />
               </button>
               <div>
-                <SheetTitle className="text-xl font-black text-slate-900 tracking-tight">
-                  Configuration: {tenant.tenantName}
+                <SheetTitle className="text-2xl font-black text-slate-900 tracking-tight">
+                  Settings for {tenant.tenantName}
                 </SheetTitle>
-                <SheetDescription className="text-sm font-medium text-slate-500">
-                  Manage brand settings and payment integrations.
+                <SheetDescription className="text-sm font-medium text-slate-500 mt-1">
+                  Adjust how this brand operates on our platform.
                 </SheetDescription>
               </div>
             </div>
           </SheetHeader>
 
-          <div className="px-6 py-4 bg-slate-50/50 border-b border-slate-200">
+          <div className="px-8 py-4 bg-slate-50/50 border-b border-slate-200">
             <ScrollArea className="w-full whitespace-nowrap">
               <div className="flex gap-2">
                 {configTabs.map((tab) => (
@@ -194,10 +205,10 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
                     variant={activeTab === tab ? "default" : "ghost"}
                     onClick={() => setActiveTab(tab)}
                     className={cn(
-                      "text-[12px] font-black uppercase tracking-widest px-6 h-9 transition-all",
+                      "text-[12px] font-black uppercase tracking-widest px-6 h-10 transition-all rounded-full",
                       activeTab === tab 
                         ? "bg-primary text-white shadow-md hover:bg-primary/90" 
-                        : "text-slate-400 hover:text-slate-900 hover:bg-slate-100"
+                        : "text-slate-400 hover:text-slate-900 hover:bg-slate-200/50"
                     )}
                     size="sm"
                   >
@@ -210,115 +221,129 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
           </div>
 
           <ScrollArea className="flex-1">
-            <div className="p-10 max-w-4xl space-y-10">
-              {activeTab === "Currency" && (
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-slate-700">Currency Code <span className="text-red-500">*</span></Label>
-                    <Select defaultValue="AED">
-                      <SelectTrigger className="h-11 bg-white border-slate-200 w-full">
-                        <SelectValue placeholder="Select currency" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="AED">UAE Dirham (د.إ)</SelectItem>
-                        <SelectItem value="USD">US Dollar ($)</SelectItem>
-                        <SelectItem value="EUR">Euro (€)</SelectItem>
-                      </SelectContent>
-                    </Select>
+            <div className="p-10 max-w-4xl mx-auto space-y-12">
+              
+              {activeTab === "Money & Time" && (
+                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-400">
+                  <div className="bg-blue-50/50 border border-blue-100 p-6 rounded-2xl flex items-start gap-4">
+                    <Info className="h-5 w-5 text-blue-500 mt-1 shrink-0" />
+                    <div>
+                      <h4 className="font-bold text-slate-900">Currency & Location</h4>
+                      <p className="text-sm text-slate-600 mt-1">Set the primary money used for sales and the local time for this brand.</p>
+                    </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-slate-700">Locale</Label>
-                    <Select defaultValue="en-US">
-                      <SelectTrigger className="h-11 bg-white border-slate-200 w-full">
-                        <SelectValue placeholder="Select locale" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="en-US">en-US</SelectItem>
-                        <SelectItem value="en-GB">en-GB</SelectItem>
-                        <SelectItem value="ar-AE">ar-AE</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <Label className="text-[13px] font-bold text-slate-900">Which money should be used?</Label>
+                      <Select defaultValue="AED">
+                        <SelectTrigger className="h-12 bg-white border-slate-200 w-full text-base">
+                          <SelectValue placeholder="Select currency" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="AED">UAE Dirham (د.إ)</SelectItem>
+                          <SelectItem value="USD">US Dollar ($)</SelectItem>
+                          <SelectItem value="EUR">Euro (€)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-slate-700">Timezone</Label>
-                    <Select defaultValue="Asia/Dubai">
-                      <SelectTrigger className="h-11 bg-white border-slate-200 w-full">
-                        <SelectValue placeholder="Select timezone" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Asia/Dubai">Asia/Dubai (GMT+04:00)</SelectItem>
-                        <SelectItem value="UTC">UTC (GMT+00:00)</SelectItem>
-                        <SelectItem value="America/New_York">America/New_York (GMT-05:00)</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <div className="space-y-3">
+                      <Label className="text-[13px] font-bold text-slate-900">Language and Date Format</Label>
+                      <Select defaultValue="en-US">
+                        <SelectTrigger className="h-12 bg-white border-slate-200 w-full text-base">
+                          <SelectValue placeholder="Select format" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="en-US">English (US)</SelectItem>
+                          <SelectItem value="en-GB">English (UK)</SelectItem>
+                          <SelectItem value="ar-AE">Arabic (UAE)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-3 md:col-span-2">
+                      <Label className="text-[13px] font-bold text-slate-900">Local Time Zone</Label>
+                      <Select defaultValue="Asia/Dubai">
+                        <SelectTrigger className="h-12 bg-white border-slate-200 w-full text-base">
+                          <SelectValue placeholder="Select time zone" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Asia/Dubai">Dubai Time (GMT+4)</SelectItem>
+                          <SelectItem value="UTC">Standard World Time (UTC)</SelectItem>
+                          <SelectItem value="America/New_York">New York Time (GMT-5)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </div>
               )}
 
-              {activeTab === "Gateways" && (
-                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                  <div className="bg-slate-50 border border-slate-200 p-6 rounded-2xl flex items-start gap-4">
-                    <ShieldCheck className="h-6 w-6 text-primary mt-1" />
+              {activeTab === "Payment Systems" && (
+                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-400">
+                  <div className="bg-primary/5 border border-primary/10 p-6 rounded-2xl flex items-start gap-4">
+                    <ShieldCheck className="h-6 w-6 text-primary mt-1 shrink-0" />
                     <div>
-                      <h4 className="font-black text-slate-900 text-[15px]">Payment Distribution Strategy</h4>
-                      <p className="text-sm text-slate-500 mt-1">Determine how payment gateways are assigned across your brand network.</p>
+                      <h4 className="font-black text-slate-900">Payment Setup</h4>
+                      <p className="text-sm text-slate-600 mt-1">Decide if every location uses the same payment system or if you want to set them individually.</p>
                     </div>
                   </div>
 
-                  <RadioGroup value={gwMode} onValueChange={(val) => setGwMode(val as any)} className="grid grid-cols-2 gap-4">
+                  <RadioGroup value={gwMode} onValueChange={(val) => setGwMode(val as any)} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <Label
                       htmlFor="gw-global"
                       className={cn(
-                        "flex flex-col items-center justify-between rounded-xl border-2 border-muted bg-popover p-6 hover:bg-accent hover:text-accent-foreground cursor-pointer transition-all",
-                        gwMode === 'global' && "border-primary ring-2 ring-primary/10"
+                        "flex flex-col items-center justify-center rounded-2xl border-2 border-slate-100 bg-white p-8 hover:border-primary/50 cursor-pointer transition-all h-full",
+                        gwMode === 'global' && "border-primary bg-primary/5"
                       )}
                     >
                       <RadioGroupItem value="global" id="gw-global" className="sr-only" />
-                      <Globe className="mb-3 h-6 w-6 text-primary" />
+                      <Globe className={cn("mb-4 h-8 w-8", gwMode === 'global' ? "text-primary" : "text-slate-300")} />
                       <div className="text-center">
-                        <p className="font-black text-[13px] uppercase tracking-wider">Global Application</p>
-                        <p className="text-xs text-slate-400 mt-1">Same gateways for all outlets</p>
+                        <p className="font-black text-[15px] text-slate-900 uppercase tracking-wider">Same for Everyone</p>
+                        <p className="text-xs text-slate-500 mt-2">Apply chosen systems to all outlets</p>
                       </div>
                     </Label>
                     <Label
                       htmlFor="gw-outlet"
                       className={cn(
-                        "flex flex-col items-center justify-between rounded-xl border-2 border-muted bg-popover p-6 hover:bg-accent hover:text-accent-foreground cursor-pointer transition-all",
-                        gwMode === 'by-outlet' && "border-primary ring-2 ring-primary/10"
+                        "flex flex-col items-center justify-center rounded-2xl border-2 border-slate-100 bg-white p-8 hover:border-primary/50 cursor-pointer transition-all h-full",
+                        gwMode === 'by-outlet' && "border-primary bg-primary/5"
                       )}
                     >
                       <RadioGroupItem value="by-outlet" id="gw-outlet" className="sr-only" />
-                      <Store className="mb-3 h-6 w-6 text-primary" />
+                      <Store className={cn("mb-4 h-8 w-8", gwMode === 'by-outlet' ? "text-primary" : "text-slate-300")} />
                       <div className="text-center">
-                        <p className="font-black text-[13px] uppercase tracking-wider">Specific by Outlet</p>
-                        <p className="text-xs text-slate-400 mt-1">Configure each branch individually</p>
+                        <p className="font-black text-[15px] text-slate-900 uppercase tracking-wider">Unique by Outlet</p>
+                        <p className="text-xs text-slate-500 mt-2">Pick systems for each branch separately</p>
                       </div>
                     </Label>
                   </RadioGroup>
 
                   <div className="space-y-6 pt-4">
                     {gwMode === 'global' ? (
-                      <div className="space-y-3">
-                        <Label className="text-[12px] font-black text-slate-400 uppercase tracking-widest">Select Global Providers</Label>
+                      <div className="space-y-4">
+                        <Label className="text-[13px] font-bold text-slate-900">Choose Global Payment Providers</Label>
                         <MultiGatewaySelector 
                           selectedIds={globalGwIds} 
                           onToggle={handleToggleGlobalGw} 
                         />
-                        <p className="text-[11px] text-slate-400 font-medium italic">Selected gateways will process transactions for all {tenantOutlets.length} active outlets.</p>
+                        <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg">
+                          <Info className="h-4 w-4 text-slate-400" />
+                          <p className="text-xs text-slate-500 font-medium italic">These choices will affect all {tenantOutlets.length} locations.</p>
+                        </div>
                       </div>
                     ) : (
                       <div className="space-y-4">
-                         <Label className="text-[12px] font-black text-slate-400 uppercase tracking-widest">Outlet Mapping ({tenantOutlets.length} Branches)</Label>
-                         <div className="grid gap-3">
+                         <Label className="text-[13px] font-bold text-slate-900">Pick for each branch ({tenantOutlets.length} total)</Label>
+                         <div className="grid gap-4">
                             {tenantOutlets.map(o => (
-                              <div key={o.id} className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-xl shadow-sm hover:border-primary/20 transition-all group">
+                              <div key={o.id} className="flex flex-col md:flex-row md:items-center justify-between p-5 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md transition-all gap-4">
                                 <div>
-                                  <p className="font-extrabold text-[14px] text-slate-900 leading-none">{o.name}</p>
-                                  <p className="text-[10px] text-slate-400 font-bold uppercase mt-1.5">{o.city}, {o.country}</p>
+                                  <p className="font-extrabold text-[15px] text-slate-900 leading-none">{o.name}</p>
+                                  <p className="text-[10px] text-slate-400 font-bold uppercase mt-2">{o.city}, {o.country}</p>
                                 </div>
-                                <div className="w-[300px]">
+                                <div className="w-full md:w-[320px]">
                                   <MultiGatewaySelector 
                                     selectedIds={outletGwMap[o.id] || []} 
                                     onToggle={(gwId) => handleToggleOutletGw(o.id, gwId)} 
@@ -333,31 +358,52 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
                 </div>
               )}
 
-              {activeTab === "Commission" && (
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-slate-700">Order Commission Rate (%) <span className="text-red-500">*</span></Label>
-                    <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
+              {activeTab === "Our Sales Fees" && (
+                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-400">
+                  <div className="bg-amber-50/50 border border-amber-100 p-6 rounded-2xl flex items-start gap-4">
+                    <Info className="h-5 w-5 text-amber-500 mt-1 shrink-0" />
+                    <div>
+                      <h4 className="font-bold text-slate-900">Standard Fees</h4>
+                      <p className="text-sm text-slate-600 mt-1">Set the percentage we take from every order and any fixed caps.</p>
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-slate-700">Order Commission Cap <span className="text-red-500">*</span></Label>
-                    <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-slate-700">Convenience Fee Rate (%) <span className="text-red-500">*</span></Label>
-                    <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-slate-700">Convenience Fee Cap <span className="text-red-500">*</span></Label>
-                    <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <Label className="text-[13px] font-bold text-slate-900">Our Percentage (%)</Label>
+                      <Input defaultValue="0" type="number" className="h-12 bg-white border-slate-200 text-lg font-bold" />
+                    </div>
+                    <div className="space-y-3">
+                      <Label className="text-[13px] font-bold text-slate-900">Maximum Fee Amount</Label>
+                      <Input defaultValue="0" type="number" className="h-12 bg-white border-slate-200 text-lg font-bold" />
+                    </div>
+                    <div className="space-y-3">
+                      <Label className="text-[13px] font-bold text-slate-900">Convenience Fee (%)</Label>
+                      <Input defaultValue="0" type="number" className="h-12 bg-white border-slate-200 text-lg font-bold" />
+                    </div>
+                    <div className="space-y-3">
+                      <Label className="text-[13px] font-bold text-slate-900">Convenience Fee Cap</Label>
+                      <Input defaultValue="0" type="number" className="h-12 bg-white border-slate-200 text-lg font-bold" />
+                    </div>
                   </div>
                 </div>
               )}
 
               {activeTab === "Tips" && (
-                <div className="space-y-6">
-                  <div className="flex items-center justify-end gap-2 mb-2">
-                    <Label htmlFor="enable-tips" className="text-sm font-medium text-slate-500">Enable tips</Label>
+                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-400">
+                   <div className="bg-green-50/50 border border-green-100 p-6 rounded-2xl flex items-start gap-4">
+                    <Info className="h-5 w-5 text-green-500 mt-1 shrink-0" />
+                    <div>
+                      <h4 className="font-bold text-slate-900">Handling Tips</h4>
+                      <p className="text-sm text-slate-600 mt-1">Decide if staff can receive tips and how those tips are handled.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between p-6 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div className="space-y-1">
+                      <Label htmlFor="enable-tips" className="text-base font-bold text-slate-900 leading-none">Enable Tips</Label>
+                      <p className="text-sm text-slate-500">Allow customers to add gratuity to their orders.</p>
+                    </div>
                     <Switch 
                       id="enable-tips" 
                       checked={tipsEnabled} 
@@ -365,37 +411,33 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
                     />
                   </div>
 
-                  <div className={cn("space-y-6 transition-opacity", !tipsEnabled && "opacity-50 pointer-events-none")}>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-semibold text-slate-700">Tip Commission Rate (%) <span className="text-red-500">*</span></Label>
-                      <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label className="text-sm font-semibold text-slate-700">Tip Commission Cap <span className="text-red-500">*</span></Label>
-                      <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-sm font-semibold text-slate-700">Maximum Tip Rate (%)</Label>
-                      <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
-                    </div>
-
-                    <div className="space-y-3">
-                      <Label className="text-sm font-semibold text-slate-700">Suggested Tip Rates (%)</Label>
+                  <div className={cn("space-y-8 transition-all duration-300", !tipsEnabled && "opacity-40 pointer-events-none")}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       <div className="space-y-3">
+                        <Label className="text-[13px] font-bold text-slate-900">Tip Commission (%)</Label>
+                        <Input defaultValue="0" type="number" className="h-12 bg-white border-slate-200 text-lg font-bold" />
+                      </div>
+                      <div className="space-y-3">
+                        <Label className="text-[13px] font-bold text-slate-900">Highest Tip Allowed (%)</Label>
+                        <Input defaultValue="0" type="number" className="h-12 bg-white border-slate-200 text-lg font-bold" />
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <Label className="text-[13px] font-bold text-slate-900">Standard Tipping Buttons (%)</Label>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {suggestedTipRates.map((rate, index) => (
                           <div key={index} className="flex gap-3">
                             <Input 
                               type="number"
                               value={rate} 
                               onChange={(e) => handleTipRateChange(index, e.target.value)}
-                              className="h-11 bg-white border-slate-200" 
+                              className="h-12 bg-white border-slate-200 text-lg font-bold" 
                             />
                             <Button 
                               variant="outline" 
                               size="icon" 
-                              className="h-11 w-11 shrink-0 border-slate-200 text-slate-400 hover:text-slate-600 bg-white"
+                              className="h-12 w-12 shrink-0 border-slate-200 text-slate-400 hover:text-rose-500"
                               onClick={() => handleRemoveTipRate(index)}
                             >
                               <Minus className="h-4 w-4" />
@@ -406,171 +448,120 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
                       <Button 
                         variant="outline" 
                         size="sm" 
-                        className="mt-2 text-slate-600 border-slate-200 bg-white hover:bg-slate-50 font-medium"
+                        className="mt-2 h-10 px-6 font-bold text-primary border-primary/20 hover:bg-primary/5"
                         onClick={handleAddTipRate}
                       >
-                        + Add Rate
+                        + Add another tip option
                       </Button>
                     </div>
                   </div>
                 </div>
               )}
 
-              {activeTab === "Contract" && (
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-slate-700">Contract Start Date</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "w-full h-11 justify-between text-left font-normal bg-white border-slate-200",
-                            !startDate && "text-muted-foreground"
-                          )}
-                        >
-                          {startDate ? format(startDate, "PPP") : <span>Pick a date</span>}
-                          <CalendarIcon className="h-4 w-4 text-slate-400" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={startDate}
-                          onSelect={setStartDate}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
+              {activeTab === "Agreement Dates" && (
+                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-400">
+                  <div className="bg-slate-50 border border-slate-200 p-6 rounded-2xl flex items-start gap-4">
+                    <CalendarIcon className="h-5 w-5 text-slate-500 mt-1 shrink-0" />
+                    <div>
+                      <h4 className="font-bold text-slate-900">Contract Duration</h4>
+                      <p className="text-sm text-slate-600 mt-1">Specify when the partnership agreement begins and expires.</p>
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-slate-700">Contract End Date</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "w-full h-11 justify-between text-left font-normal bg-white border-slate-200",
-                            !endDate && "text-muted-foreground"
-                          )}
-                        >
-                          {endDate ? format(endDate, "PPP") : <span>Pick a date</span>}
-                          <CalendarIcon className="h-4 w-4 text-slate-400" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={endDate}
-                          onSelect={setEndDate}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <Label className="text-[13px] font-bold text-slate-900">Agreement Starts On</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full h-12 justify-between text-left font-bold text-base bg-white border-slate-200",
+                              !startDate && "text-muted-foreground"
+                            )}
+                          >
+                            {startDate ? format(startDate, "PPP") : <span>Pick a date</span>}
+                            <CalendarIcon className="h-5 w-5 text-slate-400" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={startDate}
+                            onSelect={setStartDate}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                    <div className="space-y-3">
+                      <Label className="text-[13px] font-bold text-slate-900">Agreement Ends On</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full h-12 justify-between text-left font-bold text-base bg-white border-slate-200",
+                              !endDate && "text-muted-foreground"
+                            )}
+                          >
+                            {endDate ? format(endDate, "PPP") : <span>Pick a date</span>}
+                            <CalendarIcon className="h-5 w-5 text-slate-400" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={endDate}
+                            onSelect={setEndDate}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
                   </div>
                 </div>
               )}
 
-              {activeTab === "Payouts" && (
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-slate-700">Payout Frequency (Days)</Label>
-                    <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
+              {activeTab === "Getting Paid" && (
+                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-400">
+                  <div className="bg-emerald-50/50 border border-emerald-100 p-6 rounded-2xl flex items-start gap-4">
+                    <Info className="h-5 w-5 text-emerald-500 mt-1 shrink-0" />
+                    <div>
+                      <h4 className="font-bold text-slate-900">Payment Schedule</h4>
+                      <p className="text-sm text-slate-600 mt-1">Set how often the brand receives their accumulated sales funds.</p>
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-slate-700">Payout Hold (Days)</Label>
-                    <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-slate-700">Minimum Payout Amount</Label>
-                    <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <Label className="text-[13px] font-bold text-slate-900">How many days between payments?</Label>
+                      <Input defaultValue="0" type="number" className="h-12 bg-white border-slate-200 text-lg font-bold" />
+                    </div>
+                    <div className="space-y-3">
+                      <Label className="text-[13px] font-bold text-slate-900">Days to hold funds (Security)</Label>
+                      <Input defaultValue="0" type="number" className="h-12 bg-white border-slate-200 text-lg font-bold" />
+                    </div>
+                    <div className="space-y-3 md:col-span-2">
+                      <Label className="text-[13px] font-bold text-slate-900">Minimum Amount to Pay Out</Label>
+                      <Input defaultValue="0" type="number" className="h-12 bg-white border-slate-200 text-lg font-bold" />
+                    </div>
                   </div>
                 </div>
               )}
 
-              {activeTab === "Fees" && (
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-slate-700">Delivery Fee Commission Rate (%) <span className="text-red-500">*</span></Label>
-                    <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-slate-700">Delivery Fee Commission Cap</Label>
-                    <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-slate-700">Payment Processing Fee Rate (%)</Label>
-                    <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-slate-700">Payment Processing Flat Fee</Label>
-                    <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-slate-700">Reservation Fee Rate (%)</Label>
-                    <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-slate-700">Reservation Flat Fee</Label>
-                    <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
-                  </div>
-                </div>
-              )}
-
-              {activeTab === "Penalties" && (
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-slate-700">No-Show Fee Rate (%)</Label>
-                    <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-slate-700">Cancellation Fee Rate (%)</Label>
-                    <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
-                  </div>
-                </div>
-              )}
-
-              {activeTab === "Platform" && (
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-slate-700">Annual Platform Fee</Label>
-                    <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-slate-700">Monthly Platform Fee</Label>
-                    <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
-                  </div>
-                </div>
-              )}
-
-              {activeTab === "Small Order" && (
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-slate-700">Minimum Order Amount</Label>
-                    <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-slate-700">Small Order Fee</Label>
-                    <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-slate-700">Small Order Threshold</Label>
-                    <Input defaultValue="0" className="h-11 bg-white border-slate-200" />
-                  </div>
-                </div>
-              )}
             </div>
           </ScrollArea>
 
-          <SheetFooter className="p-8 bg-white border-t border-slate-200 flex sm:justify-end gap-4 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)]">
-            <Button variant="outline" onClick={onClose} className="px-8 h-12 font-black text-slate-500 border-slate-200 hover:bg-slate-50">
-              Cancel
+          <SheetFooter className="p-8 bg-white border-t border-slate-200 flex flex-col sm:flex-row sm:justify-end gap-4 shadow-[0_-10px_30px_-15px_rgba(0,0,0,0.1)]">
+            <Button variant="outline" onClick={onClose} className="px-10 h-14 font-black text-slate-500 border-slate-200 hover:bg-slate-50 text-base rounded-2xl">
+              Discard Changes
             </Button>
             <Button 
               onClick={handleSave}
-              className="px-10 h-12 font-black bg-primary hover:bg-primary/90 text-white border-none rounded-xl shadow-lg shadow-primary/20 transition-all active:scale-95"
+              className="px-12 h-14 font-black bg-primary hover:bg-primary/90 text-white border-none rounded-2xl shadow-xl shadow-primary/20 transition-all active:scale-95 text-base"
             >
-              Apply Configuration
+              Apply All Settings
             </Button>
           </SheetFooter>
         </div>
