@@ -4,6 +4,9 @@ import { Tenant, Outlet, User, Gateway } from './types';
 const businessTypes = ['Hotel', 'Fast Food', 'Restaurant', 'Cafe', 'Catering', 'Fine Dining', 'Bakery', 'Pizzeria'];
 const statusOptions: ('Active' | 'Configuration pending' | 'Inactive')[] = ['Active', 'Configuration pending', 'Active', 'Active', 'Inactive'];
 
+/**
+ * Generates mock tenants with NO payment gateways selected by default.
+ */
 function generateMockTenants(count: number): Tenant[] {
   const tenants: Tenant[] = [
     {

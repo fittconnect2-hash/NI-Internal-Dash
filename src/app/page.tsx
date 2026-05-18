@@ -40,10 +40,10 @@ import { useToast } from "@/hooks/use-toast"
 
 const ITEMS_PER_PAGE = 8
 const STORAGE_KEYS = {
-  TENANTS: 'network-dine-tenants-v5', // Increment to v5 to force reset to empty defaults
-  OUTLETS: 'network-dine-outlets-v5', // Increment to v5 to force reset
-  USERS: 'network-dine-users-v2',
-  GATEWAYS: 'network-dine-gateways-v5',
+  TENANTS: 'network-dine-tenants-v6', // Increment to v6 to force clean defaults
+  OUTLETS: 'network-dine-outlets-v6', // Increment to v6
+  USERS: 'network-dine-users-v3',
+  GATEWAYS: 'network-dine-gateways-v6',
 }
 
 export default function DashboardPage() {
@@ -263,7 +263,7 @@ export default function DashboardPage() {
     if (activeTab === 'gateways') return (
       <GatewayManagement 
         allGateways={gateways}
-        setAllGateways={setGateways}
+        setAllGateways={setAllGateways}
       />
     )
 

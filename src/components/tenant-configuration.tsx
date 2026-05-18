@@ -45,7 +45,6 @@ import {
 } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Checkbox } from "@/components/ui/checkbox"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 
@@ -55,13 +54,21 @@ interface MultiGatewaySelectorProps {
   onToggle: (id: string) => void;
 }
 
+/**
+ * Robust Multi-Selection Component for Payment Gateways
+ * Optimized for stability and ease of use.
+ */
 function MultiGatewaySelector({ allGateways, selectedIds, onToggle }: MultiGatewaySelectorProps) {
   const activeGateways = allGateways.filter(g => g.isEnabled)
+  const [isOpen, setIsOpen] = React.useState(false)
   
   return (
-    <Popover>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" className="w-full h-12 justify-between bg-white border-slate-200 text-sm font-bold shadow-sm hover:border-primary/30 transition-colors">
+        <Button 
+          variant="outline" 
+          className="w-full h-12 justify-between bg-white border-slate-200 text-sm font-bold shadow-sm hover:border-primary/30 transition-colors"
+        >
           <span className="truncate">
             {selectedIds.length === 0 
               ? "Choose payment systems..." 
@@ -79,33 +86,36 @@ function MultiGatewaySelector({ allGateways, selectedIds, onToggle }: MultiGatew
             {activeGateways.map(g => {
               const isSelected = selectedIds.includes(g.id);
               return (
-                <div 
-                  key={g.id} 
+                <button
+                  key={g.id}
+                  type="button"
                   className={cn(
-                    "flex items-center gap-3 p-3 hover:bg-slate-50 rounded-xl cursor-pointer transition-all group active:scale-[0.98]",
+                    "w-full flex items-center gap-4 p-3 hover:bg-slate-50 rounded-xl cursor-pointer transition-all group text-left",
                     isSelected && "bg-primary/5"
                   )}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    onToggle(g.id);
-                  }}
+                  onClick={() => onToggle(g.id)}
                 >
-                  <div className="pointer-events-none">
-                    <Checkbox 
-                      checked={isSelected}
-                      className="h-5 w-5 rounded-full border-slate-300 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                    />
+                  <div className={cn(
+                    "h-5 w-5 rounded-full border-2 flex items-center justify-center transition-all shrink-0",
+                    isSelected ? "bg-primary border-primary" : "border-slate-300 bg-white"
+                  )}>
+                    {isSelected && <Check className="h-3 w-3 text-white stroke-[4px]" />}
                   </div>
-                  <div className="flex flex-col min-w-0 pointer-events-none">
+                  <div className="flex flex-col min-w-0">
                     <span className={cn(
                       "text-[14px] font-extrabold truncate transition-colors leading-tight",
                       isSelected ? "text-slate-900" : "text-slate-600 group-hover:text-slate-900"
                     )}>{g.name}</span>
                     <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tight mt-0.5">{g.provider}</span>
                   </div>
-                </div>
+                </button>
               );
             })}
+            {activeGateways.length === 0 && (
+              <div className="p-8 text-center">
+                <p className="text-xs text-slate-400 font-bold">No active gateways found.</p>
+              </div>
+            )}
           </div>
         </ScrollArea>
       </PopoverContent>
@@ -149,12 +159,11 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
   React.useEffect(() => {
     if (tenant && isOpen) {
       setGwMode(tenant.paymentGatewayMode || 'global')
-      // STRICT DEFAULT EMPTY ARRAYS
-      setGlobalGwIds(tenant.globalGatewayIds && tenant.globalGatewayIds.length > 0 ? tenant.globalGatewayIds : [])
+      setGlobalGwIds(tenant.globalGatewayIds && Array.isArray(tenant.globalGatewayIds) ? tenant.globalGatewayIds : [])
       
       const initialMap: Record<string, string[]> = {}
       tenantOutlets.forEach(o => {
-        initialMap[o.id] = o.gatewayIds && o.gatewayIds.length > 0 ? o.gatewayIds : []
+        initialMap[o.id] = o.gatewayIds && Array.isArray(o.gatewayIds) ? o.gatewayIds : []
       })
       setOutletGwMap(initialMap)
       
@@ -175,10 +184,16 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
     setSuggestedTipRates(newRates)
   }
 
-  const handleToggleGlobalGw = (id: string) => setGlobalGwIds(prev => prev.includes(id) ? prev.filter(gid => gid !== id) : [...prev, id])
+  const handleToggleGlobalGw = (id: string) => {
+    setGlobalGwIds(prev => prev.includes(id) ? prev.filter(gid => gid !== id) : [...prev, id])
+  }
+  
   const handleToggleOutletGw = (outletId: string, gwId: string) => {
-    const current = outletGwMap[outletId] || []
-    setOutletGwMap(prev => ({ ...prev, [outletId]: current.includes(gwId) ? current.filter(id => id !== gwId) : [...current, gwId] }))
+    setOutletGwMap(prev => {
+      const current = prev[outletId] || []
+      const next = current.includes(gwId) ? current.filter(id => id !== gwId) : [...current, gwId]
+      return { ...prev, [outletId]: next }
+    })
   }
 
   const handleSave = () => {
