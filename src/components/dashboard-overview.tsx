@@ -442,7 +442,7 @@ export function DashboardOverview() {
                 )}
                 onClick={() => setTimeRange(range)}
               >
-                {range === 'Today' ? 'Right Now' : range === '7d' ? 'Last 7 Days' : 'This Month'}
+                {range === 'Today' ? 'Today' : range === '7d' ? 'Last 7 Days' : 'This Month'}
               </Button>
             ))}
           </div>
