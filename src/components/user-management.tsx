@@ -140,7 +140,6 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
   }
 
   const forceInteractivity = React.useCallback(() => {
-    // Ensuring the UI stays responsive by forcing body properties
     document.body.style.pointerEvents = 'auto';
     document.body.style.overflow = 'auto';
   }, []);
@@ -353,14 +352,14 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                     {!tenant && (
                       <div className="space-y-2.5">
                         <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tenant</Label>
-                        <Popover open={isTenantPopoverOpen} onOpenChange={setIsTenantPopoverOpen}>
+                        <Popover modal={false} open={isTenantPopoverOpen} onOpenChange={setIsTenantPopoverOpen}>
                           <PopoverTrigger asChild>
                             <Button variant="outline" className="w-full h-11 justify-between bg-white border-slate-200 text-sm font-medium px-3">
                               <span className="truncate">{tenantFilter ? getTenantName(tenantFilter) : "All Tenants"}</span>
                               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                             </Button>
                           </PopoverTrigger>
-                          <PopoverContent className="w-80 p-0" align="start">
+                          <PopoverContent className="w-80 p-0 shadow-2xl border-slate-200 z-[100]" align="start">
                             <div className="flex items-center border-b px-3">
                               <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
                               <input className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none" placeholder="Search..." value={tenantSearch} onChange={(e) => setTenantSearch(e.target.value)} />
@@ -444,8 +443,8 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-slate-400" onClick={(e) => e.stopPropagation()}><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="w-48 p-2">
-                                  <DropdownMenuItem className="font-bold py-2.5" onClick={(e) => { e.stopPropagation(); handleEditUser(user); }}><Edit2 className="h-4 w-4 mr-3" /> Edit Profile</DropdownMenuItem>
-                                  <DropdownMenuItem className="font-bold py-2.5" onClick={(e) => { e.stopPropagation(); setConfirmReset(user); }}><RotateCcw className="h-4 w-4 mr-3" /> Reset Password</DropdownMenuItem>
+                                  <DropdownMenuItem className="font-bold py-2.5" onClick={(e) => { e.stopPropagation(); handleEditUser(user); }}><Edit2 className="h-4 w-4 mr-3 text-slate-400" /> Edit Profile</DropdownMenuItem>
+                                  <DropdownMenuItem className="font-bold py-2.5" onClick={(e) => { e.stopPropagation(); setConfirmReset(user); }}><RotateCcw className="h-4 w-4 mr-3 text-slate-400" /> Reset Password</DropdownMenuItem>
                                   {user.status === 'Suspended' ? (
                                     <DropdownMenuItem className="font-bold py-2.5 text-green-600" onClick={(e) => { e.stopPropagation(); setConfirmReactivate(user); }}><PlayCircle className="h-4 w-4 mr-3" /> Reactivate</DropdownMenuItem>
                                   ) : (
@@ -496,7 +495,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                                 <Label className="text-[13px] font-bold text-slate-700">Step 1: Parent Tenant <span className="text-red-500">*</span></Label>
                                 <HelpCircle className="h-3.5 w-3.5 text-slate-300 cursor-help" />
                               </div>
-                              <Popover open={isFormTenantPopoverOpen} onOpenChange={setIsFormTenantPopoverOpen}>
+                              <Popover modal={false} open={isFormTenantPopoverOpen} onOpenChange={setIsFormTenantPopoverOpen}>
                                 <PopoverTrigger asChild>
                                   <Button variant="outline" className="w-full h-12 justify-between bg-[#1a73e8]/5 border-[#1a73e8]/20 font-black text-[#1a73e8] px-3">
                                     <span className="truncate">{formTenantId ? getTenantName(formTenantId) : "Select Parent Organization"}</span>
@@ -504,16 +503,15 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                                   </Button>
                                 </PopoverTrigger>
                                 <PopoverContent 
-                                  className="w-80 p-0 shadow-2xl border-slate-200" 
+                                  className="w-80 p-0 shadow-2xl border-slate-200 z-[100]" 
                                   align="start"
-                                  onInteractOutside={(e) => { e.preventDefault(); }}
                                 >
                                   <div className="p-2 border-b bg-slate-50/50">
                                     <div className="relative">
                                       <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                                       <input 
                                         autoFocus
-                                        className="h-10 w-full pl-9 pr-3 rounded-md bg-white border border-slate-200 text-sm outline-none focus:ring-1 ring-primary/20" 
+                                        className="h-10 w-full pl-9 pr-3 rounded-md bg-white border border-slate-200 text-sm outline-none focus:ring-1 ring-primary/20 pointer-events-auto" 
                                         placeholder="Search tenants..." 
                                         value={formTenantSearch} 
                                         onChange={(e) => setFormTenantSearch(e.target.value)} 

@@ -96,14 +96,17 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
   const [formCountry, setFormCountry] = React.useState("")
 
   // CRITICAL FIX: Explicitly restore pointer events when the drawer closes
+  const restoreUI = React.useCallback(() => {
+    document.body.style.pointerEvents = 'auto';
+    document.body.style.overflow = 'auto';
+  }, []);
+
   React.useEffect(() => {
     if (!isOpen) {
-      const timer = setTimeout(() => {
-        document.body.style.pointerEvents = 'auto';
-      }, 150);
+      const timer = setTimeout(restoreUI, 150);
       return () => clearTimeout(timer);
     }
-  }, [isOpen]);
+  }, [isOpen, restoreUI]);
 
   React.useEffect(() => {
     if (editingOutlet) {
@@ -229,14 +232,18 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
     handleCloseForm()
   }
 
+  const getTenantName = (tid: string) => {
+    return initialTenants.find(t => t.id === tid)?.tenantName || "Unknown"
+  }
+
   const selectedTenantName = React.useMemo(() => {
     const tid = tenant?.id || formTenantId
     if (!tid) return null
-    return initialTenants.find(t => t.id === tid)?.tenantName
+    return getTenantName(tid)
   }, [tenant, formTenantId])
 
   return (
-    <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Sheet open={isOpen} onOpenChange={(open) => { if (!open) { onClose(); restoreUI(); } }}>
       <SheetContent side="right" className="w-full sm:max-w-[1200px] p-0 border-l border-slate-200 bg-[#f8f9fc] flex flex-col transition-all duration-500">
         <SheetHeader className="px-8 py-6 bg-white border-b border-slate-100 flex-shrink-0">
           <div className="flex items-center justify-between">
@@ -290,9 +297,9 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                     {editingOutlet ? "UPDATE BRANCH PARAMETERS" : "ENTER NEW BRANCH DETAILS"}
                   </p>
                 </div>
-                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-slate-400 hover:bg-slate-50" onClick={handleCloseForm}>
+                <button className="p-1 text-slate-400 hover:text-slate-900" onClick={handleCloseForm}>
                   <X className="h-4 w-4" />
-                </Button>
+                </button>
               </div>
               <ScrollArea className="flex-1">
                 {isFormLoading ? (
@@ -305,7 +312,7 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                     <div className="space-y-2.5">
                       <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">PARENT TENANT</Label>
                       
-                      <Popover open={isFormTenantPopoverOpen} onOpenChange={setIsFormTenantPopoverOpen}>
+                      <Popover modal={false} open={isFormTenantPopoverOpen} onOpenChange={setIsFormTenantPopoverOpen}>
                         <PopoverTrigger asChild>
                           <Button 
                             variant="outline" 
@@ -314,17 +321,18 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                           >
                             <span className="truncate">
                               {formTenantId 
-                                ? initialTenants.find(t => t.id === formTenantId)?.tenantName 
+                                ? getTenantName(formTenantId) 
                                 : "Select Parent Tenant"}
                             </span>
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                           </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                        <PopoverContent className="w-80 p-0 z-[100] shadow-2xl border-slate-200" align="start">
                           <div className="flex items-center border-b px-3">
                             <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
                             <input
-                              className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground"
+                              autoFocus
+                              className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground pointer-events-auto"
                               placeholder="Search tenants..."
                               value={formTenantSearch}
                               onChange={(e) => setFormTenantSearch(e.target.value)}
@@ -543,14 +551,12 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
                       <TableCell className="text-right px-8">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="h-9 w-9 rounded-full border border-slate-100 text-slate-400 hover:text-[#1e293b] hover:bg-white active:scale-90 transition-all" 
+                            <button 
+                              className="h-9 w-9 flex items-center justify-center rounded-full border border-slate-100 text-slate-400 hover:text-[#1e293b] hover:bg-white active:scale-90 transition-all" 
                               onClick={(e) => e.stopPropagation()}
                             >
                               <MoreHorizontal className="h-4 w-4" />
-                            </Button>
+                            </button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-48 p-2">
                             <DropdownMenuItem className="font-bold py-2.5" onClick={(e) => { e.stopPropagation(); handleEdit(outlet); }}>
