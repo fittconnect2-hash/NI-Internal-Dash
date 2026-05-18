@@ -54,6 +54,9 @@ interface MultiGatewaySelectorProps {
   onToggle: (id: string) => void;
 }
 
+/**
+ * Stable standalone selector component to prevent re-mounting issues during interaction
+ */
 function MultiGatewaySelector({ allGateways, selectedIds, onToggle }: MultiGatewaySelectorProps) {
   const activeGateways = allGateways.filter(g => g.isEnabled)
   
@@ -89,13 +92,13 @@ function MultiGatewaySelector({ allGateways, selectedIds, onToggle }: MultiGatew
                     onToggle(g.id);
                   }}
                 >
-                  <Checkbox 
-                    checked={isSelected}
-                    onCheckedChange={() => onToggle(g.id)}
-                    className="h-5 w-5 rounded-full border-slate-300 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                  <div className="flex flex-col min-w-0">
+                  <div className="pointer-events-none">
+                    <Checkbox 
+                      checked={isSelected}
+                      className="h-5 w-5 rounded-full border-slate-300 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                    />
+                  </div>
+                  <div className="flex flex-col min-w-0 pointer-events-none">
                     <span className={cn(
                       "text-[14px] font-extrabold truncate transition-colors leading-tight",
                       isSelected ? "text-slate-900" : "text-slate-600 group-hover:text-slate-900"
@@ -168,6 +171,7 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
   React.useEffect(() => {
     if (tenant && isOpen) {
       setGwMode(tenant.paymentGatewayMode || 'global')
+      // Ensure defaults are empty arrays if not previously defined
       setGlobalGwIds(tenant.globalGatewayIds || [])
       
       const initialMap: Record<string, string[]> = {}
@@ -446,6 +450,12 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
                                 </div>
                               </div>
                             ))}
+                            {tenantOutlets.length === 0 && (
+                              <div className="py-12 text-center bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+                                <Store className="h-8 w-8 text-slate-300 mx-auto mb-3" />
+                                <p className="text-sm font-bold text-slate-400">No outlets registered for this brand yet.</p>
+                              </div>
+                            )}
                          </div>
                       </div>
                     )}

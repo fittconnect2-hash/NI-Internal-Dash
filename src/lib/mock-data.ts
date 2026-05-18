@@ -19,9 +19,9 @@ function generateMockTenants(count: number): Tenant[] {
       contactEmail: 'admin@grandhyatt.com',
       contactPhone: '+971 50 123 4567',
       lastLoginDate: '2024-05-15',
-      isPaymentGatewayConfigured: true,
+      isPaymentGatewayConfigured: false,
       paymentGatewayMode: 'global',
-      globalGatewayIds: ['g-3'],
+      globalGatewayIds: [], // Start empty by default
       numberOfOutlets: 2,
       numberOfUsers: 12,
       merchantId: 'M-78291',
@@ -40,6 +40,7 @@ function generateMockTenants(count: number): Tenant[] {
       contactEmail: 'setup@quickbite.io',
       contactPhone: '+1 555 987 6543',
       isPaymentGatewayConfigured: false,
+      globalGatewayIds: [], // Start empty by default
       numberOfOutlets: 1,
       numberOfUsers: 3,
     }
@@ -76,7 +77,8 @@ function generateMockTenants(count: number): Tenant[] {
       contactEmail: `contact@${name.toLowerCase().replace(/\s+/g, '')}.com`,
       contactPhone: `+971 50 ${1000000 + i}`,
       lastLoginDate: '2024-05-20',
-      isPaymentGatewayConfigured: status === 'Active',
+      isPaymentGatewayConfigured: false, // Ensure unconfigured state
+      globalGatewayIds: [], // Start empty by default
       numberOfOutlets: (i % 5) + 1,
       numberOfUsers: (i % 15) + 3,
       merchantId: status === 'Active' ? `M-${10000 + i}` : undefined,
@@ -108,7 +110,7 @@ function generateMockOutlets(tenants: Tenant[]): Outlet[] {
         zipCode: tenant.zipCode,
         status: 'Active',
         userCount: Math.floor(Math.random() * 10) + 2,
-        gatewayIds: tenant.globalGatewayIds ? [...tenant.globalGatewayIds] : []
+        gatewayIds: [] // Start empty by default
       });
     }
   });
