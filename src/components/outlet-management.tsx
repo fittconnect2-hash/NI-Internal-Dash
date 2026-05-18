@@ -36,6 +36,13 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu"
 import { Outlet, Tenant } from "@/lib/types"
 import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
