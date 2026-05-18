@@ -455,7 +455,7 @@ export function DashboardOverview() {
             <RefreshCw className={cn("h-4 w-4", isRefreshing && "animate-spin")} /> Refresh
           </Button>
           <Button size="sm" className="h-10 bg-[#e91e63] hover:bg-[#d81b60] font-bold gap-2 shadow-lg shadow-[#e91e63]/20">
-            <Share className="h-4 w-4" /> Save Report
+            <Share className="h-4 w-4" /> Export
           </Button>
         </div>
       </div>
