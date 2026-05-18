@@ -230,7 +230,7 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
                 <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                   <span className="opacity-80"><Building2 className="h-3 w-3 inline mr-1" /> TENANTS</span>
                   <ChevronRight className="h-2.5 w-2.5 opacity-30" />
-                  <span className="text-[#1a73e8] font-black">{tenant?.tenantName.toUpperCase() || "PROPERTY NETWORK"}</span>
+                  <span className="text-primary font-black">{tenant?.tenantName.toUpperCase() || "PROPERTY NETWORK"}</span>
                 </div>
                 <SheetTitle className="text-2xl font-black text-[#1e293b] tracking-tight">
                   {isAddingNew ? (editingOutlet ? `Edit ${editingOutlet.name}` : "Outlet Registration") : `Outlet Management ${tenant?.tenantName || ""}`}
@@ -238,7 +238,7 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
               </div>
             </div>
             {!isAddingNew && (
-              <Button onClick={() => { setIsFormLoading(true); setIsAddingNew(true); setEditingOutlet(null); setTimeout(() => setIsFormLoading(false), 400); }} className="h-10 px-6 font-black bg-[#1a73e8]">
+              <Button onClick={() => { setIsFormLoading(true); setIsAddingNew(true); setEditingOutlet(null); setTimeout(() => setIsFormLoading(false), 400); }} className="h-10 px-6 font-black bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20">
                 <Plus className="h-4 w-4 mr-2" /> Add Outlet
               </Button>
             )}
@@ -257,7 +257,7 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
               </div>
 
               <ScrollArea className="flex-1">
-                {isFormLoading ? <div className="py-40 flex flex-col items-center justify-center animate-pulse"><Loader2 className="h-10 w-10 animate-spin text-[#1a73e8]" /></div> : (
+                {isFormLoading ? <div className="py-40 flex flex-col items-center justify-center animate-pulse"><Loader2 className="h-10 w-10 animate-spin text-primary" /></div> : (
                   <div className="p-8 space-y-8">
                     <div className="space-y-2">
                       <Label className="text-[12px] font-bold text-slate-400 uppercase tracking-widest">ASSIGNED BRAND</Label>
@@ -321,7 +321,7 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
 
               <div className="p-8 border-t bg-slate-50/50 flex gap-4">
                 <Button variant="outline" className="flex-1 h-12 font-bold" onClick={() => { setIsAddingNew(false); setEditingOutlet(null); }}>Cancel</Button>
-                <Button className="flex-1 h-12 bg-[#1a73e8] font-black" onClick={handleSaveOutlet}>{editingOutlet ? "Update Outlet" : "Create Outlet"}</Button>
+                <Button className="flex-1 h-12 bg-primary hover:bg-primary/90 font-black shadow-lg shadow-primary/20" onClick={handleSaveOutlet}>{editingOutlet ? "Update Outlet" : "Create Outlet"}</Button>
               </div>
             </div>
           )}
@@ -354,7 +354,7 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
                     <TableRow key={o.id} className="cursor-pointer group hover:bg-slate-50/50 border-b border-slate-50" onClick={() => { setEditingOutlet(o); setIsAddingNew(true); }}>
                       <TableCell className="py-5 px-8">
                         <div>
-                          <div className="font-extrabold text-[#1e293b] text-[15px] group-hover:text-[#1a73e8] transition-colors">{o.name}</div>
+                          <div className="font-extrabold text-[#1e293b] text-[15px] group-hover:text-primary transition-colors">{o.name}</div>
                           <div className="text-[11px] text-slate-400 font-bold uppercase tracking-tight mt-0.5">slug: {o.slug}</div>
                         </div>
                       </TableCell>

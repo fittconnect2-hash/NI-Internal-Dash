@@ -118,7 +118,7 @@ export function TenantForm({ tenant, isOpen, onClose, onSubmit }: TenantFormProp
             <div className="flex items-center gap-4">
               <button 
                 onClick={onClose}
-                className="p-1 hover:bg-slate-50 rounded-md transition-colors"
+                className="p-1 hover:bg-slate-100 rounded-md transition-colors"
               >
                 <ArrowLeft className="h-5 w-5 text-slate-400 hover:text-slate-900" />
               </button>
@@ -138,7 +138,7 @@ export function TenantForm({ tenant, isOpen, onClose, onSubmit }: TenantFormProp
               <div className="bg-white rounded-[24px] border border-slate-100 p-10 shadow-sm ring-1 ring-slate-100/50">
                 {isLoading ? (
                   <div className="flex flex-col items-center justify-center py-40 space-y-4">
-                    <Loader2 className="h-10 w-10 animate-spin text-[#1a73e8]" />
+                    <Loader2 className="h-10 w-10 animate-spin text-primary" />
                     <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Preparing Form...</p>
                   </div>
                 ) : (
@@ -153,7 +153,7 @@ export function TenantForm({ tenant, isOpen, onClose, onSubmit }: TenantFormProp
                             <FormItem>
                               <FormLabel className="text-[13px] font-bold text-[#1e293b]">Business Name <span className="text-red-500 font-black">*</span></FormLabel>
                               <FormControl>
-                                <Input placeholder="Enter the business name" {...field} className="h-12 bg-white border-slate-200 focus-visible:ring-1 ring-[#1a73e8]/20" />
+                                <Input placeholder="Enter the business name" {...field} className="h-12 bg-white border-slate-200 focus-visible:ring-1 ring-primary/20" />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -359,7 +359,7 @@ export function TenantForm({ tenant, isOpen, onClose, onSubmit }: TenantFormProp
             <Button 
               type="submit" 
               onClick={form.handleSubmit(onSubmit)}
-              className="px-10 h-12 font-black bg-[#1a73e8] hover:bg-[#1557b0] text-white border-none shadow-lg shadow-[#1a73e8]/20 active:scale-95 transition-all"
+              className="px-10 h-12 font-black bg-primary hover:bg-primary/90 text-white border-none shadow-lg shadow-primary/20 active:scale-95 transition-all"
             >
               {tenant ? "Save Changes" : "Add Tenant"}
             </Button>

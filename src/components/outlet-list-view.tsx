@@ -254,7 +254,7 @@ export function OutletListView({ allOutlets, setAllOutlets, allTenants, onViewUs
             <h1 className="text-3xl font-black text-slate-900 tracking-tight">Outlet Management</h1>
             <p className="text-sm text-slate-500 mt-1">Configure and monitor your global property network.</p>
           </div>
-          <Button size="sm" className="h-10 px-6 font-black bg-[#1a73e8] shadow-lg" onClick={handleAddOutlet}>
+          <Button size="sm" className="h-10 px-6 font-black bg-primary shadow-lg shadow-primary/20" onClick={handleAddOutlet}>
             <Plus className="h-4 w-4 mr-2" /> Add Outlet
           </Button>
         </div>
@@ -290,7 +290,7 @@ export function OutletListView({ allOutlets, setAllOutlets, allTenants, onViewUs
                 </SelectContent>
               </Select>
             </div>
-            <Button variant="ghost" className="w-full h-11 text-slate-400 hover:text-[#1a73e8] gap-2 font-bold" onClick={resetFilters}><FilterX className="h-4 w-4" /> Reset Filters</Button>
+            <Button variant="ghost" className="w-full h-11 text-slate-400 hover:text-primary gap-2 font-bold" onClick={resetFilters}><FilterX className="h-4 w-4" /> Reset Filters</Button>
           </div>
         </div>
 
@@ -299,7 +299,7 @@ export function OutletListView({ allOutlets, setAllOutlets, allTenants, onViewUs
             <div className="w-[450px] flex-shrink-0 bg-white rounded-2xl border border-slate-200 shadow-xl flex flex-col animate-in slide-in-from-left duration-500 overflow-hidden">
               <div className="p-6 border-b border-slate-50 flex items-center justify-between"><div><h3 className="font-extrabold text-lg text-[#1e293b]">{editingOutlet ? `Edit ${editingOutlet.name}` : "Add New Outlet"}</h3><p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Property profile</p></div><Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={handleCloseForm}><X className="h-4 w-4" /></Button></div>
               <ScrollArea className="flex-1">
-                {isFormLoading ? <div className="flex flex-col items-center justify-center h-full py-24"><Loader2 className="h-10 w-10 animate-spin text-[#1a73e8]" /></div> : (
+                {isFormLoading ? <div className="flex flex-col items-center justify-center h-full py-24"><Loader2 className="h-10 w-10 animate-spin text-primary" /></div> : (
                   <div className="px-8 py-6 space-y-6">
                     <div className="space-y-2.5"><Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">PARENT TENANT</Label>
                       <Popover modal={true} open={isFormTenantPopoverOpen} onOpenChange={setIsFormTenantPopoverOpen}>
@@ -334,7 +334,7 @@ export function OutletListView({ allOutlets, setAllOutlets, allTenants, onViewUs
                   </div>
                 )}
               </ScrollArea>
-              <div className="p-6 border-t border-slate-100 flex gap-4 bg-slate-50/30"><Button variant="outline" className="flex-1 h-12" onClick={handleCloseForm}>Cancel</Button><Button className="flex-1 h-12 bg-[#1a73e8] font-bold" onClick={handleSaveOutlet}>{editingOutlet ? "Save Changes" : "Create Outlet"}</Button></div>
+              <div className="p-6 border-t border-slate-100 flex gap-4 bg-slate-50/30"><Button variant="outline" className="flex-1 h-12" onClick={handleCloseForm}>Cancel</Button><Button className="flex-1 h-12 bg-primary font-bold shadow-lg shadow-primary/20" onClick={handleSaveOutlet}>{editingOutlet ? "Save Changes" : "Create Outlet"}</Button></div>
             </div>
           )}
 
@@ -355,7 +355,7 @@ export function OutletListView({ allOutlets, setAllOutlets, allTenants, onViewUs
                     <TableRow key={outlet.id} className="group hover:bg-slate-50/50 transition-all border-b border-slate-50 cursor-pointer" onClick={() => handleEdit(outlet)}>
                       <TableCell className="py-5 px-8">
                         <div>
-                          <div className="font-extrabold text-[15px] text-[#1e293b] group-hover:text-[#1a73e8] transition-colors">{outlet.name}</div>
+                          <div className="font-extrabold text-[15px] text-[#1e293b] group-hover:text-primary transition-colors">{outlet.name}</div>
                           <div className="text-[11px] text-slate-400 font-medium">@{outlet.slug}</div>
                         </div>
                       </TableCell>

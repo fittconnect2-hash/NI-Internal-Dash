@@ -88,7 +88,7 @@ export function TenantCard({
           <Button 
             variant="ghost" 
             size="icon" 
-            className="h-8 w-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-[#1a73e8]"
+            className="h-8 w-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-primary"
             onClick={(e) => { 
               e.stopPropagation(); 
               window.open(`https://dine-net.app/portal/${tenant.id}`, '_blank');
@@ -116,12 +116,12 @@ export function TenantCard({
       <Tooltip>
         <TooltipTrigger asChild>
           <div 
-            className="flex-1 p-3 bg-slate-50/50 rounded-xl border border-slate-100 flex flex-col items-center justify-center transition-all duration-300 hover:bg-white hover:border-[#1a73e8]/30 hover:shadow-md cursor-pointer group/count"
+            className="flex-1 p-3 bg-slate-50/50 rounded-xl border border-slate-100 flex flex-col items-center justify-center transition-all duration-300 hover:bg-white hover:border-primary/30 hover:shadow-md cursor-pointer group/count"
             onClick={onClick}
           >
             <div className="flex items-center gap-2 mb-2">
-              <Icon className="h-3 w-3 text-slate-400 group-hover/count:text-[#1a73e8] transition-colors" />
-              <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest group-hover/count:text-[#1a73e8] transition-colors">
+              <Icon className="h-3 w-3 text-slate-400 group-hover/count:text-primary transition-colors" />
+              <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest group-hover/count:text-primary transition-colors">
                 {label}
               </span>
             </div>
@@ -140,7 +140,7 @@ export function TenantCard({
   if (viewMode === 'list') {
     return (
       <Card 
-        className="group hover:border-[#1a73e8]/30 hover:shadow-sm transition-all duration-300 border-border bg-white cursor-pointer"
+        className="group hover:border-primary/30 hover:shadow-sm transition-all duration-300 border-border bg-white cursor-pointer"
         onClick={() => onView(tenant)}
       >
         <CardContent className="flex items-center p-4 gap-4">
@@ -149,7 +149,7 @@ export function TenantCard({
             <StatusDot />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-[15px] text-slate-900 truncate group-hover:text-[#1a73e8] transition-colors">{tenant.tenantName}</h3>
+            <h3 className="font-bold text-[15px] text-slate-900 truncate group-hover:text-primary transition-colors">{tenant.tenantName}</h3>
             <div className="flex items-center gap-4 mt-1">
               <span className="flex items-center text-xs text-slate-500 gap-1.5 truncate max-w-[200px]">
                 <Mail className="h-3 w-3 opacity-60" /> {tenant.contactEmail}
@@ -196,12 +196,12 @@ export function TenantCard({
 
   return (
     <Card 
-      className="group flex flex-col h-full border-border bg-white hover:shadow-xl hover:border-[#1a73e8]/20 transition-all duration-500 cursor-pointer overflow-hidden"
+      className="group flex flex-col h-full border-border bg-white hover:shadow-xl hover:border-primary/20 transition-all duration-500 cursor-pointer overflow-hidden"
       onClick={() => onView(tenant)}
     >
       <CardContent className="p-6 flex flex-col h-full">
         <div className="flex justify-between items-start mb-6">
-          <div className="h-16 w-16 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 font-bold text-xl relative transition-all duration-500 group-hover:bg-[#1a73e8]/5 group-hover:border-[#1a73e8]/10">
+          <div className="h-16 w-16 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 font-bold text-xl relative transition-all duration-500 group-hover:bg-primary/5 group-hover:border-primary/10">
             {initials}
             <StatusDot />
           </div>
@@ -219,7 +219,7 @@ export function TenantCard({
           </div>
         </div>
         
-        <h3 className="font-extrabold text-lg text-slate-900 mb-1 group-hover:text-[#1a73e8] transition-colors leading-tight">{tenant.tenantName}</h3>
+        <h3 className="font-extrabold text-lg text-slate-900 mb-1 group-hover:text-primary transition-colors leading-tight">{tenant.tenantName}</h3>
         <p className="text-xs text-slate-500 font-medium flex items-center gap-1.5 mb-6">
           <MapPin className="h-3 w-3 opacity-60" /> Hospitality Partner
         </p>

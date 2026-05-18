@@ -138,7 +138,7 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                   <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                     <span className="flex items-center gap-1.5 opacity-80"><Building2 className="h-3 w-3" /> TENANTS</span>
                     <ChevronRight className="h-2.5 w-2.5 opacity-30" />
-                    <span className="text-[#1a73e8]">{tenant.tenantName.toUpperCase()}</span>
+                    <span className="text-primary">{tenant.tenantName.toUpperCase()}</span>
                   </div>
                   <div className="w-1 h-1 rounded-full bg-slate-200" />
                   <div className="flex items-center gap-1.5 text-xs text-slate-400 font-bold uppercase tracking-tighter">
@@ -155,13 +155,13 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
               <TabsList className="bg-transparent h-14 p-0 gap-10 justify-start">
                 <TabsTrigger 
                   value="overview" 
-                  className="rounded-none border-b-[3px] border-transparent data-[state=active]:border-[#1a73e8] data-[state=active]:bg-transparent data-[state=active]:shadow-none px-0 h-14 text-xs font-bold uppercase tracking-widest text-slate-400 data-[state=active]:text-[#1a73e8] transition-all"
+                  className="rounded-none border-b-[3px] border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-0 h-14 text-xs font-bold uppercase tracking-widest text-slate-400 data-[state=active]:text-primary transition-all"
                 >
                   Tenant Overview
                 </TabsTrigger>
                 <TabsTrigger 
                   value="admins" 
-                  className="rounded-none border-b-[3px] border-transparent data-[state=active]:border-[#1a73e8] data-[state=active]:bg-transparent data-[state=active]:shadow-none px-0 h-14 text-xs font-bold uppercase tracking-widest text-slate-400 data-[state=active]:text-[#1a73e8] transition-all"
+                  className="rounded-none border-b-[3px] border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-0 h-14 text-xs font-bold uppercase tracking-widest text-slate-400 data-[state=active]:text-primary transition-all"
                 >
                   Tenant Admins
                 </TabsTrigger>
@@ -173,8 +173,8 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                 <div className="max-w-5xl mx-auto space-y-8">
                   <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
                     <div className="flex items-center gap-3 mb-10">
-                      <div className="h-8 w-8 rounded-lg bg-blue-50/50 border border-blue-100 flex items-center justify-center">
-                        <Building2 className="h-4 w-4 text-[#1a73e8]" />
+                      <div className="h-8 w-8 rounded-lg bg-primary/10 border border-primary/10 flex items-center justify-center">
+                        <Building2 className="h-4 w-4 text-primary" />
                       </div>
                       <h3 className="font-extrabold text-[#1e293b] tracking-tight text-lg">Profile Details</h3>
                     </div>
@@ -215,7 +215,7 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Email</p>
                         <div className="flex items-center gap-2">
                           <MailIcon className="h-3.5 w-3.5 text-slate-300" />
-                          <p className="text-[15px] font-extrabold text-[#1a73e8] leading-none truncate">
+                          <p className="text-[15px] font-extrabold text-primary leading-none truncate">
                             {tenant.contactEmail}
                           </p>
                         </div>
@@ -248,8 +248,8 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                   <div className="w-[450px] bg-white rounded-2xl border border-slate-200 shadow-xl flex flex-col min-h-0 overflow-hidden ring-1 ring-slate-100 flex-shrink-0">
                     <div className="p-6 border-b border-slate-50 flex items-center gap-3 justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-[#1a73e8]/10 flex items-center justify-center">
-                          <UserPlus className="h-4 w-4 text-[#1a73e8]" />
+                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                          <UserPlus className="h-4 w-4 text-primary" />
                         </div>
                         <div>
                           <h3 className="text-lg font-black text-[#1e293b] leading-tight">
@@ -274,11 +274,11 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                         <div className="grid grid-cols-2 gap-8">
                           <div className="space-y-2.5">
                             <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">First Name <span className="text-red-500 font-black">*</span></Label>
-                            <Input key={editingAdmin?.id || 'new'} defaultValue={editingAdmin?.firstName || ""} placeholder="First Name" className="h-12 border-slate-200 bg-slate-50/30 focus-visible:bg-white focus-visible:ring-1 ring-[#1a73e8]/20 transition-all font-medium" />
+                            <Input key={editingAdmin?.id || 'new'} defaultValue={editingAdmin?.firstName || ""} placeholder="First Name" className="h-12 border-slate-200 bg-slate-50/30 focus-visible:bg-white focus-visible:ring-1 ring-primary/20 transition-all font-medium" />
                           </div>
                           <div className="space-y-2.5">
                             <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Last Name <span className="text-red-500 font-black">*</span></Label>
-                            <Input key={editingAdmin?.id || 'new'} defaultValue={editingAdmin?.lastName || ""} placeholder="Last Name" className="h-12 border-slate-200 bg-slate-50/30 focus-visible:bg-white focus-visible:ring-1 ring-[#1a73e8]/20 transition-all font-medium" />
+                            <Input key={editingAdmin?.id || 'new'} defaultValue={editingAdmin?.lastName || ""} placeholder="Last Name" className="h-12 border-slate-200 bg-slate-50/30 focus-visible:bg-white focus-visible:ring-1 ring-primary/20 transition-all font-medium" />
                           </div>
                         </div>
                         <div className="grid grid-cols-2 gap-8">
@@ -325,7 +325,7 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                       <Button variant="outline" className="h-12 px-8 font-extrabold text-slate-600 border-slate-200 hover:bg-white active:scale-95 transition-all" onClick={handleResetForm}>
                         {editingAdmin ? "Cancel" : "Reset"}
                       </Button>
-                      <Button className="h-12 px-8 font-extrabold bg-[#1a73e8] hover:bg-[#1557b0] text-white border-none shadow-lg shadow-[#1a73e8]/20 active:scale-95 transition-all">
+                      <Button className="h-12 px-8 font-extrabold bg-primary hover:bg-primary/90 text-white border-none shadow-lg shadow-primary/20 active:scale-95 transition-all">
                         {editingAdmin ? "Save Changes" : "Enroll Admin"}
                       </Button>
                     </div>
@@ -337,7 +337,7 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                         <h3 className="text-lg font-black text-slate-900 tracking-tight leading-tight">Tenant Admins</h3>
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Registered Administrators</p>
                       </div>
-                      <Badge className="bg-[#1a73e8]/10 text-[#1a73e8] border-none px-3 py-1 text-[10px] font-bold shadow-none">
+                      <Badge className="bg-primary/10 text-primary border-none px-3 py-1 text-[10px] font-bold shadow-none">
                         {mockAdmins.length} Total
                       </Badge>
                     </div>
@@ -349,18 +349,18 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                             onClick={() => handleEditAdmin(admin)}
                             className={cn(
                               "bg-white rounded-2xl border overflow-hidden shadow-sm hover:shadow-md transition-all group/card cursor-pointer",
-                              editingAdmin?.id === admin.id ? "border-[#1a73e8] ring-1 ring-[#1a73e8]/10" : "border-slate-100 hover:border-[#1a73e8]/20"
+                              editingAdmin?.id === admin.id ? "border-primary ring-1 ring-primary/10" : "border-slate-100 hover:border-primary/20"
                             )}
                           >
                             <div className="p-6 flex items-start justify-between">
                               <div className="flex items-center gap-4">
                                 <Avatar className="h-14 w-14 border-2 border-slate-50 shadow-sm">
-                                  <AvatarFallback className="bg-[#1a73e8]/5 text-[#1a73e8] font-black text-sm">
+                                  <AvatarFallback className="bg-primary/5 text-primary font-black text-sm">
                                     {admin.name.split(' ').map(n => n[0]).join('')}
                                   </AvatarFallback>
                                 </Avatar>
                                 <div className="flex flex-col">
-                                  <span className="font-black text-slate-900 text-[16px] group-hover/card:text-[#1a73e8] transition-colors">{admin.name}</span>
+                                  <span className="font-black text-slate-900 text-[16px] group-hover/card:text-primary transition-colors">{admin.name}</span>
                                   <span className="text-[11px] text-slate-400 font-bold tracking-tight uppercase">{admin.username}</span>
                                 </div>
                               </div>
@@ -384,11 +384,11 @@ export function TenantDetail({ tenant, isOpen, onClose }: TenantDetailProps) {
                             </div>
                             <div className="px-6 py-2 space-y-4">
                               <div className="flex items-center gap-3 text-slate-500">
-                                <Mail className="h-4 w-4 text-slate-300 group-hover/card:text-[#1a73e8] transition-colors" />
+                                <Mail className="h-4 w-4 text-slate-300 group-hover/card:text-primary transition-colors" />
                                 <span className="text-[14px] font-bold tracking-tight">{admin.email}</span>
                               </div>
                               <div className="flex items-center gap-3 text-slate-500">
-                                <Phone className="h-4 w-4 text-slate-300 group-hover/card:text-[#1a73e8] transition-colors" />
+                                <Phone className="h-4 w-4 text-slate-300 group-hover/card:text-primary transition-colors" />
                                 <span className="text-[14px] font-bold tracking-tight">{admin.phone}</span>
                               </div>
                             </div>

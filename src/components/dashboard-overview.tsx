@@ -53,7 +53,7 @@ const revenueTrend = [
 ];
 
 const revenueBySource = [
-  { name: 'Dine-in', value: 65, color: '#1a73e8' },
+  { name: 'Dine-in', value: 65, color: 'hsl(var(--primary))' },
   { name: 'Takeaway', value: 25, color: '#e91e63' },
   { name: 'Delivery', value: 10, color: '#f59e0b' },
 ];
@@ -69,7 +69,7 @@ const orderVolumeData = [
 ];
 
 const networkDistData = [
-  { region: 'Dubai', outlets: 84, color: '#1a73e8' },
+  { region: 'Dubai', outlets: 84, color: 'hsl(var(--primary))' },
   { region: 'Abu Dhabi', outlets: 52, color: '#3b82f6' },
   { region: 'New York', outlets: 41, color: '#e91e63' },
   { region: 'London', outlets: 38, color: '#f43f5e' },
@@ -92,9 +92,9 @@ export function DashboardOverview() {
   // Mock stats that "change" based on range
   const getStats = (range: TimeRange) => {
     const baseStats = [
-      { id: 'revenue', label: "Total revenue", value: "AED 84.2k", change: "+12%", trend: "up", icon: DollarSign, color: "text-[#1a73e8]" },
+      { id: 'revenue', label: "Total revenue", value: "AED 84.2k", change: "+12%", trend: "up", icon: DollarSign, color: "text-primary" },
       { id: 'orders', label: "Orders today", value: "1,382", change: "+7%", trend: "up", icon: Receipt, color: "text-[#22c55e]" },
-      { id: 'restaurants', label: "Active network", value: "247", change: "-3", trend: "down", icon: Store, color: "text-[#1a73e8]" },
+      { id: 'restaurants', label: "Active network", value: "247", change: "-3", trend: "down", icon: Store, color: "text-primary" },
       { id: 'serving', label: "Avg serving", value: "28 min", change: "-3 min", trend: "up", icon: Clock, color: "text-amber-600" },
     ]
 
@@ -122,7 +122,7 @@ export function DashboardOverview() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="flex items-center gap-2">
-                    <div className="h-3 w-3 rounded bg-[#1a73e8]" />
+                    <div className="h-3 w-3 rounded bg-primary" />
                     <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Revenue (AED)</span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -136,15 +136,15 @@ export function DashboardOverview() {
                   <AreaChart data={revenueTrend} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                     <defs>
                       <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#1a73e8" stopOpacity={0.1}/>
-                        <stop offset="95%" stopColor="#1a73e8" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.1}/>
+                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                     <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 700 }} dy={10} />
                     <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 700 }} tickFormatter={(v) => `AED ${v/1000}k`} />
                     <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', padding: '12px' }} />
-                    <Area type="monotone" dataKey="revenue" stroke="#1a73e8" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" />
+                    <Area type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" />
                     <Line type="monotone" dataKey="orders" stroke="#e91e63" strokeWidth={2} dot={{ fill: '#e91e63', r: 4 }} />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -189,7 +189,7 @@ export function DashboardOverview() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="font-black text-[#1a73e8] leading-none mb-1">{res.revenue}</div>
+                        <div className="font-black text-primary leading-none mb-1">{res.revenue}</div>
                         <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Growth: +14%</div>
                       </div>
                     </div>
@@ -466,7 +466,7 @@ export function DashboardOverview() {
             className={cn(
               "border-slate-200 shadow-sm overflow-hidden group transition-all duration-300 cursor-pointer active:scale-[0.98]",
               activeTab === stat.id 
-                ? "border-[#1a73e8] bg-white ring-2 ring-[#1a73e8]/10 shadow-md scale-[1.02]" 
+                ? "border-primary bg-white ring-2 ring-primary/10 shadow-md scale-[1.02]" 
                 : "bg-white hover:border-slate-300 hover:shadow-md"
             )}
             onClick={() => setActiveTab(stat.id as DashboardTab)}
@@ -475,7 +475,7 @@ export function DashboardOverview() {
               <div className="flex items-center justify-between mb-4">
                 <div className={cn(
                   "h-10 w-10 rounded-xl flex items-center justify-center transition-colors",
-                  activeTab === stat.id ? "bg-[#1a73e8] text-white" : "bg-slate-50 " + stat.color
+                  activeTab === stat.id ? "bg-primary text-white" : "bg-slate-50 " + stat.color
                 )}>
                   <stat.icon className="h-5 w-5" />
                 </div>
@@ -489,12 +489,12 @@ export function DashboardOverview() {
               </div>
               <p className={cn(
                 "text-[10px] font-bold uppercase tracking-widest mb-1 transition-colors",
-                activeTab === stat.id ? "text-[#1a73e8]" : "text-slate-400"
+                activeTab === stat.id ? "text-primary" : "text-slate-400"
               )}>{stat.label}</p>
               <h3 className="text-2xl font-black text-slate-900 tracking-tight">{stat.value}</h3>
               
               {activeTab === stat.id && (
-                <div className="mt-4 flex items-center text-[9px] font-black text-[#1a73e8] uppercase tracking-widest animate-in fade-in slide-in-from-left-2">
+                <div className="mt-4 flex items-center text-[9px] font-black text-primary uppercase tracking-widest animate-in fade-in slide-in-from-left-2">
                   Viewing Analysis <ChevronRight className="ml-1 h-3 w-3" />
                 </div>
               )}

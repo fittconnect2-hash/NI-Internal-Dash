@@ -312,12 +312,12 @@ export function UserManagement({
                   <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                     <span className="opacity-80"><Building2 className="h-3 w-3 inline mr-1" /> TENANTS</span>
                     <ChevronRight className="h-2.5 w-2.5 opacity-30" />
-                    <span className="text-[#1a73e8] font-black">{tenant?.tenantName.toUpperCase() || "STAFF LIST"}</span>
+                    <span className="text-primary font-black">{tenant?.tenantName.toUpperCase() || "STAFF LIST"}</span>
                   </div>
                   <SheetTitle className="text-2xl font-black text-[#1e293b] tracking-tight">{isAddingNew ? (editingUser ? `Edit ${editingUser.fullName}` : "New Staff Member") : "User Management"}</SheetTitle>
                 </div>
               </div>
-              {!isAddingNew && <Button onClick={() => { setIsFormLoading(true); setIsAddingNew(true); resetForm(); setTimeout(() => setIsFormLoading(false), 400); }} className="h-10 px-6 font-black bg-[#1a73e8]"><Plus className="h-4 w-4 mr-2" /> New User</Button>}
+              {!isAddingNew && <Button onClick={() => { setIsFormLoading(true); setIsAddingNew(true); resetForm(); setTimeout(() => setIsFormLoading(false), 400); }} className="h-10 px-6 font-black bg-primary hover:bg-primary/90"><Plus className="h-4 w-4 mr-2" /> New User</Button>}
             </div>
           </SheetHeader>
 
@@ -384,7 +384,7 @@ export function UserManagement({
                             <TableCell className="text-[13px] font-bold text-slate-700">{u.phone}</TableCell>
                             <TableCell>
                               <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-900">
-                                <Store className="h-3 w-3 text-[#1a73e8]" />
+                                <Store className="h-3 w-3 text-primary" />
                                 {getOutletName(u.outletId)}
                               </div>
                             </TableCell>
@@ -525,7 +525,7 @@ export function UserManagement({
                 <div className="p-8 border-t border-slate-100 flex justify-end gap-4 bg-slate-50/30">
                   <Button variant="outline" className="h-12 px-8 font-black" onClick={() => { setIsAddingNew(false); setEditingUser(null); }}>Cancel</Button>
                   <Button 
-                    className="h-12 px-10 font-black bg-[#1a73e8] hover:bg-[#1557b0] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#1a73e8]/20" 
+                    className="h-12 px-10 font-black bg-primary hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/20" 
                     onClick={handleSaveUser}
                     disabled={!isFormValid}
                   >

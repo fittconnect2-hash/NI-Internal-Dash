@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -247,7 +246,7 @@ export default function DashboardPage() {
     if (activeTab === 'tenants') {
       return (
         <div className="p-6 md:p-8 flex flex-col h-full overflow-hidden bg-[#f8f9fc]">
-          <div className="max-w-7xl mx-auto w-full flex-1 flex flex-col min-h-0">
+          <div className="max-w-7xl auto w-full flex-1 flex flex-col min-h-0">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
               <div>
                 <h1 className="text-3xl font-black text-slate-900 tracking-tight">Tenant Management</h1>
@@ -272,7 +271,7 @@ export default function DashboardPage() {
                     <Grid2X2 className="h-4 w-4" />
                   </Button>
                 </div>
-                <Button size="sm" className="h-10 px-6 font-black bg-[#1a73e8] hover:bg-[#1557b0] shadow-lg shadow-[#1a73e8]/20" onClick={() => setIsFormOpen(true)}>
+                <Button size="sm" className="h-10 px-6 font-black bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20" onClick={() => setIsFormOpen(true)}>
                   <Plus className="h-4 w-4 mr-2" /> New Tenant
                 </Button>
               </div>
@@ -442,7 +441,7 @@ export default function DashboardPage() {
       />
       <UserManagement
         tenant={selectedTenant}
-        editingUser={editingUser}
+        propEditingUser={editingUser}
         allUsers={users}
         setAllUsers={setUsers}
         allTenants={tenants}

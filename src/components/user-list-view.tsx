@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -198,7 +197,7 @@ export function UserListView({ allUsers, setAllUsers, allTenants, allOutlets, on
             <h1 className="text-3xl font-black text-slate-900 tracking-tight">User Management</h1>
             <p className="text-sm text-slate-500 mt-1">Manage platform administrators, brand managers, and outlet staff.</p>
           </div>
-          <Button size="sm" className="h-10 px-6 font-black bg-[#1a73e8] hover:bg-[#1557b0] shadow-lg shadow-[#1a73e8]/20" onClick={onAddUser}>
+          <Button size="sm" className="h-10 px-6 font-black bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20" onClick={onAddUser}>
             <Plus className="h-4 w-4 mr-2" /> Add New User
           </Button>
         </div>
@@ -284,7 +283,7 @@ export function UserListView({ allUsers, setAllUsers, allTenants, allOutlets, on
             </div>
 
             <div>
-              <Button variant="ghost" className="w-full h-11 text-slate-400 hover:text-[#1a73e8] gap-2 font-bold" onClick={resetFilters}>
+              <Button variant="ghost" className="w-full h-11 text-slate-400 hover:text-primary gap-2 font-bold" onClick={resetFilters}>
                 <FilterX className="h-4 w-4" /> Reset
               </Button>
             </div>
@@ -307,8 +306,8 @@ export function UserListView({ allUsers, setAllUsers, allTenants, allOutlets, on
                 {paginatedUsers.map((user) => (
                   <TableRow key={user.id} className="group hover:bg-slate-50/50 transition-all border-b border-slate-50">
                     <TableCell className="py-5 px-8">
-                      <div className="font-extrabold text-[#1e293b] text-[15px] group-hover:text-[#1a73e8] transition-colors">{user.fullName}</div>
-                      <div className="text-[11px] text-[#1a73e8] font-bold uppercase opacity-70">@{user.username}</div>
+                      <div className="font-extrabold text-[#1e293b] text-[15px] group-hover:text-primary transition-colors">{user.fullName}</div>
+                      <div className="text-[11px] text-primary font-bold uppercase opacity-70">@{user.username}</div>
                     </TableCell>
                     <TableCell className="px-4">
                       <div className="text-xs font-bold text-slate-700 truncate max-w-[180px]"><Mail className="h-3 w-3 inline mr-1 opacity-40" />{user.email}</div>
