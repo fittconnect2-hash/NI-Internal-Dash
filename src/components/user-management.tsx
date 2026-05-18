@@ -374,7 +374,17 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                               <div className="p-1">
                                 <Button variant="ghost" className="w-full justify-start font-normal text-sm h-10" onClick={() => { setTenantFilter(null); setIsTenantPopoverOpen(false); }}>All Tenants</Button>
                                 {filteredTenantsForDropdown.map(t => (
-                                  <Button key={t.id} variant="ghost" className="w-full justify-start font-normal text-sm h-10" onClick={() => { setTenantFilter(t.id); setIsTenantPopoverOpen(false); }}>{t.tenantName}</Button>
+                                  <Button 
+                                    key={t.id} 
+                                    variant="ghost" 
+                                    className="w-full justify-start font-normal text-sm h-10 group" 
+                                    onClick={() => { setTenantFilter(t.id); setIsTenantPopoverOpen(false); }}
+                                  >
+                                    <span className="truncate flex-1 text-left">{t.tenantName}</span>
+                                    <span className="ml-auto text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded group-hover:bg-white transition-colors">
+                                      {t.numberOfOutlets} {t.numberOfOutlets === 1 ? 'Outlet' : 'Outlets'}
+                                    </span>
+                                  </Button>
                                 ))}
                               </div>
                             </ScrollArea>
@@ -531,11 +541,17 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                                       {filteredTenantsForForm.map(t => (
                                         <button 
                                           key={t.id} 
+                                          type="button"
                                           className={cn("w-full flex items-center justify-between px-3 py-2.5 rounded-md text-sm transition-colors hover:bg-slate-100 group", formTenantId === t.id && "bg-primary/5 text-primary font-bold")}
                                           onClick={() => { setFormTenantId(t.id); setAssignments([]); setIsFormTenantPopoverOpen(false); setFormTenantSearch(""); }}
                                         >
-                                          <span>{t.tenantName}</span>
-                                          {formTenantId === t.id && <Check className="h-4 w-4" />}
+                                          <span className="truncate flex-1 text-left">{t.tenantName}</span>
+                                          <div className="flex items-center gap-2">
+                                            <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded group-hover:bg-white transition-colors">
+                                              {t.numberOfOutlets} {t.numberOfOutlets === 1 ? 'Outlet' : 'Outlets'}
+                                            </span>
+                                            {formTenantId === t.id && <Check className="h-4 w-4" />}
+                                          </div>
                                         </button>
                                       ))}
                                       {filteredTenantsForForm.length === 0 && <div className="p-8 text-center text-xs text-slate-400">No organizations found.</div>}
@@ -611,12 +627,12 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                                           </SelectContent>
                                         </Select>
                                       </TableCell>
-                                      <TableCell className="p-1 pb-4 text-right"><button className="h-12 w-12 rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-100 flex items-center justify-center transition-colors" onClick={() => setAssignments(assignments.filter(a => a.id !== assignment.id))}><Trash2 className="h-5 w-5" /></button></TableCell>
+                                      <TableCell className="p-1 pb-4 text-right"><button type="button" className="h-12 w-12 rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-100 flex items-center justify-center transition-colors" onClick={() => setAssignments(assignments.filter(a => a.id !== assignment.id))}><Trash2 className="h-5 w-5" /></button></TableCell>
                                     </TableRow>
                                   ))}
                                 </TableBody>
                               </Table>
-                              <Button variant="outline" className="w-full h-14 border-2 border-dashed border-primary/20 text-primary font-black transition-all rounded-2xl" onClick={() => setAssignments([...assignments, { id: Date.now().toString(), outletId: "all", role: "Staff" }])}><PlusCircle className="h-5 w-5 mr-3" /> Add Assignment</Button>
+                              <Button type="button" variant="outline" className="w-full h-14 border-2 border-dashed border-primary/20 text-primary font-black transition-all rounded-2xl" onClick={() => setAssignments([...assignments, { id: Date.now().toString(), outletId: "all", role: "Staff" }])}><PlusCircle className="h-5 w-5 mr-3" /> Add Assignment</Button>
                             </div>
                           )}
                         </div>
@@ -624,8 +640,8 @@ export function UserManagement({ tenant, editingUser: propEditingUser, isOpen, d
                     )}
                   </ScrollArea>
                   <div className="p-8 border-t border-slate-100 flex justify-end gap-4 bg-slate-50/30 flex-shrink-0">
-                    <Button variant="outline" className="h-12 px-8 font-black text-slate-500 border-slate-200" onClick={() => { setIsAddingNew(false); setEditingUser(null); restoreInteractivity(); }}>Cancel</Button>
-                    <Button className="h-12 px-10 font-black bg-[#1a73e8] hover:bg-[#1557b0] text-white border-none shadow-lg shadow-[#1a73e8]/20 active:scale-95 transition-all" onClick={handleSaveUser}>{editingUser ? "Save Profile Changes" : "Finalize Staff Enrollment"}</Button>
+                    <Button type="button" variant="outline" className="h-12 px-8 font-black text-slate-500 border-slate-200" onClick={() => { setIsAddingNew(false); setEditingUser(null); restoreInteractivity(); }}>Cancel</Button>
+                    <Button type="button" className="h-12 px-10 font-black bg-[#1a73e8] hover:bg-[#1557b0] text-white border-none shadow-lg shadow-[#1a73e8]/20 active:scale-95 transition-all" onClick={handleSaveUser}>{editingUser ? "Save Profile Changes" : "Finalize Staff Enrollment"}</Button>
                   </div>
                 </div>
               </div>
