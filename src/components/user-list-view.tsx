@@ -344,7 +344,7 @@ export function UserListView({ allUsers, setAllUsers, allTenants, allOutlets, on
           {totalPages > 1 && (
             <div className="px-8 py-4 border-t border-slate-100 flex items-center justify-between bg-white">
               <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">
-                Showing <span className="text-slate-900">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to <span className="text-slate-900">{Math.min(currentPage * ITEMS_PER_PAGE, filteredUsers.length)}</span> of <span className="text-slate-900">{filteredUsers.length}</span> results
+                Showing <span className="text-primary">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to <span className="text-primary">{Math.min(currentPage * ITEMS_PER_PAGE, filteredUsers.length)}</span> of <span className="text-primary">{filteredUsers.length}</span> results
               </p>
               <div className="flex items-center gap-1">
                 <Button 
@@ -369,7 +369,7 @@ export function UserListView({ allUsers, setAllUsers, allTenants, allOutlets, on
                       key={pageNum}
                       variant={currentPage === pageNum ? "default" : "outline"}
                       size="sm"
-                      className={cn("h-8 w-8 p-0 text-[11px] font-black border-slate-200", currentPage === pageNum ? "bg-slate-900 border-slate-900 text-white" : "text-slate-500")}
+                      className={cn("h-8 w-8 p-0 text-[11px] font-black border-slate-200", currentPage === pageNum ? "bg-primary border-primary text-white" : "text-slate-500")}
                       onClick={() => setCurrentPage(pageNum)}
                     >
                       {pageNum}

@@ -23,13 +23,6 @@ import {
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu"
-import {
   Table,
   TableBody,
   TableCell,
@@ -393,7 +386,7 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
             {totalPages > 1 && (
               <div className="px-8 py-4 border-t border-slate-100 flex items-center justify-between bg-white">
                 <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">
-                  Showing <span className="text-slate-900">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to <span className="text-slate-900">{Math.min(currentPage * ITEMS_PER_PAGE, filteredOutlets.length)}</span> of <span className="text-slate-900">{filteredOutlets.length}</span> results
+                  Showing <span className="text-primary">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to <span className="text-primary">{Math.min(currentPage * ITEMS_PER_PAGE, filteredOutlets.length)}</span> of <span className="text-primary">{filteredOutlets.length}</span> results
                 </p>
                 <div className="flex items-center gap-1">
                   <Button 
@@ -418,7 +411,7 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
                         key={pageNum}
                         variant={currentPage === pageNum ? "default" : "outline"}
                         size="sm"
-                        className={cn("h-8 w-8 p-0 text-[11px] font-black border-slate-200", currentPage === pageNum ? "bg-slate-900 border-slate-900 text-white" : "text-slate-500")}
+                        className={cn("h-8 w-8 p-0 text-[11px] font-black border-slate-200", currentPage === pageNum ? "bg-primary border-primary text-white" : "text-slate-500")}
                         onClick={() => setCurrentPage(pageNum)}
                       >
                         {pageNum}
