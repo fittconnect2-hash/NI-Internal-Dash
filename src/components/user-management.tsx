@@ -255,13 +255,13 @@ export function UserManagement({
       toast({ title: "Staff Enrolled" })
     }
     
-    // Notify parent and reset state
+    // Toggle back to list inside the drawer
     setIsAddingNew(false)
     setEditingUser(null)
+    
+    // Notify parent to handle additional logic (e.g. switching tabs if context allows)
     if (onSaved) {
       onSaved()
-    } else {
-      onClose()
     }
   }
 

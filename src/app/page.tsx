@@ -70,15 +70,12 @@ export default function DashboardPage() {
   const [isAddingNewUser, setIsAddingNewUser] = React.useState(false)
 
   // Robust Global Interaction Safeguard
-  // This effect runs whenever a drawer or major UI state changes to ensure the body is interactive
   React.useEffect(() => {
     const isAnyOverlayOpen = isFormOpen || isConfigOpen || isDetailOpen || isOutletsDrawerOpen || isUsersDrawerOpen;
     if (!isAnyOverlayOpen) {
-      // Small delay to allow Radix exit animations to settle before force-clearing body locks
       const timer = setTimeout(() => {
         document.body.style.pointerEvents = 'auto';
         document.body.style.overflow = 'auto';
-        // Remove any residual class names that might be locking the UI
         document.documentElement.style.pointerEvents = 'auto';
       }, 150);
       return () => clearTimeout(timer);
@@ -185,35 +182,26 @@ export default function DashboardPage() {
   }
 
   const handleUserSaved = () => {
-    // Close drawer
-    setIsUsersDrawerOpen(false)
-    setSelectedTenant(null)
-    setEditingUser(null)
-    setIsAddingNewUser(false)
-    
-    // Switch to main users page
-    setActiveTab('users')
-    
-    // Explicitly restore interactivity
+    // Determine behavior based on context
+    // If we are on the main Users tab, we close the drawer and stay on the tab
+    if (activeTab === 'users') {
+      setIsUsersDrawerOpen(false)
+      setSelectedTenant(null)
+      setEditingUser(null)
+      setIsAddingNewUser(false)
+    } 
+    // If we are on the Tenants tab (opened from card), the UserManagement component 
+    // internal state (isAddingNew) will toggle back to the list automatically. 
+    // We stay in the drawer.
+
+    // Force restore interactivity for safety
     document.body.style.pointerEvents = 'auto';
     document.body.style.overflow = 'auto';
   }
 
-  const updateTenantCounts = (tid: string) => {
-    setTenants(prev => prev.map(t => {
-      if (t.id === tid) {
-        const uCount = users.filter(u => u.tenantId === tid).length
-        const oCount = outlets.filter(o => o.tenantId === tid).length
-        return { ...t, numberOfUsers: uCount, numberOfOutlets: oCount }
-      }
-      return t
-    }))
-  }
-
-  // Effect to keep counts in sync when lists change
+  // Sync counts
   React.useEffect(() => {
     if (isLoaded) {
-      const tenantIds = tenants.map(t => t.id)
       setTenants(prev => prev.map(t => {
         const uCount = users.filter(u => u.tenantId === t.id).length
         const oCount = outlets.filter(o => o.tenantId === t.id).length
@@ -348,7 +336,6 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Pagination Controls */}
             {totalPages > 1 && (
               <div className="mt-auto py-6 border-t border-slate-100 flex items-center justify-between">
                 <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">
