@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -117,6 +118,11 @@ export function UserListView({ allUsers, setAllUsers, allTenants, allOutlets, on
     )
   }, [tenantsWithCounts, tenantSearch])
 
+  const availableOutlets = React.useMemo(() => {
+    if (!tenantFilter) return allOutlets
+    return allOutlets.filter(o => o.tenantId === tenantFilter)
+  }, [allOutlets, tenantFilter])
+
   const filteredUsers = React.useMemo(() => {
     return allUsers.filter(user => {
       const matchesSearch = 
@@ -198,7 +204,7 @@ export function UserListView({ allUsers, setAllUsers, allTenants, allOutlets, on
         </div>
 
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-6 gap-6 items-end">
+          <div className="grid grid-cols-1 md:grid-cols-7 gap-4 items-end">
             <div className="md:col-span-2 space-y-2.5">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Search Staff</label>
               <div className="relative">
@@ -208,7 +214,7 @@ export function UserListView({ allUsers, setAllUsers, allTenants, allOutlets, on
             </div>
 
             <div className="space-y-2.5">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Filter by Tenant</label>
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Tenant</label>
               <Popover open={isTenantPopoverOpen} onOpenChange={setIsTenantPopoverOpen}>
                 <PopoverTrigger asChild>
                   <Button variant="outline" role="combobox" className="w-full h-11 justify-between bg-white border-slate-200 text-sm font-medium px-3">
@@ -234,6 +240,21 @@ export function UserListView({ allUsers, setAllUsers, allTenants, allOutlets, on
                   </ScrollArea>
                 </PopoverContent>
               </Popover>
+            </div>
+
+            <div className="space-y-2.5">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Outlet</label>
+              <Select onValueChange={(v) => setOutletFilter(v === 'all' ? null : v)} value={outletFilter || 'all'}>
+                <SelectTrigger className="h-11 bg-white border-slate-200 text-sm">
+                  <SelectValue placeholder="All Outlets" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Outlets</SelectItem>
+                  {availableOutlets.map(o => (
+                    <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2.5">
@@ -264,7 +285,7 @@ export function UserListView({ allUsers, setAllUsers, allTenants, allOutlets, on
 
             <div>
               <Button variant="ghost" className="w-full h-11 text-slate-400 hover:text-[#1a73e8] gap-2 font-bold" onClick={resetFilters}>
-                <FilterX className="h-4 w-4" /> Reset Filters
+                <FilterX className="h-4 w-4" /> Reset
               </Button>
             </div>
           </div>

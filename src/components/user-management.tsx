@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -88,7 +87,7 @@ interface UserAssignment {
 
 interface UserManagementProps {
   tenant?: Tenant | null;
-  editingUser?: User | null;
+  propEditingUser?: User | null;
   allUsers: User[];
   setAllUsers: React.Dispatch<React.SetStateAction<User[]>>;
   allTenants: Tenant[];
@@ -101,7 +100,7 @@ interface UserManagementProps {
 
 export function UserManagement({ 
   tenant, 
-  editingUser: propEditingUser, 
+  propEditingUser, 
   allUsers, 
   setAllUsers, 
   allTenants, 
@@ -186,7 +185,14 @@ export function UserManagement({
   }, [propEditingUser, defaultAdding, isOpen, resetForm])
 
   const ITEMS_PER_PAGE = 10
-  const tenantOutlets = React.useMemo(() => {
+  
+  const availableOutletsForFilter = React.useMemo(() => {
+    const activeTid = tenant?.id || tenantFilter
+    if (!activeTid) return allOutlets
+    return allOutlets.filter(o => o.tenantId === activeTid)
+  }, [tenant, tenantFilter, allOutlets])
+
+  const tenantOutletsForForm = React.useMemo(() => {
     const activeTid = formTenantId || tenant?.id
     return allOutlets.filter(o => !activeTid || o.tenantId === activeTid)
   }, [formTenantId, tenant, allOutlets])
@@ -315,10 +321,24 @@ export function UserManagement({
           {!isAddingNew ? (
             <div className="flex-1 flex flex-col p-6 min-h-0 overflow-hidden">
                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 mb-6">
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+                  <div className="grid grid-cols-1 md:grid-cols-5 gap-6 items-end">
                     <div className="space-y-2.5">
                       <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Search Staff</Label>
                       <Input placeholder="Name or email..." className="h-11 text-sm bg-white" value={userFilter} onChange={(e) => setUserFilter(e.target.value)} />
+                    </div>
+                    <div className="space-y-2.5">
+                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Outlet</Label>
+                      <Select onValueChange={(v) => setOutletFilter(v === 'all' ? null : v)} value={outletFilter || 'all'}>
+                        <SelectTrigger className="h-11 bg-white border-slate-200 text-sm">
+                          <SelectValue placeholder="All Outlets" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Outlets</SelectItem>
+                          {availableOutletsForFilter.map(o => (
+                            <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="space-y-2.5">
                       <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Role</Label>
@@ -332,7 +352,7 @@ export function UserManagement({
                         <SelectContent><SelectItem value="all">All</SelectItem><SelectItem value="Active">Active</SelectItem><SelectItem value="Suspended">Suspended</SelectItem></SelectContent>
                       </Select>
                     </div>
-                    <Button variant="ghost" className="h-11 font-bold text-slate-400" onClick={() => { setUserFilter(""); setRoleFilter(null); setStatusFilter(null); }}><FilterX className="h-4 w-4 mr-2" /> Reset</Button>
+                    <Button variant="ghost" className="h-11 font-bold text-slate-400" onClick={() => { setUserFilter(""); setRoleFilter(null); setStatusFilter(null); setOutletFilter(null); }}><FilterX className="h-4 w-4 mr-2" /> Reset</Button>
                   </div>
                </div>
                <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
@@ -440,7 +460,7 @@ export function UserManagement({
                               <div key={a.id} className="flex gap-4 items-end">
                                 <div className="flex-1 space-y-1.5"><Label className="text-[10px] uppercase font-bold text-slate-400">Outlet</Label>
                                   <Select value={a.outletId} onValueChange={v => setAssignments(assignments.map(as => as.id === a.id ? { ...as, outletId: v } : as))}><SelectTrigger className="h-12 font-bold"><SelectValue /></SelectTrigger>
-                                    <SelectContent><SelectItem value="all" className="font-bold text-primary">Global Access</SelectItem>{tenantOutlets.map(o => <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}</SelectContent>
+                                    <SelectContent><SelectItem value="all" className="font-bold text-primary">Global Access</SelectItem>{tenantOutletsForForm.map(o => <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}</SelectContent>
                                   </Select>
                                 </div>
                                 <div className="flex-1 space-y-1.5"><Label className="text-[10px] uppercase font-bold text-slate-400">Role</Label>
