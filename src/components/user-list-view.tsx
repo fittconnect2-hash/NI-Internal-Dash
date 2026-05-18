@@ -343,10 +343,49 @@ export function UserListView({ allUsers, setAllUsers, allTenants, allOutlets, on
           </ScrollArea>
           {totalPages > 1 && (
             <div className="px-8 py-4 border-t border-slate-100 flex items-center justify-between bg-white">
-              <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">Page {currentPage} of {totalPages}</p>
-              <div className="flex gap-1">
-                <Button variant="outline" size="sm" className="h-8 px-2" disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}><ChevronLeft className="h-4 w-4" /></Button>
-                <Button variant="outline" size="sm" className="h-8 px-2" disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)}><ChevronRight className="h-4 w-4" /></Button>
+              <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">
+                Showing <span className="text-slate-900">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to <span className="text-slate-900">{Math.min(currentPage * ITEMS_PER_PAGE, filteredUsers.length)}</span> of <span className="text-slate-900">{filteredUsers.length}</span> results
+              </p>
+              <div className="flex items-center gap-1">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="h-8 px-2 border-slate-200"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum = i + 1;
+                  if (totalPages > 5 && currentPage > 3) {
+                    pageNum = currentPage - 2 + i;
+                    if (pageNum > totalPages) pageNum = totalPages - (4 - i);
+                  }
+                  
+                  return (
+                    <Button
+                      key={pageNum}
+                      variant={currentPage === pageNum ? "default" : "outline"}
+                      size="sm"
+                      className={cn("h-8 w-8 p-0 text-[11px] font-black border-slate-200", currentPage === pageNum ? "bg-slate-900 border-slate-900 text-white" : "text-slate-500")}
+                      onClick={() => setCurrentPage(pageNum)}
+                    >
+                      {pageNum}
+                    </Button>
+                  );
+                })}
+                
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="h-8 px-2 border-slate-200"
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           )}
