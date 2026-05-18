@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ArrowLeft, Minus, Plus, Calendar as CalendarIcon, ShieldCheck, Globe, Store, Check, Info, Layout } from "lucide-react"
+import { ArrowLeft, Minus, Plus, Calendar as CalendarIcon, ShieldCheck, Globe, Store, Check, Info, Layout, ShoppingBag } from "lucide-react"
 import { Tenant, Gateway, Outlet } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import {
@@ -647,6 +647,38 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
                       <Label className="text-[13px] font-bold text-slate-900">Monthly Platform Fee</Label>
                       <Input defaultValue="0" type="number" className="h-12 bg-white border-slate-200 text-lg font-bold" />
                       <p className="text-[11px] text-slate-400 font-medium italic">Charged every month for hosting and support services.</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "Small Order" && (
+                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-400">
+                  <div className="bg-orange-50/50 border border-orange-100 p-6 rounded-2xl flex items-start gap-4">
+                    <ShoppingBag className="h-5 w-5 text-orange-500 mt-1 shrink-0" />
+                    <div>
+                      <h4 className="font-bold text-slate-900">Small Order Policies</h4>
+                      <p className="text-sm text-slate-600 mt-1">Manage minimum spending limits and surcharges for smaller transactions.</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-8">
+                    <div className="space-y-3">
+                      <Label className="text-[13px] font-bold text-slate-900">Minimum Order Amount</Label>
+                      <Input defaultValue="0" type="number" className="h-12 bg-white border-slate-200 text-lg font-bold" />
+                      <p className="text-[11px] text-slate-400 font-medium italic">The smallest amount a customer is required to spend to place an order.</p>
+                    </div>
+
+                    <div className="space-y-3">
+                      <Label className="text-[13px] font-bold text-slate-900">Small Order Fee</Label>
+                      <Input defaultValue="0" type="number" className="h-12 bg-white border-slate-200 text-lg font-bold" />
+                      <p className="text-[11px] text-slate-400 font-medium italic">The extra cost added to orders that are below the specified threshold.</p>
+                    </div>
+
+                    <div className="space-y-3">
+                      <Label className="text-[13px] font-bold text-slate-900">Small Order Threshold</Label>
+                      <Input defaultValue="0" type="number" className="h-12 bg-white border-slate-200 text-lg font-bold" />
+                      <p className="text-[11px] text-slate-400 font-medium italic">The value below which the Small Order Fee will be automatically applied.</p>
                     </div>
                   </div>
                 </div>
