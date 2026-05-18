@@ -3,6 +3,7 @@
 
 import * as React from "react"
 import { DashboardSidebar } from "@/components/dashboard-sidebar"
+import { DashboardHeader } from "@/components/dashboard-header"
 import { TenantCard } from "@/components/tenant-card"
 import { TenantForm } from "@/components/tenant-form"
 import { TenantConfiguration } from "@/components/tenant-configuration"
@@ -182,19 +183,12 @@ export default function DashboardPage() {
   }
 
   const handleUserSaved = () => {
-    // Determine behavior based on context
-    // If we are on the main Users tab, we close the drawer and stay on the tab
     if (activeTab === 'users') {
       setIsUsersDrawerOpen(false)
       setSelectedTenant(null)
       setEditingUser(null)
       setIsAddingNewUser(false)
     } 
-    // If we are on the Tenants tab (opened from card), the UserManagement component 
-    // internal state (isAddingNew) will toggle back to the list automatically. 
-    // We stay in the drawer.
-
-    // Force restore interactivity for safety
     document.body.style.pointerEvents = 'auto';
     document.body.style.overflow = 'auto';
   }
@@ -410,7 +404,10 @@ export default function DashboardPage() {
           setIsAddingNewUser(false)
         }} />
         <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
-          {renderContent()}
+          <DashboardHeader />
+          <div className="flex-1 overflow-hidden flex flex-col">
+            {renderContent()}
+          </div>
         </main>
       </div>
       <TenantForm 
