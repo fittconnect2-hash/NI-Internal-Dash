@@ -263,7 +263,7 @@ export default function DashboardPage() {
     if (activeTab === 'gateways') return (
       <GatewayManagement 
         allGateways={gateways}
-        setAllGateways={setAllGateways}
+        setAllGateways={setGateways}
       />
     )
 

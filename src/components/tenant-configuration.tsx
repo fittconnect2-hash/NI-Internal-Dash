@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -99,7 +100,6 @@ function MultiGatewaySelector({ allGateways, selectedIds, onToggle }: MultiGatew
                     isSelected && "bg-primary/5"
                   )}
                   onClick={(e) => {
-                    e.preventDefault();
                     e.stopPropagation();
                     onToggle(g.id);
                   }}
