@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -41,7 +42,6 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { Outlet, Tenant } from "@/lib/types"
-import { initialOutlets, initialTenants } from "@/lib/mock-data"
 import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
 import { 
@@ -66,14 +66,16 @@ const COUNTRY_CITY_MAP: Record<string, string[]> = {
 
 interface OutletManagementProps {
   tenant?: Tenant | null;
+  allOutlets: Outlet[];
+  setAllOutlets: React.Dispatch<React.SetStateAction<Outlet[]>>;
+  allTenants: Tenant[];
   isOpen: boolean;
   onClose: () => void;
   onViewUsers: (outlet: Outlet) => void;
 }
 
-export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: OutletManagementProps) {
+export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants, isOpen, onClose, onViewUsers }: OutletManagementProps) {
   const { toast } = useToast()
-  const [outlets, setOutlets] = React.useState<Outlet[]>(initialOutlets)
   const [searchQuery, setSearchQuery] = React.useState("")
   const [statusFilter, setStatusFilter] = React.useState<string | null>(null)
   const [currentPage, setCurrentPage] = React.useState(1)
@@ -82,11 +84,9 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
   const [editingOutlet, setEditingOutlet] = React.useState<Outlet | null>(null)
   const [isFormLoading, setIsFormLoading] = React.useState(false)
 
-  // Search states for Form Parent Tenant Selection
   const [isFormTenantPopoverOpen, setIsFormTenantPopoverOpen] = React.useState(false)
   const [formTenantSearch, setFormTenantSearch] = React.useState("")
 
-  // Form State
   const [formTenantId, setFormTenantId] = React.useState("")
   const [formName, setFormName] = React.useState("")
   const [formSlug, setFormSlug] = React.useState("")
@@ -95,127 +95,75 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
   const [formCity, setFormCity] = React.useState("")
   const [formCountry, setFormCountry] = React.useState("")
 
-  // CRITICAL FIX: Explicitly restore pointer events when the drawer closes
   const restoreUI = React.useCallback(() => {
     document.body.style.pointerEvents = 'auto';
     document.body.style.overflow = 'auto';
   }, []);
 
   React.useEffect(() => {
-    if (!isOpen) {
-      const timer = setTimeout(restoreUI, 150);
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen, restoreUI]);
-
-  React.useEffect(() => {
-    if (editingOutlet) {
-      setFormTenantId(editingOutlet.tenantId)
-      setFormName(editingOutlet.name)
-      setFormSlug(editingOutlet.slug)
-      setFormPhone(editingOutlet.phone)
-      setFormTimezone(editingOutlet.timezone)
-      setFormCity(editingOutlet.city)
-      setFormCountry(editingOutlet.country)
+    if (isOpen) {
+      if (editingOutlet) {
+        setFormTenantId(editingOutlet.tenantId)
+        setFormName(editingOutlet.name)
+        setFormSlug(editingOutlet.slug)
+        setFormPhone(editingOutlet.phone)
+        setFormTimezone(editingOutlet.timezone)
+        setFormCity(editingOutlet.city)
+        setFormCountry(editingOutlet.country)
+      } else {
+        setFormTenantId(tenant?.id || "")
+        setFormName("")
+        setFormSlug("")
+        setFormPhone("")
+        setFormTimezone("Asia/Dubai")
+        setFormCity("")
+        setFormCountry("")
+      }
     } else {
-      setFormTenantId(tenant?.id || "")
-      setFormName("")
-      setFormSlug("")
-      setFormPhone("")
-      setFormTimezone("Asia/Dubai")
-      setFormCity("")
-      setFormCountry("")
+      restoreUI()
     }
-    setFormTenantSearch("")
-  }, [editingOutlet, tenant, isAddingNew])
+  }, [editingOutlet, tenant, isOpen])
 
   const filteredOutlets = React.useMemo(() => {
-    return outlets.filter(o => {
+    return allOutlets.filter(o => {
       const matchesSearch = o.name.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesStatus = !statusFilter || o.status === statusFilter
       const matchesTenant = !tenant || o.tenantId === tenant.id
       return matchesSearch && matchesStatus && matchesTenant
     })
-  }, [outlets, searchQuery, statusFilter, tenant])
+  }, [allOutlets, searchQuery, statusFilter, tenant])
 
-  const filteredTenantsForForm = React.useMemo(() => {
-    return initialTenants.filter(t => 
-      t.tenantName.toLowerCase().includes(formTenantSearch.toLowerCase())
-    )
-  }, [formTenantSearch])
-
-  // Pagination logic
-  const totalPages = Math.ceil(filteredOutlets.length / ITEMS_PER_PAGE)
   const paginatedOutlets = React.useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE
     return filteredOutlets.slice(start, start + ITEMS_PER_PAGE)
   }, [filteredOutlets, currentPage])
 
-  // Reset page when filtering/searching
-  React.useEffect(() => {
-    setCurrentPage(1)
-  }, [searchQuery, statusFilter])
-
-  const resetFilters = () => {
-    setSearchQuery("")
-    setStatusFilter(null)
-  }
-
-  const handleEdit = (outlet: Outlet) => {
-    setEditingOutlet(outlet)
-    setIsAddingNew(true)
-    setIsFormLoading(true)
-    setTimeout(() => {
-      setIsFormLoading(false)
-    }, 600)
-  }
-
-  const handleAddNew = () => {
-    setEditingOutlet(null)
-    setIsAddingNew(true)
-    setIsFormLoading(true)
-    setTimeout(() => {
-      setIsFormLoading(false)
-    }, 400)
-  }
-
-  const handleCloseForm = () => {
-    setIsAddingNew(false)
-    setEditingOutlet(null)
-    setIsFormLoading(false)
-  }
+  const totalPages = Math.ceil(filteredOutlets.length / ITEMS_PER_PAGE)
 
   const handleSaveOutlet = () => {
     if (!formTenantId || !formName) {
-      toast({
-        title: "Validation Error",
-        description: "Please fill in all required fields.",
-        variant: "destructive"
-      })
+      toast({ title: "Required Fields", description: "Missing branch name or tenant.", variant: "destructive" })
       return
     }
 
     if (editingOutlet) {
-      setOutlets(prev => prev.map(o => o.id === editingOutlet.id ? {
+      setAllOutlets(prev => prev.map(o => o.id === editingOutlet.id ? {
         ...o,
         tenantId: formTenantId,
         name: formName,
-        slug: formSlug,
+        slug: formSlug || formName.toLowerCase().replace(/\s+/g, '-'),
         phone: formPhone,
         timezone: formTimezone,
         city: formCity,
         country: formCountry
       } : o))
-      toast({
-        title: "Outlet Updated",
-        description: `${formName} has been successfully updated.`
-      })
+      toast({ title: "Outlet Updated" })
     } else {
       const newOutlet: Outlet = {
-        id: Math.random().toString(36).substr(2, 9),
+        id: `o-${Math.random().toString(36).substr(2, 9)}`,
         tenantId: formTenantId,
         name: formName,
-        slug: formSlug,
+        slug: formSlug || formName.toLowerCase().replace(/\s+/g, '-'),
         phone: formPhone,
         timezone: formTimezone,
         city: formCity,
@@ -223,426 +171,106 @@ export function OutletManagement({ tenant, isOpen, onClose, onViewUsers }: Outle
         status: 'Active',
         userCount: 0
       }
-      setOutlets(prev => [newOutlet, ...prev])
-      toast({
-        title: "Outlet Added",
-        description: `${formName} has been successfully added.`
-      })
+      setAllOutlets(prev => [newOutlet, ...prev])
+      toast({ title: "Branch Registered" })
     }
-    handleCloseForm()
+    setIsAddingNew(false)
+    setEditingOutlet(null)
   }
 
-  const getTenantName = (tid: string) => {
-    return initialTenants.find(t => t.id === tid)?.tenantName || "Unknown"
-  }
-
-  const selectedTenantName = React.useMemo(() => {
-    const tid = tenant?.id || formTenantId
-    if (!tid) return null
-    return getTenantName(tid)
-  }, [tenant, formTenantId])
+  const getTenantName = (tid: string) => allTenants.find(t => t.id === tid)?.tenantName || "Unknown"
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => { if (!open) { onClose(); restoreUI(); } }}>
-      <SheetContent side="right" className="w-full sm:max-w-[1200px] p-0 border-l border-slate-200 bg-[#f8f9fc] flex flex-col transition-all duration-500">
+      <SheetContent side="right" className="w-full sm:max-w-[1200px] p-0 border-l border-slate-200 bg-[#f8f9fc] flex flex-col">
         <SheetHeader className="px-8 py-6 bg-white border-b border-slate-100 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
-              <button 
-                onClick={onClose}
-                className="p-2 hover:bg-slate-50 rounded-lg transition-colors group"
-              >
+              <button onClick={isAddingNew ? () => setIsAddingNew(false) : onClose} className="p-2 hover:bg-slate-50 rounded-lg group transition-colors">
                 <ArrowLeft className="h-5 w-5 text-slate-400 group-hover:text-slate-900" />
               </button>
               <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                  <span className="flex items-center gap-1.5 opacity-80"><Building2 className="h-3 w-3" /> TENANTS</span>
+                  <span className="opacity-80"><Building2 className="h-3 w-3 inline mr-1" /> TENANTS</span>
                   <ChevronRight className="h-2.5 w-2.5 opacity-30" />
-                  <span className="text-[#1a73e8] font-black">{tenant?.tenantName.toUpperCase() || "ALL TENANTS"}</span>
-                  <ChevronRight className="h-2.5 w-2.5 opacity-30" />
-                  <span className="opacity-80">OUTLETS</span>
+                  <span className="text-[#1a73e8] font-black">{tenant?.tenantName.toUpperCase() || "PROPERTY LIST"}</span>
                 </div>
-                <SheetTitle className="text-2xl font-black text-[#1e293b] tracking-tight">
-                  {isAddingNew 
-                    ? (selectedTenantName ? `Add New Outlet to ${selectedTenantName}` : "Add New Outlet")
-                    : tenant ? `Outlet Management of ${tenant.tenantName}` : "Outlet Management"}
-                </SheetTitle>
+                <SheetTitle className="text-2xl font-black text-[#1e293b] tracking-tight">{isAddingNew ? (editingOutlet ? `Edit ${editingOutlet.name}` : "Register Property") : "Branch Network"}</SheetTitle>
               </div>
             </div>
-            {!isAddingNew && (
-              <Button 
-                size="sm" 
-                className="h-10 px-5 font-black bg-[#1a73e8] hover:bg-[#1557b0] text-white rounded-lg shadow-sm transition-all active:scale-95"
-                onClick={handleAddNew}
-              >
-                <Plus className="h-4 w-4 mr-2" /> Add New Outlet
-              </Button>
-            )}
+            {!isAddingNew && <Button onClick={() => { setIsFormLoading(true); setIsAddingNew(true); setEditingOutlet(null); setTimeout(() => setIsFormLoading(false), 400); }} className="h-10 px-6 font-black bg-[#1a73e8]"><Plus className="h-4 w-4 mr-2" /> Add Branch</Button>}
           </div>
         </SheetHeader>
 
         <div className="flex-1 flex min-h-0 overflow-hidden bg-[#f8f9fc] p-6 gap-6">
-          {isAddingNew && (
-            <div className="w-[400px] flex-shrink-0 bg-white rounded-2xl border border-slate-200 shadow-xl flex flex-col animate-in slide-in-from-left fade-in duration-500 overflow-hidden">
-              <div className="p-6 border-b border-slate-50 flex items-center justify-between">
-                <div>
-                  <h3 className="font-extrabold text-lg text-[#1e293b]">
-                    {editingOutlet 
-                      ? `Edit ${editingOutlet.name}` 
-                      : selectedTenantName 
-                        ? `Add New Outlet to ${selectedTenantName}` 
-                        : "Add New Outlet"}
-                  </h3>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                    {editingOutlet ? "UPDATE BRANCH PARAMETERS" : "ENTER NEW BRANCH DETAILS"}
-                  </p>
-                </div>
-                <button className="p-1 text-slate-400 hover:text-slate-900" onClick={handleCloseForm}>
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-              <ScrollArea className="flex-1">
-                {isFormLoading ? (
-                  <div className="flex flex-col items-center justify-center h-full py-24 space-y-4">
-                    <Loader2 className="h-10 w-10 animate-spin text-[#1a73e8]" />
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Loading Details...</p>
-                  </div>
-                ) : (
-                  <div className="px-8 py-6 space-y-8">
-                    <div className="space-y-2.5">
-                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">PARENT TENANT</Label>
-                      
-                      <Popover modal={true} open={isFormTenantPopoverOpen} onOpenChange={setIsFormTenantPopoverOpen}>
-                        <PopoverTrigger asChild>
-                          <Button 
-                            variant="outline" 
-                            role="combobox"
-                            className="w-full h-12 justify-between bg-slate-50/50 border-slate-200 text-sm font-medium px-3"
-                          >
-                            <span className="truncate">
-                              {formTenantId 
-                                ? getTenantName(formTenantId) 
-                                : "Select Parent Tenant"}
-                            </span>
-                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent 
-                          className="w-80 p-0 z-[110] shadow-2xl border-slate-200" 
-                          align="start"
-                          onPointerDownOutside={(e) => e.preventDefault()}
-                          onInteractOutside={(e) => e.preventDefault()}
-                        >
-                          <div className="flex items-center border-b px-3">
-                            <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-                            <input
-                              autoFocus
-                              className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground pointer-events-auto"
-                              placeholder="Search tenants..."
-                              value={formTenantSearch}
-                              onChange={(e) => setFormTenantSearch(e.target.value)}
-                            />
-                          </div>
-                          <ScrollArea className="h-60">
-                            <div className="p-1">
-                              {filteredTenantsForForm.map((t) => (
-                                <button
-                                  key={t.id}
-                                  type="button"
-                                  className={cn("w-full flex items-center justify-between px-3 py-2.5 rounded-md text-sm transition-colors hover:bg-slate-100 group", formTenantId === t.id && "bg-primary/5 text-primary font-bold")}
-                                  onClick={() => {
-                                    setFormTenantId(t.id);
-                                    setIsFormTenantPopoverOpen(false);
-                                    setFormTenantSearch("");
-                                  }}
-                                >
-                                  <span className="truncate flex-1 text-left">{t.tenantName}</span>
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded group-hover:bg-white transition-colors">
-                                      {t.numberOfOutlets} {t.numberOfOutlets === 1 ? 'Outlet' : 'Outlets'}
-                                    </span>
-                                    {formTenantId === t.id && <Check className="h-4 w-4" />}
-                                  </div>
+          {isAddingNew ? (
+            <div className="w-[450px] mx-auto bg-white rounded-3xl border border-slate-200 shadow-2xl overflow-hidden flex flex-col">
+               <ScrollArea className="flex-1">
+                 {isFormLoading ? <div className="py-40 flex items-center justify-center animate-pulse"><Loader2 className="animate-spin text-primary" /></div> : (
+                   <div className="p-10 space-y-8">
+                     <div className="space-y-2">
+                        <Label className="text-[13px] font-bold text-slate-700">Organization Identity <span className="text-red-500">*</span></Label>
+                        <Popover modal={true} open={isFormTenantPopoverOpen} onOpenChange={setIsFormTenantPopoverOpen}>
+                          <PopoverTrigger asChild><Button variant="outline" className="w-full h-12 justify-between bg-primary/5 text-primary font-black"><span className="truncate">{formTenantId ? getTenantName(formTenantId) : "Assign to Organization..."}</span><ChevronsUpDown className="h-4 w-4 opacity-50" /></Button></PopoverTrigger>
+                          <PopoverContent className="w-80 p-0 shadow-2xl z-[110]" onPointerDownOutside={e => e.preventDefault()} onInteractOutside={e => e.preventDefault()}>
+                            <div className="p-2 border-b"><Input autoFocus placeholder="Search brands..." value={formTenantSearch} onChange={e => setFormTenantSearch(e.target.value)} /></div>
+                            <ScrollArea className="h-60"><div className="p-1">
+                              {allTenants.filter(t => t.tenantName.toLowerCase().includes(formTenantSearch.toLowerCase())).map(t => (
+                                <button key={t.id} type="button" className={cn("w-full flex items-center justify-between px-3 py-2.5 rounded-md text-sm hover:bg-slate-100", formTenantId === t.id && "bg-primary/5 text-primary font-bold")} onClick={() => { setFormTenantId(t.id); setFormTenantSearch(""); setIsFormTenantPopoverOpen(false); }}>
+                                  <span>{t.tenantName}</span><span className="text-[10px] font-bold text-slate-400">{t.numberOfOutlets} Outlets</span>
                                 </button>
                               ))}
-                              {filteredTenantsForForm.length === 0 && (
-                                <div className="py-6 text-center text-xs text-slate-400">No organizations found.</div>
-                              )}
-                            </div>
-                          </ScrollArea>
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-
-                    <div className="space-y-2.5">
-                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">OUTLET NAME</Label>
-                      <Input 
-                        placeholder="e.g. Downtown Branch" 
-                        className="h-12 bg-slate-50/50 border-slate-200 focus-visible:bg-white focus-visible:ring-1 ring-[#1a73e8]/20 transition-all" 
-                        value={formName}
-                        onChange={(e) => setFormName(e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2.5">
-                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">SLUG</Label>
-                      <Input 
-                        placeholder="e.g. downtown-branch" 
-                        className="h-12 bg-slate-50/50 border-slate-200 focus-visible:bg-white" 
-                        value={formSlug}
-                        onChange={(e) => setFormSlug(e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2.5">
-                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">PHONE</Label>
-                      <Input 
-                        placeholder="e.g. +971 50 123 4567" 
-                        className="h-12 bg-slate-50/50 border-slate-200 focus-visible:bg-white" 
-                        value={formPhone}
-                        onChange={(e) => setFormPhone(e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2.5">
-                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">TIMEZONE</Label>
-                      <Select value={formTimezone} onValueChange={setFormTimezone}>
-                        <SelectTrigger className="h-12 bg-slate-50/50 border-slate-200">
-                          <SelectValue placeholder="Select Timezone" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Asia/Dubai">Asia/Dubai (GMT+4)</SelectItem>
-                          <SelectItem value="Europe/London">Europe/London (GMT+0)</SelectItem>
-                          <SelectItem value="America/New_York">America/New_York (GMT-5)</SelectItem>
-                          <SelectItem value="UTC">UTC</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2.5">
-                        <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">COUNTRY</Label>
-                        <Select value={formCountry} onValueChange={(val) => { setFormCountry(val); setFormCity(""); }}>
-                          <SelectTrigger className="h-12 bg-slate-50/50 border-slate-200">
-                            <SelectValue placeholder="Select Country" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {Object.keys(COUNTRY_CITY_MAP).map(country => (
-                              <SelectItem key={country} value={country}>{country}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2.5">
-                        <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">CITY</Label>
-                        <Select value={formCity} onValueChange={setFormCity} disabled={!formCountry}>
-                          <SelectTrigger className="h-12 bg-slate-50/50 border-slate-200">
-                            <SelectValue placeholder="Select City" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {(COUNTRY_CITY_MAP[formCountry] || []).map(city => (
-                              <SelectItem key={city} value={city}>{city}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </ScrollArea>
-              {!isFormLoading && (
-                <div className="p-6 border-t border-slate-50 flex gap-4 bg-slate-50/30">
-                  <Button type="button" variant="outline" className="flex-1 h-12 border-slate-200 font-bold text-slate-600 hover:bg-white" onClick={handleCloseForm}>Cancel</Button>
-                  <Button 
-                    type="button"
-                    className="flex-1 h-12 bg-[#1a73e8] hover:bg-[#1557b0] text-white font-bold shadow-lg shadow-[#1a73e8]/20 active:scale-95 transition-all"
-                    onClick={handleSaveOutlet}
-                  >
-                    {editingOutlet ? "Update Branch" : "Create Outlet"}
-                  </Button>
-                </div>
-              )}
+                            </div></ScrollArea>
+                          </PopoverContent>
+                        </Popover>
+                     </div>
+                     <div className="space-y-4">
+                        <div className="space-y-2"><Label>Branch Display Name</Label><Input value={formName} onChange={e => setFormName(e.target.value)} placeholder="e.g. Downtown Hub" className="h-12" /></div>
+                        <div className="space-y-2"><Label>Primary Phone</Label><Input value={formPhone} onChange={e => setFormPhone(e.target.value)} placeholder="+971..." className="h-12" /></div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2"><Label>Region</Label><Select value={formCountry} onValueChange={setFormCountry}><SelectTrigger className="h-12"><SelectValue placeholder="Country" /></SelectTrigger><SelectContent>{Object.keys(COUNTRY_CITY_MAP).map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></div>
+                          <div className="space-y-2"><Label>City</Label><Select value={formCity} onValueChange={setFormCity} disabled={!formCountry}><SelectTrigger className="h-12"><SelectValue placeholder="City" /></SelectTrigger><SelectContent>{(COUNTRY_CITY_MAP[formCountry] || []).map(ci => <SelectItem key={ci} value={ci}>{ci}</SelectItem>)}</SelectContent></Select></div>
+                        </div>
+                     </div>
+                   </div>
+                 )}
+               </ScrollArea>
+               <div className="p-8 border-t bg-slate-50/50 flex gap-4">
+                  <Button variant="outline" className="flex-1 h-12" onClick={() => setIsAddingNew(false)}>Cancel</Button>
+                  <Button className="flex-1 h-12 bg-[#1a73e8] font-black" onClick={handleSaveOutlet}>{editingOutlet ? "Save Changes" : "Register Branch"}</Button>
+               </div>
+            </div>
+          ) : (
+            <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col min-h-0">
+               <div className="p-6 flex flex-col md:flex-row gap-4 border-b bg-slate-50/10">
+                  <Input placeholder="Search branches..." className="max-w-sm h-11 bg-white" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+                  <Select value={statusFilter || "all"} onValueChange={v => setStatusFilter(v === "all" ? null : v)}><SelectTrigger className="w-56 h-11"><SelectValue placeholder="Status" /></SelectTrigger><SelectContent><SelectItem value="all">All Statuses</SelectItem><SelectItem value="Active">Active</SelectItem><SelectItem value="Inactive">Inactive</SelectItem></SelectContent></Select>
+               </div>
+               <ScrollArea className="flex-1">
+                  <Table>
+                    <TableHeader className="bg-slate-50/50"><TableRow className="h-12 uppercase text-[10px] font-bold text-slate-400"><TableHead className="px-8">Name</TableHead><TableHead>Phone</TableHead><TableHead className="text-center">Status</TableHead><TableHead className="text-right px-8">Actions</TableHead></TableRow></TableHeader>
+                    <TableBody>
+                      {paginatedOutlets.map(o => (
+                        <TableRow key={o.id} className="cursor-pointer group hover:bg-slate-50/50" onClick={() => { setIsFormLoading(true); setEditingOutlet(o); setIsAddingNew(true); setTimeout(() => setIsFormLoading(false), 400); }}>
+                          <TableCell className="py-5 px-8"><div><div className="font-extrabold text-[#1e293b] group-hover:text-[#1a73e8] transition-colors">{o.name}</div><div className="text-[11px] text-slate-400">{o.city}, {o.country}</div></div></TableCell>
+                          <TableCell className="font-bold text-slate-600">{o.phone}</TableCell>
+                          <TableCell className="text-center"><Badge className={cn("rounded-full px-3 py-1 text-[10px] font-bold uppercase", o.status === 'Active' ? "bg-green-100 text-green-600" : "bg-slate-100")}>{o.status}</Badge></TableCell>
+                          <TableCell className="text-right px-8">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="text-slate-400" onClick={e => e.stopPropagation()}><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-48 p-2">
+                                <DropdownMenuItem className="font-bold py-2.5" onClick={e => { e.stopPropagation(); setEditingOutlet(o); setIsAddingNew(true); }}><Edit2 className="h-4 w-4 mr-3" /> Edit</DropdownMenuItem>
+                                <DropdownMenuItem className="text-destructive font-black py-2.5" onClick={e => { e.stopPropagation(); setAllOutlets(prev => prev.filter(p => p.id !== o.id)); toast({ title: "Branch Deleted" }); }}><Trash2 className="h-4 w-4 mr-3" /> Delete</DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+               </ScrollArea>
             </div>
           )}
-
-          <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col min-h-0">
-            <div className="p-6 flex flex-col md:flex-row gap-4 border-b border-slate-50 bg-slate-50/10">
-              <div className="relative flex-1 max-sm:max-w-none max-w-sm">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <Input 
-                  placeholder="Search branches..." 
-                  className="pl-10 h-11 text-sm bg-white border-slate-200 focus-visible:ring-1 ring-[#1a73e8]/10"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              <Select onValueChange={(v) => setStatusFilter(v === 'all' ? null : v)} value={statusFilter || 'all'}>
-                <SelectTrigger className="w-56 h-11 bg-white border-slate-200">
-                  <SelectValue placeholder="Status: All" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Status: All</SelectItem>
-                  <SelectItem value="Active">Active</SelectItem>
-                  <SelectItem value="Inactive">Inactive</SelectItem>
-                </SelectContent>
-              </Select>
-              {(searchQuery || statusFilter) && (
-                <Button variant="ghost" size="sm" onClick={resetFilters} className="text-slate-400 hover:text-slate-900">
-                  <FilterX className="h-4 w-4 mr-2" /> Reset
-                </Button>
-              )}
-            </div>
-
-            <ScrollArea className="flex-1">
-              <Table>
-                <TableHeader className="bg-slate-50/50">
-                  <TableRow className="hover:bg-transparent border-b border-slate-100">
-                    <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-8 uppercase tracking-widest">
-                      <div className="flex items-center gap-1.5 cursor-pointer hover:text-slate-900 transition-colors">Name <ChevronsUpDown className="h-3 w-3 opacity-50" /></div>
-                    </TableHead>
-                    <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">
-                      Phone
-                    </TableHead>
-                    <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest text-center">
-                      Users
-                    </TableHead>
-                    <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">
-                      Timezone
-                    </TableHead>
-                    <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">
-                      City / Country
-                    </TableHead>
-                    <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest text-center">
-                      Status
-                    </TableHead>
-                    <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-8 text-right uppercase tracking-widest">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {paginatedOutlets.map((outlet) => (
-                    <TableRow 
-                      key={outlet.id} 
-                      className={cn(
-                        "group hover:bg-slate-50/50 transition-all border-b border-slate-50 cursor-pointer relative",
-                        editingOutlet?.id === outlet.id && "bg-[#1a73e8]/5 border-l-4 border-l-[#1a73e8]"
-                      )}
-                      onClick={() => handleEdit(outlet)}
-                    >
-                      <TableCell className="py-5 px-8">
-                        <div>
-                          <div className="font-extrabold text-[15px] text-[#1e293b] border-b border-transparent inline-block leading-tight mb-1 group-hover:text-[#1a73e8] transition-colors">{outlet.name}</div>
-                          <div className="text-[11px] text-slate-400 font-medium tracking-tight opacity-70">slug: {outlet.slug}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="px-4 text-[14px] text-[#1e293b] font-extrabold">
-                        {outlet.phone}
-                      </TableCell>
-                      <TableCell className="px-4 text-center">
-                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 border border-slate-100 rounded-lg group-hover:bg-white transition-colors">
-                          <UsersIcon className="h-3.5 w-3.5 text-[#1a73e8]" />
-                          <span className="text-[14px] font-black text-slate-900">{outlet.userCount || 0}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="px-4 text-[14px] text-slate-400 font-medium">
-                        {outlet.timezone}
-                      </TableCell>
-                      <TableCell className="px-4">
-                        <div className="text-[14px] text-[#1e293b] font-extrabold leading-none mb-1">{outlet.city}</div>
-                        <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{outlet.country}</div>
-                      </TableCell>
-                      <TableCell className="text-center px-4">
-                        <div className="flex justify-center">
-                          <Badge className={cn(
-                            "rounded-full px-3 py-1 text-[10px] font-bold flex items-center gap-2 border shadow-none uppercase tracking-wider",
-                            outlet.status === 'Active' 
-                              ? "bg-[#e1f9ef] text-[#22c55e] border-[#e1f9ef]" 
-                              : "bg-slate-100 text-slate-500 border-slate-200"
-                          )}>
-                            <div className={cn("h-1.5 w-1.5 rounded-full", outlet.status === 'Active' ? "bg-[#22c55e]" : "bg-slate-400")} />
-                            {outlet.status}
-                          </Badge>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right px-8">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <button 
-                              className="h-9 w-9 flex items-center justify-center rounded-full border border-slate-100 text-slate-400 hover:text-[#1e293b] hover:bg-white active:scale-90 transition-all" 
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <MoreHorizontal className="h-4 w-4" />
-                            </button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-48 p-2">
-                            <DropdownMenuItem className="font-bold py-2.5" onClick={(e) => { e.stopPropagation(); handleEdit(outlet); }}>
-                              <Edit2 className="h-4 w-4 mr-3 text-slate-400" /> Edit Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive font-black py-2.5" onClick={(e) => e.stopPropagation()}>Deactivate</DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              {filteredOutlets.length === 0 && (
-                <div className="py-32 text-center">
-                  <div className="h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100">
-                    <Store className="h-8 w-8 text-slate-200" />
-                  </div>
-                  <h3 className="text-sm font-bold text-slate-900">No Outlets Detected</h3>
-                  <p className="text-xs text-slate-500 mt-1">Refine your search or add a new branch to your portfolio.</p>
-                </div>
-              )}
-            </ScrollArea>
-            
-            {/* Pagination Controls */}
-            {totalPages > 1 && (
-              <div className="px-8 py-4 border-t border-slate-100 flex items-center justify-between bg-white">
-                <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">
-                  Showing <span className="text-slate-900">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to <span className="text-slate-900">{Math.min(currentPage * ITEMS_PER_PAGE, filteredOutlets.length)}</span> of <span className="text-slate-900">{filteredOutlets.length}</span> results
-                </p>
-                <div className="flex items-center gap-1">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="h-8 px-2 border-slate-200"
-                    disabled={currentPage === 1}
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
-                    if (totalPages > 5) {
-                      if (pageNum !== 1 && pageNum !== totalPages && Math.abs(pageNum - currentPage) > 1) {
-                        if (pageNum === 2 && currentPage > 3) return <span key="start-ellipsis" className="px-2 text-slate-300">...</span>;
-                        if (pageNum === totalPages - 1 && currentPage < totalPages - 2) return <span key="end-ellipsis" className="px-2 text-slate-300">...</span>;
-                        return null;
-                      }
-                    }
-                    return (
-                      <Button
-                        key={pageNum}
-                        variant={currentPage === pageNum ? "default" : "outline"}
-                        size="sm"
-                        className={cn("h-8 w-8 p-0 text-[11px] font-black border-slate-200", currentPage === pageNum ? "bg-slate-900 border-slate-900" : "text-slate-500")}
-                        onClick={() => setCurrentPage(pageNum)}
-                      >
-                        {pageNum}
-                      </Button>
-                    );
-                  })}
-                  
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="h-8 px-2 border-slate-200"
-                    disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
         </div>
       </SheetContent>
     </Sheet>

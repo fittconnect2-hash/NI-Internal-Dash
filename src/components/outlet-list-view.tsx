@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -48,7 +49,6 @@ import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Label } from "@/components/ui/label"
-import { initialOutlets, initialTenants } from "@/lib/mock-data"
 import { Outlet, Tenant } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
@@ -62,12 +62,14 @@ const COUNTRY_CITY_MAP: Record<string, string[]> = {
 }
 
 interface OutletListViewProps {
+  allOutlets: Outlet[];
+  setAllOutlets: React.Dispatch<React.SetStateAction<Outlet[]>>;
+  allTenants: Tenant[];
   onViewUsers: (outlet: Outlet) => void;
 }
 
-export function OutletListView({ onViewUsers }: OutletListViewProps) {
+export function OutletListView({ allOutlets, setAllOutlets, allTenants, onViewUsers }: OutletListViewProps) {
   const { toast } = useToast()
-  const [outlets, setOutlets] = React.useState<Outlet[]>(initialOutlets)
   const [searchQuery, setSearchQuery] = React.useState("")
   const [tenantFilter, setTenantFilter] = React.useState<string | null>(null)
   const [statusFilter, setStatusFilter] = React.useState<string | null>(null)
@@ -76,7 +78,7 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
   const [tenantSearch, setTenantSearch] = React.useState("")
   const [isTenantPopoverOpen, setIsTenantPopoverOpen] = React.useState(false)
 
-  // Form states for Parent Tenant search
+  // Form states
   const [isFormTenantPopoverOpen, setIsFormTenantPopoverOpen] = React.useState(false)
   const [formTenantSearch, setFormTenantSearch] = React.useState("")
 
@@ -115,13 +117,13 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
     setFormTenantSearch("")
   }, [editingOutlet, tenantFilter, isFormVisible])
 
-  // Calculate outlet counts for each tenant for the filter
+  // Calculate outlet counts for filter
   const tenantsWithCounts = React.useMemo(() => {
-    return initialTenants.map(tenant => ({
+    return allTenants.map(tenant => ({
       ...tenant,
-      count: outlets.filter(o => o.tenantId === tenant.id).length
+      count: allOutlets.filter(o => o.tenantId === tenant.id).length
     })).filter(tenant => tenant.count > 0)
-  }, [outlets])
+  }, [allOutlets, allTenants])
 
   const filteredTenantsForDropdown = React.useMemo(() => {
     return tenantsWithCounts.filter(t => 
@@ -130,13 +132,13 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
   }, [tenantsWithCounts, tenantSearch])
 
   const filteredTenantsForForm = React.useMemo(() => {
-    return initialTenants.filter(t => 
+    return allTenants.filter(t => 
       t.tenantName.toLowerCase().includes(formTenantSearch.toLowerCase())
     )
-  }, [formTenantSearch])
+  }, [allTenants, formTenantSearch])
 
   const filteredOutlets = React.useMemo(() => {
-    return outlets.filter(outlet => {
+    return allOutlets.filter(outlet => {
       const matchesSearch = outlet.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            outlet.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            outlet.phone.includes(searchQuery)
@@ -144,16 +146,14 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
       const matchesStatus = !statusFilter || outlet.status === statusFilter
       return matchesSearch && matchesTenant && matchesStatus
     })
-  }, [outlets, searchQuery, tenantFilter, statusFilter])
+  }, [allOutlets, searchQuery, tenantFilter, statusFilter])
 
-  // Pagination logic
   const totalPages = Math.ceil(filteredOutlets.length / ITEMS_PER_PAGE)
   const paginatedOutlets = React.useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE
     return filteredOutlets.slice(start, start + ITEMS_PER_PAGE)
   }, [filteredOutlets, currentPage])
 
-  // Reset page when filtering/searching
   React.useEffect(() => {
     setCurrentPage(1)
   }, [searchQuery, tenantFilter, statusFilter])
@@ -162,18 +162,14 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
     setEditingOutlet(outlet)
     setIsFormVisible(true)
     setIsFormLoading(true)
-    setTimeout(() => {
-      setIsFormLoading(false)
-    }, 800)
+    setTimeout(() => setIsFormLoading(false), 600)
   }
 
   const handleAddOutlet = () => {
     setEditingOutlet(null)
     setIsFormVisible(true)
     setIsFormLoading(true)
-    setTimeout(() => {
-      setIsFormLoading(false)
-    }, 400)
+    setTimeout(() => setIsFormLoading(false), 400)
   }
 
   const handleCloseForm = () => {
@@ -183,16 +179,12 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
 
   const handleSaveOutlet = () => {
     if (!formTenantId || !formName) {
-      toast({
-        title: "Validation Error",
-        description: "Please fill in all required fields.",
-        variant: "destructive"
-      })
+      toast({ title: "Validation Error", description: "Please fill in all required fields.", variant: "destructive" })
       return
     }
 
     if (editingOutlet) {
-      setOutlets(prev => prev.map(o => o.id === editingOutlet.id ? {
+      setAllOutlets(prev => prev.map(o => o.id === editingOutlet.id ? {
         ...o,
         tenantId: formTenantId,
         name: formName,
@@ -202,13 +194,10 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
         city: formCity,
         country: formCountry
       } : o))
-      toast({
-        title: "Outlet Updated",
-        description: `${formName} has been successfully updated.`
-      })
+      toast({ title: "Outlet Updated", description: `${formName} has been modified.` })
     } else {
       const newOutlet: Outlet = {
-        id: Math.random().toString(36).substr(2, 9),
+        id: `o-${Math.random().toString(36).substr(2, 9)}`,
         tenantId: formTenantId,
         name: formName,
         slug: formSlug,
@@ -219,11 +208,8 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
         status: 'Active',
         userCount: 0
       }
-      setOutlets(prev => [newOutlet, ...prev])
-      toast({
-        title: "Outlet Added",
-        description: `${formName} has been successfully added to your network.`
-      })
+      setAllOutlets(prev => [newOutlet, ...prev])
+      toast({ title: "Outlet Added", description: `${formName} added to the network.` })
     }
     handleCloseForm()
   }
@@ -237,8 +223,8 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
 
   const selectedTenantName = React.useMemo(() => {
     if (!formTenantId) return null
-    return initialTenants.find(t => t.id === formTenantId)?.tenantName
-  }, [formTenantId])
+    return allTenants.find(t => t.id === formTenantId)?.tenantName
+  }, [formTenantId, allTenants])
 
   return (
     <div className="p-6 md:p-8 flex flex-col h-full overflow-hidden bg-[#f8f9fc]">
@@ -257,19 +243,13 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
           </Button>
         </div>
 
-        {/* Search and Filters */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
             <div className="space-y-2.5">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Search Outlets</label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
-                <Input 
-                  placeholder="Name, city or phone..." 
-                  className="pl-9 h-11 text-sm bg-white border-slate-200" 
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
+                <Input placeholder="Name, city or phone..." className="pl-9 h-11 text-sm bg-white border-slate-200" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
               </div>
             </div>
 
@@ -277,59 +257,23 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Filter by Tenants</label>
               <Popover open={isTenantPopoverOpen} onOpenChange={setIsTenantPopoverOpen}>
                 <PopoverTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    role="combobox"
-                    className="w-full h-11 justify-between bg-white border-slate-200 text-sm font-medium px-3"
-                  >
-                    <span className="truncate">
-                      {tenantFilter 
-                        ? initialTenants.find(t => t.id === tenantFilter)?.tenantName 
-                        : "All Tenants"}
-                    </span>
+                  <Button variant="outline" role="combobox" className="w-full h-11 justify-between bg-white border-slate-200 text-sm font-medium px-3">
+                    <span className="truncate">{tenantFilter ? allTenants.find(t => t.id === tenantFilter)?.tenantName : "All Tenants"}</span>
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                <PopoverContent className="w-80 p-0 shadow-2xl border-slate-200" align="start">
                   <div className="flex items-center border-b px-3">
                     <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-                    <input
-                      className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground"
-                      placeholder="Search tenants..."
-                      value={tenantSearch}
-                      onChange={(e) => setTenantSearch(e.target.value)}
-                    />
+                    <Input className="flex h-11 w-full border-none shadow-none focus-visible:ring-0 bg-transparent py-3 text-sm outline-none" placeholder="Search tenants..." value={tenantSearch} onChange={(e) => setTenantSearch(e.target.value)} />
                   </div>
                   <ScrollArea className="h-72">
                     <div className="p-1">
-                      <Button
-                        variant="ghost"
-                        className="w-full justify-start font-normal text-sm h-10"
-                        onClick={() => {
-                          setTenantFilter(null);
-                          setIsTenantPopoverOpen(false);
-                          setTenantSearch("");
-                        }}
-                      >
-                        <Check className={cn("mr-2 h-4 w-4 text-[#1a73e8]", !tenantFilter ? "opacity-100" : "opacity-0")} />
-                        All Tenants
-                      </Button>
+                      <Button variant="ghost" className="w-full justify-start font-normal text-sm h-10" onClick={() => { setTenantFilter(null); setIsTenantPopoverOpen(false); }}>All Tenants</Button>
                       {filteredTenantsForDropdown.map((t) => (
-                        <Button
-                          key={t.id}
-                          variant="ghost"
-                          className="w-full justify-start font-normal text-sm h-10"
-                          onClick={() => {
-                            setTenantFilter(t.id);
-                            setIsTenantPopoverOpen(false);
-                            setTenantSearch("");
-                          }}
-                        >
-                          <Check className={cn("mr-2 h-4 w-4 text-[#1a73e8]", tenantFilter === t.id ? "opacity-100" : "opacity-0")} />
+                        <Button key={t.id} variant="ghost" className="w-full justify-start font-normal text-sm h-10 group" onClick={() => { setTenantFilter(t.id); setIsTenantPopoverOpen(false); }}>
                           <span className="truncate flex-1 text-left">{t.tenantName}</span>
-                          <span className="ml-auto text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
-                            {t.count} {t.count === 1 ? 'Outlet' : 'Outlets'}
-                          </span>
+                          <span className="ml-auto text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded group-hover:bg-white transition-colors">{t.count} Outlets</span>
                         </Button>
                       ))}
                     </div>
@@ -341,9 +285,7 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
             <div className="space-y-2.5">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Status</label>
               <Select onValueChange={(v) => setStatusFilter(v === 'all' ? null : v)} value={statusFilter || 'all'}>
-                <SelectTrigger className="h-11 bg-white border-slate-200 text-sm">
-                  <SelectValue placeholder="All Statuses" />
-                </SelectTrigger>
+                <SelectTrigger className="h-11 bg-white border-slate-200 text-sm"><SelectValue placeholder="All Statuses" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Statuses</SelectItem>
                   <SelectItem value="Active">Active</SelectItem>
@@ -353,11 +295,7 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
             </div>
 
             <div>
-              <Button 
-                variant="ghost" 
-                className="w-full h-11 text-slate-400 hover:text-[#1a73e8] hover:bg-[#1a73e8]/5 gap-2 font-bold transition-all"
-                onClick={resetFilters}
-              >
+              <Button variant="ghost" className="w-full h-11 text-slate-400 hover:text-[#1a73e8] gap-2 font-bold" onClick={resetFilters}>
                 <FilterX className="h-4 w-4" /> Reset Filters
               </Button>
             </div>
@@ -369,166 +307,75 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
             <div className="w-[400px] flex-shrink-0 bg-white rounded-2xl border border-slate-200 shadow-xl flex flex-col animate-in slide-in-from-left duration-500 overflow-hidden">
               <div className="p-6 border-b border-slate-50 flex items-center justify-between">
                 <div>
-                  <h3 className="font-extrabold text-lg text-[#1e293b]">
-                    {editingOutlet 
-                      ? `Edit ${editingOutlet.name}` 
-                      : selectedTenantName 
-                        ? `Add New Outlet to ${selectedTenantName}` 
-                        : "Add New Outlet"}
-                  </h3>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                    {editingOutlet ? "UPDATE BRANCH PARAMETERS" : "ENTER NEW BRANCH DETAILS"}
-                  </p>
+                  <h3 className="font-extrabold text-lg text-[#1e293b]">{editingOutlet ? `Edit ${editingOutlet.name}` : "Add New Outlet"}</h3>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">BRANCH PARAMETERS</p>
                 </div>
-                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={handleCloseForm}>
-                  <X className="h-4 w-4" />
-                </Button>
+                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={handleCloseForm}><X className="h-4 w-4" /></Button>
               </div>
               <ScrollArea className="flex-1">
                 {isFormLoading ? (
                   <div className="flex flex-col items-center justify-center h-full py-24 space-y-4">
                     <Loader2 className="h-10 w-10 animate-spin text-[#1a73e8]" />
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Loading Details...</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Loading...</p>
                   </div>
                 ) : (
                   <div className="px-8 py-6 space-y-8">
                     <div className="space-y-2.5">
                       <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">PARENT TENANT</Label>
-                      
-                      <Popover open={isFormTenantPopoverOpen} onOpenChange={setIsFormTenantPopoverOpen}>
+                      <Popover modal={true} open={isFormTenantPopoverOpen} onOpenChange={setIsFormTenantPopoverOpen}>
                         <PopoverTrigger asChild>
-                          <Button 
-                            variant="outline" 
-                            role="combobox"
-                            className="w-full h-12 justify-between bg-slate-50/50 border-slate-200 text-sm font-medium px-3"
-                          >
-                            <span className="truncate">
-                              {formTenantId 
-                                ? initialTenants.find(t => t.id === formTenantId)?.tenantName 
-                                : "Select Parent Tenant"}
-                            </span>
+                          <Button variant="outline" className="w-full h-12 justify-between bg-slate-50/50 border-slate-200 text-sm font-medium px-3">
+                            <span className="truncate">{formTenantId ? allTenants.find(t => t.id === formTenantId)?.tenantName : "Select Tenant"}</span>
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                           </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                        <PopoverContent className="w-80 p-0 z-[110] shadow-2xl border-slate-200" align="start">
                           <div className="flex items-center border-b px-3">
                             <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-                            <input
-                              className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground"
-                              placeholder="Search tenants..."
-                              value={formTenantSearch}
-                              onChange={(e) => setFormTenantSearch(e.target.value)}
-                            />
+                            <Input autoFocus className="flex h-11 w-full border-none shadow-none focus-visible:ring-0 bg-transparent py-3 text-sm outline-none" placeholder="Search..." value={formTenantSearch} onChange={(e) => setFormTenantSearch(e.target.value)} />
                           </div>
                           <ScrollArea className="h-60">
                             <div className="p-1">
                               {filteredTenantsForForm.map((t) => (
-                                <Button
-                                  key={t.id}
-                                  variant="ghost"
-                                  className="w-full justify-start font-normal text-sm h-10"
-                                  onClick={() => {
-                                    setFormTenantId(t.id);
-                                    setIsFormTenantPopoverOpen(false);
-                                    setFormTenantSearch("");
-                                  }}
+                                <button 
+                                  key={t.id} 
+                                  type="button" 
+                                  className={cn("w-full flex items-center justify-between px-3 py-2.5 rounded-md text-sm transition-colors hover:bg-slate-100 group", formTenantId === t.id && "bg-primary/5 text-primary font-bold")}
+                                  onClick={() => { setFormTenantId(t.id); setIsFormTenantPopoverOpen(false); }}
                                 >
-                                  <Check className={cn("mr-2 h-4 w-4 text-[#1a73e8]", formTenantId === t.id ? "opacity-100" : "opacity-0")} />
                                   <span className="truncate flex-1 text-left">{t.tenantName}</span>
-                                </Button>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded group-hover:bg-white transition-colors">{t.numberOfOutlets} Outlets</span>
+                                    {formTenantId === t.id && <Check className="h-4 w-4" />}
+                                  </div>
+                                </button>
                               ))}
-                              {filteredTenantsForForm.length === 0 && (
-                                <div className="py-6 text-center text-xs text-slate-400">No organizations found.</div>
-                              )}
                             </div>
                           </ScrollArea>
                         </PopoverContent>
                       </Popover>
                     </div>
-
-                    <div className="space-y-2.5">
-                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">OUTLET NAME</Label>
-                      <Input 
-                        placeholder="e.g. Downtown Branch"
-                        value={formName} 
-                        onChange={(e) => setFormName(e.target.value)} 
-                        className="h-12 bg-slate-50/50 border-slate-200" 
-                      />
-                    </div>
-                    <div className="space-y-2.5">
-                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">SLUG</Label>
-                      <Input 
-                        placeholder="e.g. downtown-branch"
-                        value={formSlug} 
-                        onChange={(e) => setFormSlug(e.target.value)} 
-                        className="h-12 bg-slate-50/50 border-slate-200" 
-                      />
-                    </div>
-                    <div className="space-y-2.5">
-                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">PHONE</Label>
-                      <Input 
-                        placeholder="e.g. +971 50 123 4567"
-                        value={formPhone} 
-                        onChange={(e) => setFormPhone(e.target.value)} 
-                        className="h-12 bg-slate-50/50 border-slate-200" 
-                      />
-                    </div>
-                    <div className="space-y-2.5">
-                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">TIMEZONE</Label>
-                      <Select value={formTimezone} onValueChange={setFormTimezone}>
-                        <SelectTrigger className="h-12 bg-slate-50/50 border-slate-200">
-                          <SelectValue placeholder="Select Timezone" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Asia/Dubai">Asia/Dubai (GMT+4)</SelectItem>
-                          <SelectItem value="America/New_York">America/New_York (GMT-5)</SelectItem>
-                          <SelectItem value="Europe/London">Europe/London (GMT+0)</SelectItem>
-                          <SelectItem value="UTC">UTC</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    <div className="space-y-2.5"><Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">OUTLET NAME</Label><Input placeholder="Branch Name" value={formName} onChange={(e) => setFormName(e.target.value)} className="h-12 bg-slate-50/50" /></div>
+                    <div className="space-y-2.5"><Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">PHONE</Label><Input placeholder="+971..." value={formPhone} onChange={(e) => setFormPhone(e.target.value)} className="h-12 bg-slate-50/50" /></div>
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2.5">
-                        <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">COUNTRY</Label>
-                        <Select value={formCountry} onValueChange={(val) => { setFormCountry(val); setFormCity(""); }}>
-                          <SelectTrigger className="h-12 bg-slate-50/50 border-slate-200">
-                            <SelectValue placeholder="Select Country" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {Object.keys(COUNTRY_CITY_MAP).map(country => (
-                              <SelectItem key={country} value={country}>{country}</SelectItem>
-                            ))}
-                          </SelectContent>
+                      <div className="space-y-2.5"><Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">COUNTRY</Label>
+                        <Select value={formCountry} onValueChange={(val) => { setFormCountry(val); setFormCity(""); }}><SelectTrigger className="h-12 bg-slate-50/50"><SelectValue placeholder="Country" /></SelectTrigger>
+                          <SelectContent>{Object.keys(COUNTRY_CITY_MAP).map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                         </Select>
                       </div>
-                      <div className="space-y-2.5">
-                        <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">CITY</Label>
-                        <Select value={formCity} onValueChange={setFormCity} disabled={!formCountry}>
-                          <SelectTrigger className="h-12 bg-slate-50/50 border-slate-200">
-                            <SelectValue placeholder="Select City" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {(COUNTRY_CITY_MAP[formCountry] || []).map(city => (
-                              <SelectItem key={city} value={city}>{city}</SelectItem>
-                            ))}
-                          </SelectContent>
+                      <div className="space-y-2.5"><Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">CITY</Label>
+                        <Select value={formCity} onValueChange={setFormCity} disabled={!formCountry}><SelectTrigger className="h-12 bg-slate-50/50"><SelectValue placeholder="City" /></SelectTrigger>
+                          <SelectContent>{(COUNTRY_CITY_MAP[formCountry] || []).map(ci => <SelectItem key={c} value={ci}>{ci}</SelectItem>)}</SelectContent>
                         </Select>
                       </div>
                     </div>
                   </div>
                 )}
               </ScrollArea>
-              {!isFormLoading && (
-                <div className="p-6 border-t border-slate-100 flex gap-4 bg-slate-50/30">
-                  <Button variant="outline" className="flex-1 h-12" onClick={handleCloseForm}>Cancel</Button>
-                  <Button 
-                    className="flex-1 h-12 bg-[#1a73e8] hover:bg-[#1557b0] text-white font-bold"
-                    onClick={handleSaveOutlet}
-                  >
-                    {editingOutlet ? "Save Changes" : "Create Outlet"}
-                  </Button>
-                </div>
-              )}
+              <div className="p-6 border-t border-slate-100 flex gap-4 bg-slate-50/30">
+                <Button variant="outline" className="flex-1 h-12" onClick={handleCloseForm}>Cancel</Button>
+                <Button className="flex-1 h-12 bg-[#1a73e8] hover:bg-[#1557b0] text-white font-bold" onClick={handleSaveOutlet}>{editingOutlet ? "Save" : "Create"}</Button>
+              </div>
             </div>
           )}
 
@@ -537,89 +384,40 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
               <Table>
                 <TableHeader className="bg-slate-50/50">
                   <TableRow className="hover:bg-transparent border-b border-slate-100">
-                    <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-8 uppercase tracking-widest">
-                      <div className="flex items-center gap-1.5 cursor-pointer hover:text-slate-900 transition-colors">Name <ChevronsUpDown className="h-3 w-3 opacity-50" /></div>
-                    </TableHead>
-                    <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">
-                      Phone
-                    </TableHead>
-                    <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest text-center">
-                      Users
-                    </TableHead>
-                    <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">
-                      Timezone
-                    </TableHead>
-                    <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">
-                      City / Country
-                    </TableHead>
-                    <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest text-center">
-                      Status
-                    </TableHead>
+                    <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-8 uppercase tracking-widest">Name</TableHead>
+                    <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">Phone</TableHead>
+                    <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest text-center">Users</TableHead>
+                    <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest text-center">Status</TableHead>
                     <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-8 text-right uppercase tracking-widest">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {paginatedOutlets.map((outlet) => (
-                    <TableRow 
-                      key={outlet.id} 
-                      className={cn(
-                        "group hover:bg-slate-50/50 transition-all border-b border-slate-50 cursor-pointer",
-                        editingOutlet?.id === outlet.id && "bg-[#1a73e8]/5"
-                      )}
-                      onClick={() => handleEdit(outlet)}
-                    >
+                    <TableRow key={outlet.id} className="group hover:bg-slate-50/50 transition-all border-b border-slate-50 cursor-pointer" onClick={() => handleEdit(outlet)}>
                       <TableCell className="py-5 px-8">
                         <div>
-                          <div className="font-extrabold text-[15px] text-[#1e293b] border-b border-transparent inline-block leading-tight mb-1 group-hover:text-[#1a73e8] transition-colors">{outlet.name}</div>
-                          <div className="text-[11px] text-slate-400 font-medium tracking-tight opacity-70">slug: {outlet.slug}</div>
+                          <div className="font-extrabold text-[15px] text-[#1e293b] group-hover:text-[#1a73e8] transition-colors">{outlet.name}</div>
+                          <div className="text-[11px] text-slate-400 font-medium">brand: {allTenants.find(t => t.id === outlet.tenantId)?.tenantName}</div>
                         </div>
                       </TableCell>
-                      <TableCell className="px-4 text-[14px] text-[#1e293b] font-extrabold">
-                        {outlet.phone}
-                      </TableCell>
+                      <TableCell className="px-4 text-[14px] text-[#1e293b] font-extrabold">{outlet.phone}</TableCell>
                       <TableCell className="px-4 text-center">
                         <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 border border-slate-100 rounded-lg group-hover:bg-white transition-colors">
                           <Users className="h-3.5 w-3.5 text-[#1a73e8]" />
                           <span className="text-[14px] font-black text-slate-900">{outlet.userCount || 0}</span>
                         </div>
                       </TableCell>
-                      <TableCell className="px-4 text-[14px] text-slate-400 font-medium">
-                        {outlet.timezone}
-                      </TableCell>
-                      <TableCell className="px-4">
-                        <div className="text-[14px] text-[#1e293b] font-extrabold leading-none mb-1">{outlet.city}</div>
-                        <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{outlet.country}</div>
-                      </TableCell>
                       <TableCell className="px-4 text-center">
-                        <div className="flex justify-center">
-                          <Badge className={cn(
-                            "rounded-full px-3 py-1 text-[10px] font-bold flex items-center gap-2 border shadow-none uppercase tracking-wider",
-                            outlet.status === 'Active' 
-                              ? "bg-[#e1f9ef] text-[#22c55e] border-[#e1f9ef]" 
-                              : "bg-slate-100 text-slate-500 border-slate-200"
-                          )}>
-                            <div className={cn("h-1.5 w-1.5 rounded-full", outlet.status === 'Active' ? "bg-[#22c55e]" : "bg-slate-400")} />
-                            {outlet.status}
-                          </Badge>
-                        </div>
+                        <Badge className={cn("rounded-full px-3 py-1 text-[10px] font-bold uppercase", outlet.status === 'Active' ? "bg-[#e1f9ef] text-[#22c55e]" : "bg-slate-100 text-slate-500")}>
+                          {outlet.status}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-right px-8">
                         <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="h-9 w-9 rounded-full hover:bg-white border border-transparent hover:border-slate-100 text-slate-400" 
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
+                          <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-slate-400" onClick={(e) => e.stopPropagation()}><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-48 p-2">
-                            <DropdownMenuItem className="font-bold py-2.5" onClick={(e) => { e.stopPropagation(); handleEdit(outlet); }}>
-                              <Edit2 className="h-4 w-4 mr-3 text-slate-400" /> Edit Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive font-black py-2.5" onClick={(e) => e.stopPropagation()}>Deactivate</DropdownMenuItem>
+                            <DropdownMenuItem className="font-bold py-2.5" onClick={(e) => { e.stopPropagation(); handleEdit(outlet); }}><Edit2 className="h-4 w-4 mr-3 text-slate-400" /> Edit</DropdownMenuItem>
+                            <DropdownMenuItem className="text-destructive font-black py-2.5" onClick={(e) => { e.stopPropagation(); setAllOutlets(prev => prev.filter(o => o.id !== outlet.id)); toast({ title: "Outlet Deleted" }); }}>Delete</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -627,64 +425,13 @@ export function OutletListView({ onViewUsers }: OutletListViewProps) {
                   ))}
                 </TableBody>
               </Table>
-              {filteredOutlets.length === 0 && (
-                <div className="py-24 text-center">
-                  <div className="h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100">
-                    <Store className="h-8 w-8 text-slate-200" />
-                  </div>
-                  <h3 className="text-sm font-extrabold text-slate-900">No Outlets Detected</h3>
-                  <p className="text-xs text-slate-500 mt-1">Adjust your filters or add a new branch to your network.</p>
-                </div>
-              )}
             </ScrollArea>
-            
-            {/* Pagination Controls */}
             {totalPages > 1 && (
               <div className="px-8 py-4 border-t border-slate-100 flex items-center justify-between bg-white">
-                <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">
-                  Showing <span className="text-slate-900">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to <span className="text-slate-900">{Math.min(currentPage * ITEMS_PER_PAGE, filteredOutlets.length)}</span> of <span className="text-slate-900">{filteredOutlets.length}</span> results
-                </p>
-                <div className="flex items-center gap-1">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="h-8 px-2 border-slate-200"
-                    disabled={currentPage === 1}
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
-                    if (totalPages > 5) {
-                      if (pageNum !== 1 && pageNum !== totalPages && Math.abs(pageNum - currentPage) > 1) {
-                        if (pageNum === 2 && currentPage > 3) return <span key="start-ellipsis" className="px-2 text-slate-300">...</span>;
-                        if (pageNum === totalPages - 1 && currentPage < totalPages - 2) return <span key="end-ellipsis" className="px-2 text-slate-300">...</span>;
-                        return null;
-                      }
-                    }
-                    return (
-                      <Button
-                        key={pageNum}
-                        variant={currentPage === pageNum ? "default" : "outline"}
-                        size="sm"
-                        className={cn("h-8 w-8 p-0 text-[11px] font-black border-slate-200", currentPage === pageNum ? "bg-slate-900 border-slate-900" : "text-slate-500")}
-                        onClick={() => setCurrentPage(pageNum)}
-                      >
-                        {pageNum}
-                      </Button>
-                    );
-                  })}
-                  
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="h-8 px-2 border-slate-200"
-                    disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
+                <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">Page {currentPage} of {totalPages}</p>
+                <div className="flex gap-1">
+                  <Button variant="outline" size="sm" className="h-8 px-2" disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}><ChevronLeft className="h-4 w-4" /></Button>
+                  <Button variant="outline" size="sm" className="h-8 px-2" disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)}><ChevronRight className="h-4 w-4" /></Button>
                 </div>
               </div>
             )}

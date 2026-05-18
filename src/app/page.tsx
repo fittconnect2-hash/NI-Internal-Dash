@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -11,8 +12,8 @@ import { UserManagement } from "@/components/user-management"
 import { DashboardOverview } from "@/components/dashboard-overview"
 import { OutletListView } from "@/components/outlet-list-view"
 import { UserListView } from "@/components/user-list-view"
-import { initialTenants } from "@/lib/mock-data"
-import { Tenant, User } from "@/lib/types"
+import { initialTenants, initialOutlets, initialUsers } from "@/lib/mock-data"
+import { Tenant, User, Outlet } from "@/lib/types"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { 
   Search, 
@@ -33,12 +34,23 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
+import { useToast } from "@/hooks/use-toast"
 
 const ITEMS_PER_PAGE = 8
+const STORAGE_KEYS = {
+  TENANTS: 'network-dine-tenants-v1',
+  OUTLETS: 'network-dine-outlets-v1',
+  USERS: 'network-dine-users-v1',
+}
 
 export default function DashboardPage() {
+  const { toast } = useToast()
   const [activeTab, setActiveTab] = React.useState("dashboard")
-  const [tenants, setTenants] = React.useState<Tenant[]>(initialTenants)
+  const [tenants, setTenants] = React.useState<Tenant[]>([])
+  const [outlets, setOutlets] = React.useState<Outlet[]>([])
+  const [users, setUsers] = React.useState<User[]>([])
+  const [isLoaded, setIsLoaded] = React.useState(false)
+
   const [searchQuery, setSearchQuery] = React.useState("")
   const [filterStatus, setFilterStatus] = React.useState<string | null>(null)
   const [viewMode, setViewMode] = React.useState<'grid' | 'list'>('grid')
@@ -56,6 +68,26 @@ export default function DashboardPage() {
   const [selectedTenant, setSelectedTenant] = React.useState<Tenant | null>(null)
   const [editingUser, setEditingUser] = React.useState<User | null>(null)
   const [isAddingNewUser, setIsAddingNewUser] = React.useState(false)
+
+  // Persistence Logic
+  React.useEffect(() => {
+    const t = localStorage.getItem(STORAGE_KEYS.TENANTS)
+    const o = localStorage.getItem(STORAGE_KEYS.OUTLETS)
+    const u = localStorage.getItem(STORAGE_KEYS.USERS)
+
+    setTenants(t ? JSON.parse(t) : initialTenants)
+    setOutlets(o ? JSON.parse(o) : initialOutlets)
+    setUsers(u ? JSON.parse(u) : initialUsers)
+    setIsLoaded(true)
+  }, [])
+
+  React.useEffect(() => {
+    if (isLoaded) {
+      localStorage.setItem(STORAGE_KEYS.TENANTS, JSON.stringify(tenants))
+      localStorage.setItem(STORAGE_KEYS.OUTLETS, JSON.stringify(outlets))
+      localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users))
+    }
+  }, [tenants, outlets, users, isLoaded])
 
   // Filter logic
   const filteredTenants = React.useMemo(() => {
@@ -84,16 +116,18 @@ export default function DashboardPage() {
   const handleAddTenant = (data: Partial<Tenant>) => {
     if (editingTenant) {
       setTenants(prev => prev.map(t => t.id === editingTenant.id ? { ...t, ...data } as Tenant : t))
+      toast({ title: "Tenant Updated", description: `${data.tenantName} has been successfully modified.` })
     } else {
       const newTenant: Tenant = {
         ...data,
-        id: Math.random().toString(36).substr(2, 9),
+        id: `t-${Math.random().toString(36).substr(2, 9)}`,
         configurationStatus: 'Configuration pending',
         isPaymentGatewayConfigured: false,
         numberOfOutlets: 0,
         numberOfUsers: 0,
       } as Tenant
       setTenants(prev => [newTenant, ...prev])
+      toast({ title: "New Tenant Added", description: `${data.tenantName} is now registered on the platform.` })
     }
     setIsFormOpen(false)
     setEditingTenant(null)
@@ -101,6 +135,9 @@ export default function DashboardPage() {
 
   const handleDeleteTenant = (id: string) => {
     setTenants(prev => prev.filter(t => t.id !== id))
+    setOutlets(prev => prev.filter(o => o.tenantId !== id))
+    setUsers(prev => prev.filter(u => u.tenantId !== id))
+    toast({ title: "Tenant Removed", description: "The organization and all associated data have been deleted." })
   }
 
   const handleConfigureTenant = (tenant: Tenant) => {
@@ -131,7 +168,32 @@ export default function DashboardPage() {
     setIsUsersDrawerOpen(true)
   }
 
+  const updateTenantCounts = (tid: string) => {
+    setTenants(prev => prev.map(t => {
+      if (t.id === tid) {
+        const uCount = users.filter(u => u.tenantId === tid).length
+        const oCount = outlets.filter(o => o.tenantId === tid).length
+        return { ...t, numberOfUsers: uCount, numberOfOutlets: oCount }
+      }
+      return t
+    }))
+  }
+
+  // Effect to keep counts in sync when lists change
+  React.useEffect(() => {
+    if (isLoaded) {
+      const tenantIds = tenants.map(t => t.id)
+      setTenants(prev => prev.map(t => {
+        const uCount = users.filter(u => u.tenantId === t.id).length
+        const oCount = outlets.filter(o => o.tenantId === t.id).length
+        return { ...t, numberOfUsers: uCount, numberOfOutlets: oCount }
+      }))
+    }
+  }, [users.length, outlets.length, isLoaded])
+
   const renderContent = () => {
+    if (!isLoaded) return <div className="flex-1 flex items-center justify-center"><p className="text-sm font-bold text-slate-400 animate-pulse">Initializing Data...</p></div>
+
     if (activeTab === 'dashboard') {
       return <DashboardOverview />
     }
@@ -139,6 +201,9 @@ export default function DashboardPage() {
     if (activeTab === 'outlets') {
       return (
         <OutletListView 
+          allOutlets={outlets}
+          setAllOutlets={setOutlets}
+          allTenants={tenants}
           onViewUsers={(outlet) => {
             const owner = tenants.find(t => t.id === outlet.tenantId)
             setSelectedTenant(owner || null)
@@ -152,6 +217,10 @@ export default function DashboardPage() {
     if (activeTab === 'users') {
       return (
         <UserListView 
+          allUsers={users}
+          setAllUsers={setUsers}
+          allTenants={tenants}
+          allOutlets={outlets}
           onAddUser={handleAddUserGlobal}
           onEditUser={(user) => {
             setEditingUser(user)
@@ -345,6 +414,9 @@ export default function DashboardPage() {
       />
       <OutletManagement
         tenant={selectedTenant}
+        allOutlets={outlets}
+        setAllOutlets={setOutlets}
+        allTenants={tenants}
         isOpen={isOutletsDrawerOpen}
         onClose={() => {setIsOutletsDrawerOpen(false); setSelectedTenant(null)}}
         onViewUsers={(outlet) => {
@@ -356,6 +428,10 @@ export default function DashboardPage() {
       <UserManagement
         tenant={selectedTenant}
         editingUser={editingUser}
+        allUsers={users}
+        setAllUsers={setUsers}
+        allTenants={tenants}
+        allOutlets={outlets}
         isOpen={isUsersDrawerOpen}
         defaultAdding={isAddingNewUser}
         onClose={() => {
