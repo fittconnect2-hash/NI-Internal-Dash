@@ -56,14 +56,13 @@ interface MultiGatewaySelectorProps {
 
 /**
  * Optimized Multi-Selection Component for Payment Gateways
- * Uses a non-modal Popover to avoid interaction conflicts with the parent Sheet.
+ * Uses standard button interactions and non-modal Popover to prevent focus-stealing
  */
 function MultiGatewaySelector({ allGateways, selectedIds, onToggle }: MultiGatewaySelectorProps) {
   const activeGateways = allGateways.filter(g => g.isEnabled)
-  const [isOpen, setIsOpen] = React.useState(false)
   
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen} modal={false}>
+    <Popover modal={false}>
       <PopoverTrigger asChild>
         <Button 
           type="button"
@@ -79,11 +78,10 @@ function MultiGatewaySelector({ allGateways, selectedIds, onToggle }: MultiGatew
         </Button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-80 p-0 shadow-2xl rounded-2xl overflow-hidden border-slate-200 z-[150]" 
+        className="w-80 p-0 shadow-2xl rounded-2xl overflow-hidden border-slate-200 z-[200]" 
         align="start"
         side="bottom"
         sideOffset={5}
-        onCloseAutoFocus={(e) => e.preventDefault()}
       >
         <div className="bg-slate-50/80 p-3 border-b border-slate-100">
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Options</p>
@@ -93,31 +91,33 @@ function MultiGatewaySelector({ allGateways, selectedIds, onToggle }: MultiGatew
             {activeGateways.map(g => {
               const isSelected = selectedIds.includes(g.id);
               return (
-                <div
+                <button
                   key={g.id}
+                  type="button"
                   className={cn(
-                    "w-full flex items-center gap-4 p-3 hover:bg-slate-50 rounded-xl cursor-pointer transition-all group",
+                    "w-full flex items-center gap-4 p-3 hover:bg-slate-50 rounded-xl transition-all group text-left",
                     isSelected && "bg-primary/5"
                   )}
                   onClick={(e) => {
+                    e.preventDefault();
                     e.stopPropagation();
                     onToggle(g.id);
                   }}
                 >
                   <div className={cn(
                     "h-6 w-6 rounded-full border-2 flex items-center justify-center transition-all shrink-0",
-                    isSelected ? "bg-primary border-primary" : "border-slate-300 bg-white shadow-inner"
+                    isSelected ? "bg-primary border-primary shadow-sm" : "border-slate-300 bg-white"
                   )}>
                     {isSelected && <Check className="h-3.5 w-3.5 text-white stroke-[4px]" />}
                   </div>
                   <div className="flex flex-col min-w-0">
                     <span className={cn(
-                      "text-[14px] font-extrabold truncate transition-colors leading-tight",
+                      "text-[14px] font-extrabold truncate leading-tight transition-colors",
                       isSelected ? "text-slate-900" : "text-slate-600 group-hover:text-slate-900"
                     )}>{g.name}</span>
                     <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tight mt-0.5">{g.provider}</span>
                   </div>
-                </div>
+                </button>
               );
             })}
             {activeGateways.length === 0 && (
