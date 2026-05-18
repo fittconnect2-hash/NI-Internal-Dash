@@ -509,7 +509,7 @@ export function DashboardOverview() {
       {/* Navigation for sections */}
       <div className="flex border-b border-slate-200">
         {[
-          { id: 'revenue', label: 'Money' },
+          { id: 'revenue', label: 'Revenue' },
           { id: 'orders', label: 'Orders' },
           { id: 'growth', label: 'Growth' },
           { id: 'efficiency', label: 'Speed' }
