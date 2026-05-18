@@ -39,10 +39,10 @@ import { useToast } from "@/hooks/use-toast"
 
 const ITEMS_PER_PAGE = 8
 const STORAGE_KEYS = {
-  TENANTS: 'network-dine-tenants-v1',
-  OUTLETS: 'network-dine-outlets-v1',
+  TENANTS: 'network-dine-tenants-v2', // Incremented for multi-gw
+  OUTLETS: 'network-dine-outlets-v2', // Incremented for multi-gw
   USERS: 'network-dine-users-v1',
-  GATEWAYS: 'network-dine-gateways-v3', // Incremented key to force refresh
+  GATEWAYS: 'network-dine-gateways-v3',
 }
 
 export default function DashboardPage() {
@@ -164,14 +164,13 @@ export default function DashboardPage() {
     setIsConfigOpen(true)
   }
 
-  const handleSaveConfiguration = (tenantId: string, updates: Partial<Tenant>, outletUpdates?: Record<string, string>) => {
+  const handleSaveConfiguration = (tenantId: string, updates: Partial<Tenant>, outletUpdates?: Record<string, string[]>) => {
     setTenants(prev => prev.map(t => t.id === tenantId ? { ...t, ...updates } : t))
     
     if (outletUpdates) {
       setOutlets(prev => prev.map(o => {
         if (o.tenantId === tenantId && outletUpdates[o.id] !== undefined) {
-          const val = outletUpdates[o.id]
-          return { ...o, gatewayId: val === 'none' ? undefined : val }
+          return { ...o, gatewayIds: outletUpdates[o.id] }
         }
         return o
       }))
@@ -279,7 +278,7 @@ export default function DashboardPage() {
     if (activeTab === 'tenants') {
       return (
         <div className="p-6 md:p-8 flex flex-col h-full overflow-hidden bg-[#f8f9fc]">
-          <div className="w-full mx-auto flex-1 flex flex-col min-h-0 max-w-full">
+          <div className="max-w-7xl mx-auto w-full flex-1 flex flex-col min-h-0">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
               <div>
                 <h1 className="text-3xl font-black text-slate-900 tracking-tight">Tenant Management</h1>

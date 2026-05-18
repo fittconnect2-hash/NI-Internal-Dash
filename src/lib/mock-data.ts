@@ -21,7 +21,7 @@ function generateMockTenants(count: number): Tenant[] {
       lastLoginDate: '2024-05-15',
       isPaymentGatewayConfigured: true,
       paymentGatewayMode: 'global',
-      globalGatewayId: 'g-3',
+      globalGatewayIds: ['g-3'],
       numberOfOutlets: 2,
       numberOfUsers: 12,
       merchantId: 'M-78291',
@@ -107,7 +107,8 @@ function generateMockOutlets(tenants: Tenant[]): Outlet[] {
         streetAddress: tenant.addressLine1,
         zipCode: tenant.zipCode,
         status: 'Active',
-        userCount: Math.floor(Math.random() * 10) + 2
+        userCount: Math.floor(Math.random() * 10) + 2,
+        gatewayIds: tenant.globalGatewayIds ? [...tenant.globalGatewayIds] : []
       });
     }
   });

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ArrowLeft, Minus, Plus, Calendar as CalendarIcon, ShieldCheck, Globe, Store } from "lucide-react"
+import { ArrowLeft, Minus, Plus, Calendar as CalendarIcon, ShieldCheck, Globe, Store, Check } from "lucide-react"
 import { Tenant, Gateway, Outlet } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import {
@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Checkbox } from "@/components/ui/checkbox"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 
@@ -39,7 +40,7 @@ interface TenantConfigurationProps {
   allOutlets: Outlet[];
   isOpen: boolean;
   onClose: () => void;
-  onSave: (tenantId: string, updates: Partial<Tenant>, outletUpdates?: Record<string, string>) => void;
+  onSave: (tenantId: string, updates: Partial<Tenant>, outletUpdates?: Record<string, string[]>) => void;
 }
 
 const configTabs = [
@@ -56,8 +57,8 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
 
   // Gateway state
   const [gwMode, setGwMode] = React.useState<'global' | 'by-outlet'>('global')
-  const [globalGwId, setGlobalGwId] = React.useState<string>("")
-  const [outletGwMap, setOutletGwMap] = React.useState<Record<string, string>>({})
+  const [globalGwIds, setGlobalGwIds] = React.useState<string[]>([])
+  const [outletGwMap, setOutletGwMap] = React.useState<Record<string, string[]>>({})
 
   const tenantOutlets = React.useMemo(() => {
     return allOutlets.filter(o => o.tenantId === tenant?.id)
@@ -66,11 +67,11 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
   React.useEffect(() => {
     if (tenant && isOpen) {
       setGwMode(tenant.paymentGatewayMode || 'global')
-      setGlobalGwId(tenant.globalGatewayId || "")
+      setGlobalGwIds(tenant.globalGatewayIds || [])
       
-      const initialMap: Record<string, string> = {}
+      const initialMap: Record<string, string[]> = {}
       tenantOutlets.forEach(o => {
-        initialMap[o.id] = o.gatewayId || ""
+        initialMap[o.id] = o.gatewayIds || []
       })
       setOutletGwMap(initialMap)
     }
@@ -90,16 +91,73 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
     setSuggestedTipRates(newRates)
   }
 
+  const handleToggleGlobalGw = (id: string) => {
+    setGlobalGwIds(prev => 
+      prev.includes(id) ? prev.filter(gid => gid !== id) : [...prev, id]
+    )
+  }
+
+  const handleToggleOutletGw = (outletId: string, gwId: string) => {
+    const current = outletGwMap[outletId] || []
+    const updated = current.includes(gwId) 
+      ? current.filter(id => id !== gwId)
+      : [...current, gwId]
+    
+    setOutletGwMap(prev => ({
+      ...prev,
+      [outletId]: updated
+    }))
+  }
+
   const handleSave = () => {
     if (!tenant) return
     
     const updates: Partial<Tenant> = {
       paymentGatewayMode: gwMode,
-      globalGatewayId: globalGwId,
-      isPaymentGatewayConfigured: (gwMode === 'global' && !!globalGwId) || (gwMode === 'by-outlet' && Object.values(outletGwMap).some(id => !!id))
+      globalGatewayIds: globalGwIds,
+      isPaymentGatewayConfigured: (gwMode === 'global' && globalGwIds.length > 0) || (gwMode === 'by-outlet' && Object.values(outletGwMap).some(ids => ids.length > 0))
     }
 
     onSave(tenant.id, updates, outletGwMap)
+  }
+
+  const MultiGatewaySelector = ({ selectedIds, onToggle, label }: { selectedIds: string[], onToggle: (id: string) => void, label?: string }) => {
+    const activeGateways = allGateways.filter(g => g.isEnabled)
+    
+    return (
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button variant="outline" className="w-full h-12 justify-between bg-white border-slate-200">
+            <span className="truncate">
+              {selectedIds.length === 0 
+                ? "Select Gateways..." 
+                : `${selectedIds.length} Gateways selected`}
+            </span>
+            <Plus className="h-4 w-4 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-80 p-2 shadow-2xl" align="start">
+          <div className="space-y-1">
+            {activeGateways.map(g => (
+              <div 
+                key={g.id} 
+                className="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg cursor-pointer transition-colors"
+                onClick={() => onToggle(g.id)}
+              >
+                <Checkbox checked={selectedIds.includes(g.id)} onCheckedChange={() => onToggle(g.id)} />
+                <div className="flex flex-col">
+                  <span className="text-[13px] font-bold text-slate-900">{g.name}</span>
+                  <span className="text-[10px] text-slate-400 font-bold uppercase">{g.provider}</span>
+                </div>
+              </div>
+            ))}
+            {activeGateways.length === 0 && (
+              <p className="p-4 text-center text-xs text-slate-400 font-bold uppercase">No active gateways found</p>
+            )}
+          </div>
+        </PopoverContent>
+      </Popover>
+    )
   }
 
   if (!tenant) return null
@@ -221,7 +279,7 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
                       <Globe className="mb-3 h-6 w-6 text-primary" />
                       <div className="text-center">
                         <p className="font-black text-[13px] uppercase tracking-wider">Global Application</p>
-                        <p className="text-xs text-slate-400 mt-1">Same gateway for all outlets</p>
+                        <p className="text-xs text-slate-400 mt-1">Same gateways for all outlets</p>
                       </div>
                     </Label>
                     <Label
@@ -243,23 +301,12 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
                   <div className="space-y-6 pt-4">
                     {gwMode === 'global' ? (
                       <div className="space-y-3">
-                        <Label className="text-[12px] font-black text-slate-400 uppercase tracking-widest">Select Global Provider</Label>
-                        <Select value={globalGwId} onValueChange={setGlobalGwId}>
-                          <SelectTrigger className="h-12 border-slate-200 bg-white">
-                            <SelectValue placeholder="Choose a payment gateway..." />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {allGateways.filter(g => g.isEnabled).map(g => (
-                              <SelectItem key={g.id} value={g.id} className="py-3">
-                                <div className="flex flex-col">
-                                  <span className="font-bold">{g.name}</span>
-                                  <span className="text-[10px] text-slate-400 uppercase font-black">{g.provider} • {g.type}</span>
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <p className="text-[11px] text-slate-400 font-medium italic">This gateway will process transactions for all {tenantOutlets.length} active outlets.</p>
+                        <Label className="text-[12px] font-black text-slate-400 uppercase tracking-widest">Select Global Providers</Label>
+                        <MultiGatewaySelector 
+                          selectedIds={globalGwIds} 
+                          onToggle={handleToggleGlobalGw} 
+                        />
+                        <p className="text-[11px] text-slate-400 font-medium italic">Selected gateways will process transactions for all {tenantOutlets.length} active outlets.</p>
                       </div>
                     ) : (
                       <div className="space-y-4">
@@ -271,17 +318,12 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
                                   <p className="font-extrabold text-[14px] text-slate-900 leading-none">{o.name}</p>
                                   <p className="text-[10px] text-slate-400 font-bold uppercase mt-1.5">{o.city}, {o.country}</p>
                                 </div>
-                                <Select value={outletGwMap[o.id] || "none"} onValueChange={(val) => setOutletGwMap({...outletGwMap, [o.id]: val})}>
-                                  <SelectTrigger className="w-[300px] h-10 border-slate-200">
-                                    <SelectValue placeholder="Assign Gateway..." />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="none">None (Disabled)</SelectItem>
-                                    {allGateways.filter(g => g.isEnabled).map(g => (
-                                      <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
+                                <div className="w-[300px]">
+                                  <MultiGatewaySelector 
+                                    selectedIds={outletGwMap[o.id] || []} 
+                                    onToggle={(gwId) => handleToggleOutletGw(o.id, gwId)} 
+                                  />
+                                </div>
                               </div>
                             ))}
                          </div>

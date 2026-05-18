@@ -15,7 +15,7 @@ export interface Tenant {
   lastLoginDate?: string;
   isPaymentGatewayConfigured: boolean;
   paymentGatewayMode?: 'global' | 'by-outlet';
-  globalGatewayId?: string;
+  globalGatewayIds?: string[];
   numberOfOutlets: number;
   numberOfUsers: number;
   merchantId?: string;
@@ -37,7 +37,7 @@ export interface Outlet {
   zipCode: string;
   status: 'Active' | 'Inactive';
   userCount: number;
-  gatewayId?: string;
+  gatewayIds?: string[];
 }
 
 export interface User {
