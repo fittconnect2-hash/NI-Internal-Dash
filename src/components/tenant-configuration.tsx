@@ -548,6 +548,62 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
                 </div>
               )}
 
+              {activeTab === "Fees" && (
+                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-400">
+                  <div className="bg-indigo-50/50 border border-indigo-100 p-6 rounded-2xl flex items-start gap-4">
+                    <Info className="h-5 w-5 text-indigo-500 mt-1 shrink-0" />
+                    <div>
+                      <h4 className="font-bold text-slate-900">Service Fees</h4>
+                      <p className="text-sm text-slate-600 mt-1">Manage extra costs for specific services like delivery, payments, and table bookings.</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-8">
+                    <div className="p-6 bg-slate-50/50 rounded-2xl border border-slate-100 space-y-6">
+                      <h5 className="font-black text-[11px] text-indigo-500 uppercase tracking-widest">Delivery Service</h5>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="space-y-3">
+                          <Label className="text-[13px] font-bold text-slate-900">Delivery Fee Commission Rate (%) <span className="text-red-500">*</span></Label>
+                          <Input defaultValue="0" type="number" className="h-12 bg-white border-slate-200 text-lg font-bold" />
+                        </div>
+                        <div className="space-y-3">
+                          <Label className="text-[13px] font-bold text-slate-900">Delivery Fee Commission Cap</Label>
+                          <Input defaultValue="0" type="number" className="h-12 bg-white border-slate-200 text-lg font-bold" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-6 bg-slate-50/50 rounded-2xl border border-slate-100 space-y-6">
+                      <h5 className="font-black text-[11px] text-indigo-500 uppercase tracking-widest">Payment Processing</h5>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="space-y-3">
+                          <Label className="text-[13px] font-bold text-slate-900">Payment Processing Fee Rate (%)</Label>
+                          <Input defaultValue="0" type="number" className="h-12 bg-white border-slate-200 text-lg font-bold" />
+                        </div>
+                        <div className="space-y-3">
+                          <Label className="text-[13px] font-bold text-slate-900">Payment Processing Flat Fee</Label>
+                          <Input defaultValue="0" type="number" className="h-12 bg-white border-slate-200 text-lg font-bold" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-6 bg-slate-50/50 rounded-2xl border border-slate-100 space-y-6">
+                      <h5 className="font-black text-[11px] text-indigo-500 uppercase tracking-widest">Table Reservations</h5>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="space-y-3">
+                          <Label className="text-[13px] font-bold text-slate-900">Reservation Fee Rate (%)</Label>
+                          <Input defaultValue="0" type="number" className="h-12 bg-white border-slate-200 text-lg font-bold" />
+                        </div>
+                        <div className="space-y-3">
+                          <Label className="text-[13px] font-bold text-slate-900">Reservation Flat Fee</Label>
+                          <Input defaultValue="0" type="number" className="h-12 bg-white border-slate-200 text-lg font-bold" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
             </div>
           </ScrollArea>
 
