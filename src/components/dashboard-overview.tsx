@@ -76,7 +76,7 @@ const networkDistData = [
   { region: 'California', outlets: 32, color: '#f59e0b' },
 ];
 
-type DashboardTab = 'revenue' | 'orders' | 'restaurants' | 'serving';
+type DashboardTab = 'revenue' | 'orders' | 'growth' | 'efficiency';
 type TimeRange = '7d' | 'Today' | 'MTD';
 
 export function DashboardOverview() {
@@ -89,13 +89,13 @@ export function DashboardOverview() {
     setTimeout(() => setIsRefreshing(false), 800)
   }
 
-  // Mock stats that "change" based on range
+  // Mock stats with more user-friendly labels
   const getStats = (range: TimeRange) => {
     const baseStats = [
-      { id: 'revenue', label: "Total revenue", value: "AED 84.2k", change: "+12%", trend: "up", icon: DollarSign, color: "text-primary" },
-      { id: 'orders', label: "Orders today", value: "1,382", change: "+7%", trend: "up", icon: Receipt, color: "text-[#22c55e]" },
-      { id: 'restaurants', label: "Active network", value: "247", change: "-3", trend: "down", icon: Store, color: "text-primary" },
-      { id: 'serving', label: "Avg serving", value: "28 min", change: "-3 min", trend: "up", icon: Clock, color: "text-amber-600" },
+      { id: 'revenue', label: "Platform Revenue", value: "AED 84.2k", change: "+12%", trend: "up", icon: DollarSign, color: "text-primary" },
+      { id: 'orders', label: "Global Orders", value: "1,382", change: "+7%", trend: "up", icon: Receipt, color: "text-[#22c55e]" },
+      { id: 'growth', label: "Connected Outlets", value: "247", change: "-3", trend: "down", icon: Store, color: "text-primary" },
+      { id: 'efficiency', label: "Avg. Fulfillment", value: "28 min", change: "-3 min", trend: "up", icon: Clock, color: "text-amber-600" },
     ]
 
     if (range === '7d') {
@@ -117,8 +117,8 @@ export function DashboardOverview() {
             <Card className="border-slate-200 shadow-sm p-8">
               <div className="flex items-center justify-between mb-8">
                 <div>
-                  <h3 className="text-xl font-black text-slate-900 tracking-tight">Financial Performance ({timeRange})</h3>
-                  <p className="text-xs text-slate-400 font-bold uppercase tracking-tight mt-1">Daily revenue vs transaction volume</p>
+                  <h3 className="text-xl font-black text-slate-900 tracking-tight">Earnings Analysis ({timeRange})</h3>
+                  <p className="text-xs text-slate-400 font-bold uppercase tracking-tight mt-1">Comparing total revenue with order volume across the network</p>
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="flex items-center gap-2">
@@ -154,7 +154,7 @@ export function DashboardOverview() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <Card className="border-slate-200 shadow-sm overflow-hidden flex flex-col">
                 <CardHeader className="p-8 border-b border-slate-50 bg-white">
-                  <CardTitle className="text-lg font-black text-slate-900 tracking-tight">Revenue by Channel</CardTitle>
+                  <CardTitle className="text-lg font-black text-slate-900 tracking-tight">Where is revenue coming from?</CardTitle>
                 </CardHeader>
                 <CardContent className="p-8">
                   <div className="space-y-6">
@@ -176,7 +176,7 @@ export function DashboardOverview() {
 
               <Card className="border-slate-200 shadow-sm overflow-hidden flex flex-col">
                 <CardHeader className="p-8 border-b border-slate-50 bg-white">
-                  <CardTitle className="text-lg font-black text-slate-900 tracking-tight">Top Revenue Contributors</CardTitle>
+                  <CardTitle className="text-lg font-black text-slate-900 tracking-tight">Top Performing Brands</CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
                   {topRestaurants.slice(0, 3).map((res, i) => (
@@ -205,8 +205,8 @@ export function DashboardOverview() {
             <Card className="border-slate-200 shadow-sm p-8">
               <div className="flex items-center justify-between mb-8">
                 <div>
-                  <h3 className="text-xl font-black text-slate-900 tracking-tight">Order Velocity ({timeRange})</h3>
-                  <p className="text-xs text-slate-400 font-bold uppercase tracking-tight mt-1">Transaction flow by hour</p>
+                  <h3 className="text-xl font-black text-slate-900 tracking-tight">Network Activity Heatmap ({timeRange})</h3>
+                  <p className="text-xs text-slate-400 font-bold uppercase tracking-tight mt-1">Order flow trends by time of day</p>
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="flex items-center gap-2">
@@ -235,8 +235,8 @@ export function DashboardOverview() {
 
             <Card className="border-slate-200 shadow-sm overflow-hidden">
               <CardHeader className="p-8 border-b border-slate-50 flex flex-row items-center justify-between bg-white">
-                <CardTitle className="text-lg font-black text-slate-900 tracking-tight">Live Order Stream</CardTitle>
-                <Button variant="link" className="text-[#e91e63] font-bold text-xs uppercase tracking-widest">Monitor All <ChevronRight className="h-4 w-4" /></Button>
+                <CardTitle className="text-lg font-black text-slate-900 tracking-tight">Live Global Activity</CardTitle>
+                <Button variant="link" className="text-[#e91e63] font-bold text-xs uppercase tracking-widest">Monitor All Orders <ChevronRight className="h-4 w-4" /></Button>
               </CardHeader>
               <CardContent className="p-0">
                 {liveOrders.map((order, i) => (
@@ -263,14 +263,14 @@ export function DashboardOverview() {
             </Card>
           </div>
         )
-      case 'restaurants':
+      case 'growth':
         return (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <Card className="border-slate-200 shadow-sm p-8">
                 <div className="mb-6">
-                  <h3 className="text-lg font-black text-slate-900 tracking-tight leading-none">Top Regional Hubs</h3>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">Absolute outlet count by city</p>
+                  <h3 className="text-lg font-black text-slate-900 tracking-tight leading-none">Location Density</h3>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">Where your outlets are located globally</p>
                 </div>
                 <div className="h-[300px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
@@ -299,8 +299,8 @@ export function DashboardOverview() {
               </Card>
               <Card className="border-slate-200 shadow-sm p-8">
                 <div className="mb-6">
-                  <h3 className="text-lg font-black text-slate-900 tracking-tight leading-none">Market Expansion Status</h3>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">Progress toward 2024 regional targets</p>
+                  <h3 className="text-lg font-black text-slate-900 tracking-tight leading-none">Onboarding Progress</h3>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">New brand and outlet setup status</p>
                 </div>
                 <div className="space-y-6">
                   {[
@@ -313,8 +313,8 @@ export function DashboardOverview() {
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-extrabold text-slate-700">{region.country}</span>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-black text-slate-900">{region.current} Outlets</span>
-                          <span className="text-[10px] font-bold text-slate-400 uppercase">Target: {region.target}</span>
+                          <span className="text-sm font-black text-slate-900">{region.current} Live</span>
+                          <span className="text-[10px] font-bold text-slate-400 uppercase">Goal: {region.target}</span>
                         </div>
                       </div>
                       <Progress value={(region.current / region.target) * 100} className="h-2 bg-slate-100" />
@@ -340,12 +340,12 @@ export function DashboardOverview() {
                     </div>
                     <div className="flex items-center gap-10">
                       <div className="text-center">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase">Users</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase">Staff</p>
                         <p className="text-sm font-black text-slate-900">{(i + 2) * 4}</p>
                       </div>
                       <div className="text-center">
                         <p className="text-[10px] font-bold text-slate-400 uppercase">Status</p>
-                        <Badge className="bg-green-100 text-green-600 border-none rounded-full px-3 py-0.5 text-[10px]">Live</Badge>
+                        <Badge className="bg-green-100 text-green-600 border-none rounded-full px-3 py-0.5 text-[10px]">Active</Badge>
                       </div>
                     </div>
                   </div>
@@ -354,23 +354,23 @@ export function DashboardOverview() {
             </Card>
           </div>
         )
-      case 'serving':
+      case 'efficiency':
         return (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
             <Card className="border-slate-200 shadow-sm p-8">
               <div className="flex items-center justify-between mb-8">
                 <div>
-                  <h3 className="text-lg font-black text-slate-900 tracking-tight">Average Serving Performance (min)</h3>
-                  <p className="text-xs text-slate-400 font-bold uppercase tracking-tight mt-1">Network latency benchmark</p>
+                  <h3 className="text-lg font-black text-slate-900 tracking-tight">Service Speed Benchmarks (min)</h3>
+                  <p className="text-xs text-slate-400 font-bold uppercase tracking-tight mt-1">Measuring how fast brands are fulfilling orders</p>
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="flex items-center gap-2">
                     <div className="h-2.5 w-2.5 rounded-full bg-[#e91e63]" />
-                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Selected Period</span>
+                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Current Avg.</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="h-2.5 w-2.5 rounded-full bg-[#f8bbd0]" />
-                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Previous Average</span>
+                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Previous Avg.</span>
                   </div>
                 </div>
               </div>
@@ -391,7 +391,7 @@ export function DashboardOverview() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <Card className="border-slate-200 shadow-sm p-6 flex flex-col items-center justify-center text-center">
                 <Clock className="h-8 w-8 text-amber-500 mb-2" />
-                <h4 className="text-[11px] font-bold text-slate-400 uppercase mb-1">Peak Serving Time</h4>
+                <h4 className="text-[11px] font-bold text-slate-400 uppercase mb-1">Peak Busy Time</h4>
                 <p className="text-2xl font-black text-slate-900">1:30 PM</p>
                 <p className="text-[10px] text-green-500 font-bold mt-1">+8% volume</p>
               </Card>
@@ -403,9 +403,9 @@ export function DashboardOverview() {
               </Card>
               <Card className="border-slate-200 shadow-sm p-6 flex flex-col items-center justify-center text-center">
                 <TrendingUp className="h-8 w-8 text-green-500 mb-2" />
-                <h4 className="text-[11px] font-bold text-slate-400 uppercase mb-1">Network Reliability</h4>
+                <h4 className="text-[11px] font-bold text-slate-400 uppercase mb-1">Platform Reliability</h4>
                 <p className="text-2xl font-black text-slate-900">99.9%</p>
-                <p className="text-[10px] text-slate-400 font-bold mt-1">Last 24 hours</p>
+                <p className="text-[10px] text-slate-400 font-bold mt-1">Uptime last 24h</p>
               </Card>
             </div>
           </div>
@@ -419,7 +419,7 @@ export function DashboardOverview() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
-            <span>NetworkDine</span>
+            <span>DineNet Admin</span>
             <span className="opacity-50">/</span>
             <span className="text-slate-900">Dashboard</span>
           </div>
