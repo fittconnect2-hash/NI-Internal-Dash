@@ -82,7 +82,6 @@ import { useToast } from "@/hooks/use-toast"
 interface UserAssignment {
   id: string;
   outletId: string;
-  role: string;
 }
 
 interface UserManagementProps {
@@ -132,13 +131,13 @@ export function UserManagement({
   const [confirmReactivate, setConfirmReactivate] = React.useState<User | null>(null)
   const [confirmDelete, setConfirmDelete] = React.useState<User | null>(null)
 
-  const [formFullName, setFormFullName] = React.useState("")
   const [formUsername, setFormUsername] = React.useState("")
   const [formEmail, setFormEmail] = React.useState("")
   const [formPhone, setFormPhone] = React.useState("")
-  const [formPrimaryRole, setFormPrimaryRole] = React.useState<string>("Staff")
+  const [formRole, setFormRole] = React.useState<string>("Manager")
   const [formTenantId, setFormTenantId] = React.useState("")
   const [formPassword, setFormPassword] = React.useState("")
+  const [formConfirmPassword, setFormConfirmPassword] = React.useState("")
   const [showPassword, setShowPassword] = React.useState(false)
   const [assignments, setAssignments] = React.useState<UserAssignment[]>([])
 
@@ -149,13 +148,13 @@ export function UserManagement({
   }
 
   const resetForm = React.useCallback(() => {
-    setFormFullName("")
     setFormUsername("")
     setFormEmail("")
     setFormPhone("")
-    setFormPrimaryRole('Staff')
+    setFormRole('Manager')
     setFormTenantId(tenant?.id || "")
     setFormPassword("")
+    setFormConfirmPassword("")
     setShowPassword(false)
     setAssignments([])
     setFormTenantSearch("")
@@ -166,13 +165,12 @@ export function UserManagement({
       if (propEditingUser) {
         setEditingUser(propEditingUser)
         setIsAddingNew(true)
-        setFormFullName(propEditingUser.fullName)
         setFormUsername(propEditingUser.username)
         setFormEmail(propEditingUser.email)
         setFormPhone(propEditingUser.phone)
-        setFormPrimaryRole(propEditingUser.role)
+        setFormRole(propEditingUser.role)
         setFormTenantId(propEditingUser.tenantId)
-        setAssignments(propEditingUser.outletId ? [{ id: '1', outletId: propEditingUser.outletId, role: propEditingUser.role }] : [])
+        setAssignments(propEditingUser.outletId ? [{ id: '1', outletId: propEditingUser.outletId }] : [])
       } else if (defaultAdding) {
         setIsAddingNew(true)
         setEditingUser(null)
@@ -216,25 +214,26 @@ export function UserManagement({
   const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE)
 
   const isFormValid = React.useMemo(() => {
+    const passwordsMatch = editingUser || (formPassword !== "" && formPassword === formConfirmPassword)
     return (
-      formFullName.trim() !== "" &&
       formUsername.trim() !== "" &&
       formEmail.trim() !== "" &&
-      formTenantId !== ""
+      formTenantId !== "" &&
+      formRole !== "" &&
+      passwordsMatch
     )
-  }, [formFullName, formUsername, formEmail, formTenantId])
+  }, [formUsername, formEmail, formTenantId, formRole, formPassword, formConfirmPassword, editingUser])
 
   const handleEditUser = (user: User) => {
     setIsFormLoading(true)
     setEditingUser(user)
     setIsAddingNew(true)
-    setFormFullName(user.fullName)
     setFormUsername(user.username)
     setFormEmail(user.email)
     setFormPhone(user.phone)
-    setFormPrimaryRole(user.role)
+    setFormRole(user.role)
     setFormTenantId(user.tenantId)
-    setAssignments(user.outletId ? [{ id: '1', outletId: user.outletId, role: user.role }] : [])
+    setAssignments(user.outletId ? [{ id: '1', outletId: user.outletId }] : [])
     setTimeout(() => setIsFormLoading(false), 500)
   }
 
@@ -245,11 +244,11 @@ export function UserManagement({
     if (editingUser) {
       setAllUsers(prev => prev.map(u => u.id === editingUser.id ? {
         ...u,
-        fullName: formFullName,
+        fullName: u.fullName, // Keep existing for mock data
         username: formUsername,
         email: formEmail,
         phone: formPhone,
-        role: (firstA?.role || formPrimaryRole) as any,
+        role: formRole as any,
         tenantId: formTenantId,
         outletId: (!firstA || firstA.outletId === "all") ? undefined : firstA.outletId
       } : u))
@@ -257,11 +256,11 @@ export function UserManagement({
     } else {
       const newUser: User = {
         id: `u-${Math.random().toString(36).substr(2, 9)}`,
-        fullName: formFullName,
+        fullName: formUsername, // Fallback for mock display
         username: formUsername,
         email: formEmail,
         phone: formPhone,
-        role: (firstA?.role || formPrimaryRole) as any,
+        role: formRole as any,
         tenantId: formTenantId,
         outletId: (!firstA || firstA.outletId === "all") ? undefined : firstA.outletId,
         status: 'Active',
@@ -434,10 +433,10 @@ export function UserManagement({
                   {isFormLoading ? <div className="flex items-center justify-center py-40 animate-pulse"><Loader2 className="animate-spin text-primary" /></div> : (
                     <div className="p-10 grid grid-cols-1 lg:grid-cols-2 gap-16">
                       <div className="space-y-10">
-                        <div><h3 className="text-2xl font-black">Step 1: Identity</h3><p className="text-sm text-slate-400">Fundamental staff member profile.</p></div>
+                        <div><h3 className="text-2xl font-black">Identity Details</h3><p className="text-sm text-slate-400">Complete the profile to enroll a new user.</p></div>
                         <div className="space-y-6">
                           <div className="space-y-2">
-                            <Label className="text-[13px] font-bold text-slate-700">Select Parent Organization <span className="text-red-500">*</span></Label>
+                            <Label className="text-[13px] font-bold text-slate-700">Assign Organization <span className="text-red-500">*</span></Label>
                             <Popover modal={true} open={isFormTenantPopoverOpen} onOpenChange={setIsFormTenantPopoverOpen}>
                               <PopoverTrigger asChild><Button variant="outline" className="w-full h-12 justify-between bg-primary/5 text-primary font-black"><span className="truncate">{formTenantId ? getTenantName(formTenantId) : "Select Tenant..."}</span><ChevronsUpDown className="h-4 w-4 opacity-50" /></Button></PopoverTrigger>
                               <PopoverContent className="w-80 p-0 shadow-2xl z-[110]" onPointerDownOutside={e => e.preventDefault()} onInteractOutside={e => e.preventDefault()}>
@@ -452,33 +451,76 @@ export function UserManagement({
                               </PopoverContent>
                             </Popover>
                           </div>
+                          
                           <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2"><Label>Full Name</Label><Input value={formFullName} onChange={e => setFormFullName(e.target.value)} placeholder="Jane Doe" className="h-12" /></div>
-                            <div className="space-y-2"><Label>Username</Label><Input value={formUsername} onChange={e => setFormUsername(e.target.value)} placeholder="jdoe" className="h-12" /></div>
+                            <div className="space-y-2"><Label>Username <span className="text-red-500">*</span></Label><Input value={formUsername} onChange={e => setFormUsername(e.target.value)} placeholder="Username" className="h-12" /></div>
+                            <div className="space-y-2"><Label>Email Address <span className="text-red-500">*</span></Label><Input type="email" value={formEmail} onChange={e => setFormEmail(e.target.value)} placeholder="Email Address" className="h-12" /></div>
                           </div>
-                          <div className="space-y-2"><Label>Email</Label><Input value={formEmail} onChange={e => setFormEmail(e.target.value)} placeholder="email@brand.com" className="h-12" /></div>
+
+                          {!editingUser && (
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label>Password <span className="text-red-500">*</span></Label>
+                                <div className="relative">
+                                  <Input type={showPassword ? "text" : "password"} value={formPassword} onChange={e => setFormPassword(e.target.value)} placeholder="••••••••" className="h-12 pr-10" />
+                                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">{showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button>
+                                </div>
+                              </div>
+                              <div className="space-y-2">
+                                <Label>Confirm Password <span className="text-red-500">*</span></Label>
+                                <Input type={showPassword ? "text" : "password"} value={formConfirmPassword} onChange={e => setFormConfirmPassword(e.target.value)} placeholder="••••••••" className="h-12" />
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2"><Label>Phone Number</Label><Input value={formPhone} onChange={e => setFormPhone(e.target.value)} placeholder="Phone Number" className="h-12" /></div>
+                            <div className="space-y-2">
+                              <Label>Role <span className="text-red-500">*</span></Label>
+                              <Select value={formRole} onValueChange={setFormRole}>
+                                <SelectTrigger className="h-12 font-bold"><SelectValue placeholder="Select Role" /></SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="Organization Admin">Organization Admin</SelectItem>
+                                  <SelectItem value="Manager">Manager</SelectItem>
+                                  <SelectItem value="Partner Admin">Partner Admin</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
                         </div>
                       </div>
+                      
                       <div className="space-y-10 border-l border-dashed pl-16">
-                        <div><h3 className="text-2xl font-black">Step 2: Role & Mapping</h3><p className="text-sm text-slate-400">Control staff scope and permissions.</p></div>
-                        {!formTenantId ? <div className="py-20 text-center bg-slate-50 rounded-2xl border-2 border-dashed"><Building2 className="mx-auto h-8 w-8 text-slate-300 mb-4" /><p className="text-sm font-bold text-slate-400">Select an organization first</p></div> : (
+                        <div><h3 className="text-2xl font-black">Mapping & Access</h3><p className="text-sm text-slate-400">Control location-specific assignment.</p></div>
+                        {!formTenantId ? (
+                          <div className="py-20 text-center bg-slate-50 rounded-2xl border-2 border-dashed">
+                            <Building2 className="mx-auto h-8 w-8 text-slate-300 mb-4" />
+                            <p className="text-sm font-bold text-slate-400">Select an organization to assign outlets</p>
+                          </div>
+                        ) : (
                           <div className="space-y-6">
                             {assignments.map(a => (
                               <div key={a.id} className="flex gap-4 items-end">
-                                <div className="flex-1 space-y-1.5"><Label className="text-[10px] uppercase font-bold text-slate-400">Outlet</Label>
-                                  <Select value={a.outletId} onValueChange={v => setAssignments(assignments.map(as => as.id === a.id ? { ...as, outletId: v } : as))}><SelectTrigger className="h-12 font-bold"><SelectValue /></SelectTrigger>
-                                    <SelectContent><SelectItem value="all" className="font-bold text-primary">Global Access</SelectItem>{tenantOutletsForForm.map(o => <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}</SelectContent>
+                                <div className="flex-1 space-y-1.5">
+                                  <Label className="text-[10px] uppercase font-bold text-slate-400">Select Outlet</Label>
+                                  <Select value={a.outletId} onValueChange={v => setAssignments(assignments.map(as => as.id === a.id ? { ...as, outletId: v } : as))}>
+                                    <SelectTrigger className="h-12 font-bold"><SelectValue /></SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="all" className="font-bold text-primary">Global Access (All Outlets)</SelectItem>
+                                      {tenantOutletsForForm.map(o => <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}
+                                    </SelectContent>
                                   </Select>
                                 </div>
-                                <div className="flex-1 space-y-1.5"><Label className="text-[10px] uppercase font-bold text-slate-400">Role</Label>
-                                  <Select value={a.role} onValueChange={v => setAssignments(assignments.map(as => as.id === a.id ? { ...as, role: v } : as))}><SelectTrigger className="h-12 font-bold"><SelectValue /></SelectTrigger>
-                                    <SelectContent><SelectItem value="Staff">Staff</SelectItem><SelectItem value="Manager">Manager</SelectItem><SelectItem value="Organization Admin">Organization Admin</SelectItem></SelectContent>
-                                  </Select>
-                                </div>
-                                <button type="button" className="h-12 w-12 flex items-center justify-center text-rose-500 bg-rose-50 rounded-lg" onClick={() => setAssignments(assignments.filter(as => as.id !== a.id))}><Trash2 className="h-4 w-4" /></button>
+                                <button type="button" className="h-12 w-12 flex items-center justify-center text-rose-500 bg-rose-50 rounded-lg hover:bg-rose-100 transition-colors" onClick={() => setAssignments(assignments.filter(as => as.id !== a.id))}>
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
                               </div>
                             ))}
-                            <Button variant="outline" className="w-full h-14 border-2 border-dashed border-primary/20 text-primary font-black rounded-2xl" onClick={() => setAssignments([...assignments, { id: Date.now().toString(), outletId: "all", role: "Staff" }])}><PlusCircle className="h-5 w-5 mr-3" /> Add Assignment</Button>
+                            {assignments.length === 0 && (
+                              <Button variant="outline" className="w-full h-14 border-2 border-dashed border-primary/20 text-primary font-black rounded-2xl" onClick={() => setAssignments([{ id: '1', outletId: "all" }])}>
+                                <PlusCircle className="h-5 w-5 mr-3" /> Assign to Outlet
+                              </Button>
+                            )}
                           </div>
                         )}
                       </div>
@@ -488,7 +530,7 @@ export function UserManagement({
                 <div className="p-8 border-t border-slate-100 flex justify-end gap-4 bg-slate-50/30">
                   <Button variant="outline" className="h-12 px-8 font-black" onClick={() => { setIsAddingNew(false); setEditingUser(null); }}>Cancel</Button>
                   <Button 
-                    className="h-12 px-10 font-black bg-[#1a73e8]" 
+                    className="h-12 px-10 font-black bg-[#1a73e8] hover:bg-[#1557b0] transition-all disabled:opacity-50 disabled:cursor-not-allowed" 
                     onClick={handleSaveUser}
                     disabled={!isFormValid}
                   >
