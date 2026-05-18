@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -96,10 +95,16 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
   const [formCity, setFormCity] = React.useState("")
   const [formCountry, setFormCountry] = React.useState("")
 
-  const restoreUI = React.useCallback(() => {
-    document.body.style.pointerEvents = 'auto';
-    document.body.style.overflow = 'auto';
-  }, []);
+  // CRITICAL: Robust Safety Cleanup to restore interactivity when any modal is closed
+  React.useEffect(() => {
+    if (!isOpen) {
+      const timer = setTimeout(() => {
+        document.body.style.pointerEvents = '';
+        document.body.style.overflow = '';
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
 
   React.useEffect(() => {
     if (isOpen) {
@@ -120,8 +125,6 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
         setFormCity("")
         setFormCountry("")
       }
-    } else {
-      restoreUI()
     }
   }, [editingOutlet, tenant, isOpen])
 
@@ -182,7 +185,7 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
   const getTenantName = (tid: string) => allTenants.find(t => t.id === tid)?.tenantName || "Unknown"
 
   return (
-    <Sheet open={isOpen} onOpenChange={(open) => { if (!open) { onClose(); restoreUI(); } }}>
+    <Sheet open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
       <SheetContent side="right" className="w-full sm:max-w-[1200px] p-0 border-l border-slate-200 bg-[#f8f9fc] flex flex-col">
         <SheetHeader className="px-8 py-6 bg-white border-b border-slate-100 flex-shrink-0">
           <div className="flex items-center justify-between">
@@ -260,7 +263,7 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="text-slate-400" onClick={e => e.stopPropagation()}><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-48 p-2">
-                                <DropdownMenuItem className="font-bold py-2.5" onClick={e => { e.stopPropagation(); setEditingOutlet(o); setIsAddingNew(true); }}><Edit2 className="h-4 w-4 mr-3" /> Edit</DropdownMenuItem>
+                                <DropdownMenuItem className="font-bold py-2.5" onClick={e => { e.stopPropagation(); setEditingOutlet(o); setIsAddingNew(true); }}><Edit2 className="h-4 w-4 mr-3 text-slate-400" /> Edit</DropdownMenuItem>
                                 <DropdownMenuItem className="text-destructive font-black py-2.5" onClick={e => { e.stopPropagation(); setAllOutlets(prev => prev.filter(p => p.id !== o.id)); toast({ title: "Branch Deleted" }); }}><Trash2 className="h-4 w-4 mr-3" /> Delete</DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>

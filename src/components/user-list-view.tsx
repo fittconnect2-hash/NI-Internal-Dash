@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -94,12 +93,16 @@ export function UserListView({ allUsers, setAllUsers, allTenants, allOutlets, on
   const [confirmReactivate, setConfirmReactivate] = React.useState<User | null>(null)
   const [confirmDelete, setConfirmDelete] = React.useState<User | null>(null)
 
-  const restoreUI = React.useCallback(() => {
-    setTimeout(() => {
-      document.body.style.pointerEvents = '';
-      document.body.style.overflow = '';
-    }, 300);
-  }, []);
+  // Safety Effect: Force interactivity cleanup when confirmation boxes close
+  React.useEffect(() => {
+    if (!confirmSuspend && !confirmReset && !confirmReactivate && !confirmDelete) {
+      const timer = setTimeout(() => {
+        document.body.style.pointerEvents = '';
+        document.body.style.overflow = '';
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [confirmSuspend, confirmReset, confirmReactivate, confirmDelete]);
 
   const tenantsWithCounts = React.useMemo(() => {
     return allTenants.map(t => ({
@@ -161,28 +164,24 @@ export function UserListView({ allUsers, setAllUsers, allTenants, allOutlets, on
   const handleResetPassword = (user: User) => {
     toast({ title: "Password Reset Sent", description: `Reset link dispatched to ${user.email}.` })
     setConfirmReset(null)
-    restoreUI()
   }
 
   const handleSuspendUser = (user: User) => {
     setAllUsers(prev => prev.map(u => u.id === user.id ? { ...u, status: 'Suspended' } : u))
     toast({ title: "User Suspended", description: `${user.fullName}'s access revoked.` })
     setConfirmSuspend(null)
-    restoreUI()
   }
 
   const handleReactivateUser = (user: User) => {
     setAllUsers(prev => prev.map(u => u.id === user.id ? { ...u, status: 'Active' } : u))
     toast({ title: "User Reactivated", description: `${user.fullName}'s access restored.` })
     setConfirmReactivate(null)
-    restoreUI()
   }
 
   const handleDeleteUser = (user: User) => {
     setAllUsers(prev => prev.filter(u => u.id !== user.id))
     toast({ title: "User Deleted", description: `${user.fullName} removed from the platform.` })
     setConfirmDelete(null)
-    restoreUI()
   }
 
   return (
@@ -334,31 +333,31 @@ export function UserListView({ allUsers, setAllUsers, allTenants, allOutlets, on
         </div>
       </div>
 
-      <AlertDialog open={!!confirmSuspend} onOpenChange={(o) => { if (!o) { setConfirmSuspend(null); restoreUI(); } }}>
+      <AlertDialog open={!!confirmSuspend} onOpenChange={(o) => { if (!o) setConfirmSuspend(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader><AlertDialogTitle>Suspend Staff Access?</AlertDialogTitle><AlertDialogDescription>Revoke all platform access for <strong>{confirmSuspend?.fullName}</strong>?</AlertDialogDescription></AlertDialogHeader>
-          <AlertDialogFooter><AlertDialogCancel onClick={restoreUI}>Cancel</AlertDialogCancel><AlertDialogAction className="bg-rose-500" onClick={() => confirmSuspend && handleSuspendUser(confirmSuspend)}>Confirm Suspension</AlertDialogAction></AlertDialogFooter>
+          <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction className="bg-rose-500" onClick={() => confirmSuspend && handleSuspendUser(confirmSuspend)}>Confirm Suspension</AlertDialogAction></AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={!!confirmReactivate} onOpenChange={(o) => { if (!o) { setConfirmReactivate(null); restoreUI(); } }}>
+      <AlertDialog open={!!confirmReactivate} onOpenChange={(o) => { if (!o) setConfirmReactivate(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader><AlertDialogTitle>Reactivate Access?</AlertDialogTitle><AlertDialogDescription>Restore platform access for <strong>{confirmReactivate?.fullName}</strong>?</AlertDialogDescription></AlertDialogHeader>
-          <AlertDialogFooter><AlertDialogCancel onClick={restoreUI}>Cancel</AlertDialogCancel><AlertDialogAction className="bg-green-600" onClick={() => confirmReactivate && handleReactivateUser(confirmReactivate)}>Confirm</AlertDialogAction></AlertDialogFooter>
+          <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction className="bg-green-600" onClick={() => confirmReactivate && handleReactivateUser(confirmReactivate)}>Confirm</AlertDialogAction></AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={!!confirmReset} onOpenChange={(o) => { if (!o) { setConfirmReset(null); restoreUI(); } }}>
+      <AlertDialog open={!!confirmReset} onOpenChange={(o) => { if (!o) setConfirmReset(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader><AlertDialogTitle>Reset Password?</AlertDialogTitle><AlertDialogDescription>Send secure reset link to <strong>{confirmReset?.email}</strong>?</AlertDialogDescription></AlertDialogHeader>
-          <AlertDialogFooter><AlertDialogCancel onClick={restoreUI}>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => confirmReset && handleResetPassword(confirmReset)}>Send Link</AlertDialogAction></AlertDialogFooter>
+          <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => confirmReset && handleResetPassword(confirmReset)}>Send Link</AlertDialogAction></AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={!!confirmDelete} onOpenChange={(o) => { if (!o) { setConfirmDelete(null); restoreUI(); } }}>
+      <AlertDialog open={!!confirmDelete} onOpenChange={(o) => { if (!o) setConfirmDelete(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader><AlertDialogTitle>Delete Staff Member?</AlertDialogTitle><AlertDialogDescription>Permanently remove <strong>{confirmDelete?.fullName}</strong> and their records? This cannot be undone.</AlertDialogDescription></AlertDialogHeader>
-          <AlertDialogFooter><AlertDialogCancel onClick={restoreUI}>Cancel</AlertDialogCancel><AlertDialogAction className="bg-destructive" onClick={() => confirmDelete && handleDeleteUser(confirmDelete)}>Delete Permanently</AlertDialogAction></AlertDialogFooter>
+          <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction className="bg-destructive" onClick={() => confirmDelete && handleDeleteUser(confirmDelete)}>Delete Permanently</AlertDialogAction></AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </div>

@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -134,12 +133,18 @@ export function UserManagement({ tenant, editingUser: propEditingUser, allUsers,
   const getTenantName = (tid: string) => allTenants.find(t => t.id === tid)?.tenantName || "Unknown"
   const getOutletName = (oid: string) => allOutlets.find(o => o.id === oid)?.name || "Unknown"
 
-  const restoreInteractivity = React.useCallback(() => {
-    setTimeout(() => {
-      document.body.style.pointerEvents = 'auto';
-      document.body.style.overflow = 'auto';
-    }, 300);
-  }, []);
+  // CRITICAL: Robust Safety Cleanup to restore interactivity when any modal is closed
+  React.useEffect(() => {
+    const isAnyModalOpen = isOpen || !!confirmSuspend || !!confirmReset || !!confirmReactivate || !!confirmDelete;
+    if (!isAnyModalOpen) {
+      // Force clean up of any residual body styles from Radix/react-remove-scroll
+      const timer = setTimeout(() => {
+        document.body.style.pointerEvents = '';
+        document.body.style.overflow = '';
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, confirmSuspend, confirmReset, confirmReactivate, confirmDelete]);
 
   const resetForm = React.useCallback(() => {
     setFormFullName("")
@@ -257,32 +262,28 @@ export function UserManagement({ tenant, editingUser: propEditingUser, allUsers,
     setAllUsers(prev => prev.map(usr => usr.id === u.id ? { ...usr, status: 'Suspended' } : usr))
     toast({ title: "Suspended" })
     setConfirmSuspend(null)
-    restoreInteractivity()
   }
 
   const handleReactivateUser = (u: User) => {
     setAllUsers(prev => prev.map(usr => usr.id === u.id ? { ...usr, status: 'Active' } : usr))
     toast({ title: "Reactivated" })
     setConfirmReactivate(null)
-    restoreInteractivity()
   }
 
   const handleResetPassword = (u: User) => {
     toast({ title: "Reset link sent" })
     setConfirmReset(null)
-    restoreInteractivity()
   }
 
   const handleDeleteUser = (u: User) => {
     setAllUsers(prev => prev.filter(usr => usr.id !== u.id))
     toast({ title: "Deleted" })
     setConfirmDelete(null)
-    restoreInteractivity()
   }
 
   return (
     <>
-      <Sheet open={isOpen} onOpenChange={(val) => { if (!val) { onClose(); restoreInteractivity(); } }}>
+      <Sheet open={isOpen} onOpenChange={(val) => { if (!val) onClose(); }}>
         <SheetContent side="right" className="w-full sm:max-w-[1200px] p-0 border-l border-slate-200 bg-[#f8f9fc] flex flex-col">
           <SheetHeader className="px-8 py-6 bg-white border-b border-slate-100 flex-shrink-0">
             <div className="flex items-center justify-between">
@@ -340,8 +341,8 @@ export function UserManagement({ tenant, editingUser: propEditingUser, allUsers,
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="text-slate-400" onClick={e => e.stopPropagation()}><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="w-48 p-2">
-                                  <DropdownMenuItem className="font-bold py-2.5" onClick={e => { e.stopPropagation(); handleEditUser(u); }}><Edit2 className="h-4 w-4 mr-3" /> Edit</DropdownMenuItem>
-                                  <DropdownMenuItem className="font-bold py-2.5" onClick={e => { e.stopPropagation(); setConfirmReset(u); }}><RotateCcw className="h-4 w-4 mr-3" /> Reset Password</DropdownMenuItem>
+                                  <DropdownMenuItem className="font-bold py-2.5" onClick={e => { e.stopPropagation(); handleEditUser(u); }}><Edit2 className="h-4 w-4 mr-3 text-slate-400" /> Edit</DropdownMenuItem>
+                                  <DropdownMenuItem className="font-bold py-2.5" onClick={e => { e.stopPropagation(); setConfirmReset(u); }}><RotateCcw className="h-4 w-4 mr-3 text-slate-400" /> Reset Password</DropdownMenuItem>
                                   {u.status === 'Suspended' ? <DropdownMenuItem className="text-green-600 font-bold py-2.5" onClick={e => { e.stopPropagation(); setConfirmReactivate(u); }}><PlayCircle className="h-4 w-4 mr-3" /> Reactivate</DropdownMenuItem> : <DropdownMenuItem className="text-rose-500 font-bold py-2.5" onClick={e => { e.stopPropagation(); setConfirmSuspend(u); }}><PauseCircle className="h-4 w-4 mr-3" /> Suspend</DropdownMenuItem>}
                                   <DropdownMenuSeparator />
                                   <DropdownMenuItem className="text-destructive font-black py-2.5" onClick={e => { e.stopPropagation(); setConfirmDelete(u); }}><Trash2 className="h-4 w-4 mr-3" /> Delete</DropdownMenuItem>
@@ -403,7 +404,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, allUsers,
                                     <SelectContent><SelectItem value="Staff">Staff</SelectItem><SelectItem value="Manager">Manager</SelectItem><SelectItem value="Organization Admin">Organization Admin</SelectItem></SelectContent>
                                   </Select>
                                 </div>
-                                <Button variant="ghost" size="icon" className="h-12 w-12 text-rose-500 bg-rose-50" onClick={() => setAssignments(assignments.filter(as => as.id !== a.id))}><Trash2 className="h-4 w-4" /></Button>
+                                <button type="button" className="h-12 w-12 flex items-center justify-center text-rose-500 bg-rose-50 rounded-lg" onClick={() => setAssignments(assignments.filter(as => as.id !== a.id))}><Trash2 className="h-4 w-4" /></button>
                               </div>
                             ))}
                             <Button variant="outline" className="w-full h-14 border-2 border-dashed border-primary/20 text-primary font-black rounded-2xl" onClick={() => setAssignments([...assignments, { id: Date.now().toString(), outletId: "all", role: "Staff" }])}><PlusCircle className="h-5 w-5 mr-3" /> Add Assignment</Button>
@@ -414,7 +415,7 @@ export function UserManagement({ tenant, editingUser: propEditingUser, allUsers,
                   )}
                 </ScrollArea>
                 <div className="p-8 border-t border-slate-100 flex justify-end gap-4 bg-slate-50/30">
-                  <Button variant="outline" className="h-12 px-8 font-black" onClick={() => { setIsAddingNew(false); setEditingUser(null); restoreInteractivity(); }}>Cancel</Button>
+                  <Button variant="outline" className="h-12 px-8 font-black" onClick={() => { setIsAddingNew(false); setEditingUser(null); }}>Cancel</Button>
                   <Button className="h-12 px-10 font-black bg-[#1a73e8]" onClick={handleSaveUser}>{editingUser ? "Update Profile" : "Finalize Enrollment"}</Button>
                 </div>
               </div>
@@ -423,27 +424,27 @@ export function UserManagement({ tenant, editingUser: propEditingUser, allUsers,
         </SheetContent>
       </Sheet>
 
-      <AlertDialog open={!!confirmSuspend} onOpenChange={o => { if (!o) { setConfirmSuspend(null); restoreInteractivity(); } }}>
+      <AlertDialog open={!!confirmSuspend} onOpenChange={o => { if (!o) setConfirmSuspend(null); }}>
         <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Suspend Access?</AlertDialogTitle><AlertDialogDescription>Revoke access for <strong>{confirmSuspend?.fullName}</strong>?</AlertDialogDescription></AlertDialogHeader>
-          <AlertDialogFooter><AlertDialogCancel onClick={restoreInteractivity}>Cancel</AlertDialogCancel><AlertDialogAction className="bg-rose-500" onClick={() => confirmSuspend && handleSuspendUser(confirmSuspend)}>Confirm Suspension</AlertDialogAction></AlertDialogFooter>
+          <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction className="bg-rose-500" onClick={() => confirmSuspend && handleSuspendUser(confirmSuspend)}>Confirm Suspension</AlertDialogAction></AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={!!confirmReactivate} onOpenChange={o => { if (!o) { setConfirmReactivate(null); restoreInteractivity(); } }}>
+      <AlertDialog open={!!confirmReactivate} onOpenChange={o => { if (!o) setConfirmReactivate(null); }}>
         <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Reactivate Access?</AlertDialogTitle><AlertDialogDescription>Restore platform access for <strong>{confirmReactivate?.fullName}</strong>?</AlertDialogDescription></AlertDialogHeader>
-          <AlertDialogFooter><AlertDialogCancel onClick={restoreInteractivity}>Cancel</AlertDialogCancel><AlertDialogAction className="bg-green-600" onClick={() => confirmReactivate && handleReactivateUser(confirmReactivate)}>Reactivate</AlertDialogAction></AlertDialogFooter>
+          <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction className="bg-green-600" onClick={() => confirmReactivate && handleReactivateUser(confirmReactivate)}>Reactivate</AlertDialogAction></AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={!!confirmReset} onOpenChange={o => { if (!o) { setConfirmReset(null); restoreInteractivity(); } }}>
+      <AlertDialog open={!!confirmReset} onOpenChange={o => { if (!o) setConfirmReset(null); }}>
         <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Send Reset Link?</AlertDialogTitle><AlertDialogDescription>Send credentials reset to <strong>{confirmReset?.email}</strong>?</AlertDialogDescription></AlertDialogHeader>
-          <AlertDialogFooter><AlertDialogCancel onClick={restoreInteractivity}>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => confirmReset && handleResetPassword(confirmReset)}>Send Reset Link</AlertDialogAction></AlertDialogFooter>
+          <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => confirmReset && handleResetPassword(confirmReset)}>Send Reset Link</AlertDialogAction></AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={!!confirmDelete} onOpenChange={o => { if (!o) { setConfirmDelete(null); restoreInteractivity(); } }}>
+      <AlertDialog open={!!confirmDelete} onOpenChange={o => { if (!o) setConfirmDelete(null); }}>
         <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Delete Permanently?</AlertDialogTitle><AlertDialogDescription>Remove <strong>{confirmDelete?.fullName}</strong>? This action cannot be reversed.</AlertDialogDescription></AlertDialogHeader>
-          <AlertDialogFooter><AlertDialogCancel onClick={restoreInteractivity}>Cancel</AlertDialogCancel><AlertDialogAction className="bg-destructive" onClick={() => confirmDelete && handleDeleteUser(confirmDelete)}>Delete Staff Member</AlertDialogAction></AlertDialogFooter>
+          <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction className="bg-destructive" onClick={() => confirmDelete && handleDeleteUser(confirmDelete)}>Delete Staff Member</AlertDialogAction></AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </>
