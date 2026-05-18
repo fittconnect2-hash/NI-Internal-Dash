@@ -150,7 +150,7 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
 
   const handleSaveOutlet = () => {
     if (!formTenantId || !formName) {
-      toast({ title: "Validation Error", description: "Brand identity and branch name are required.", variant: "destructive" })
+      toast({ title: "Validation Error", description: "Brand identity and outlet name are required.", variant: "destructive" })
       return
     }
 
@@ -165,7 +165,7 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
         city: formCity,
         country: formCountry
       } : o))
-      toast({ title: "Branch Updated", description: `${formName} configuration has been saved.` })
+      toast({ title: "Outlet Updated", description: `${formName} configuration has been saved.` })
     } else {
       const newOutlet: Outlet = {
         id: `o-${Math.random().toString(36).substr(2, 9)}`,
@@ -180,7 +180,7 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
         userCount: 0
       }
       setAllOutlets(prev => [newOutlet, ...prev])
-      toast({ title: "New Branch Registered", description: `${formName} is now part of the network.` })
+      toast({ title: "New Outlet Registered", description: `${formName} is now part of the network.` })
     }
     setIsAddingNew(false)
     setEditingOutlet(null)
@@ -207,7 +207,7 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
                   <span className="text-[#1a73e8] font-black">{tenant?.tenantName.toUpperCase() || "PROPERTY NETWORK"}</span>
                 </div>
                 <SheetTitle className="text-2xl font-black text-[#1e293b] tracking-tight">
-                  {isAddingNew ? (editingOutlet ? `Edit ${editingOutlet.name}` : "Branch Registration") : `Outlet Management ${tenant?.tenantName || "Property Network"}`}
+                  {isAddingNew ? (editingOutlet ? `Edit ${editingOutlet.name}` : "Outlet Registration") : `Outlet Management ${tenant?.tenantName || ""}`}
                 </SheetTitle>
               </div>
             </div>
@@ -227,7 +227,7 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
             <div className="w-[400px] flex-shrink-0 bg-white rounded-3xl border border-slate-200 shadow-xl flex flex-col animate-in slide-in-from-left duration-500 overflow-hidden">
               <div className="p-6 border-b border-slate-50 flex items-center justify-between">
                 <div>
-                  <h3 className="font-extrabold text-[#1e293b] text-lg">Branch Details</h3>
+                  <h3 className="font-extrabold text-[#1e293b] text-lg">Outlet Details</h3>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Configuration parameters</p>
                 </div>
                 <button 
@@ -289,7 +289,7 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
 
                     <div className="space-y-4">
                       <div className="space-y-2">
-                        <Label className="text-[13px] font-bold text-slate-700">Branch Name</Label>
+                        <Label className="text-[13px] font-bold text-slate-700">Outlet Name</Label>
                         <Input value={formName} onChange={e => setFormName(e.target.value)} placeholder="e.g. Downtown Flagship" className="h-12 bg-slate-50/50" />
                       </div>
                       <div className="space-y-2">
@@ -320,7 +320,7 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
               <div className="p-8 border-t bg-slate-50/50 flex gap-4 mt-auto flex-shrink-0">
                 <Button variant="outline" className="flex-1 h-12 font-bold border-slate-200" onClick={() => { setIsAddingNew(false); setEditingOutlet(null); }}>Cancel</Button>
                 <Button className="flex-1 h-12 bg-[#1a73e8] hover:bg-[#1557b0] text-white font-black shadow-lg shadow-[#1a73e8]/20" onClick={handleSaveOutlet}>
-                  {editingOutlet ? "Update Branch" : "Confirm Addition"}
+                  {editingOutlet ? "Update Outlet" : "Confirm Addition"}
                 </Button>
               </div>
             </div>
@@ -328,7 +328,7 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
 
           <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col min-h-0 overflow-hidden">
             <div className="p-6 border-b border-slate-50 bg-white flex flex-col md:flex-row items-center gap-4">
-              <div className="relative flex-1 max-w-sm">
+              <div className="relative flex-1 max-sm:w-full max-w-sm">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input 
                   placeholder="Search locations..." 
@@ -358,7 +358,7 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
               <Table>
                 <TableHeader className="bg-slate-50/50">
                   <TableRow className="h-12 border-b border-slate-100 hover:bg-transparent">
-                    <TableHead className="px-8 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Branch Profile</TableHead>
+                    <TableHead className="px-8 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Outlet Profile</TableHead>
                     <TableHead className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Contact Information</TableHead>
                     <TableHead className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">Operational Status</TableHead>
                     <TableHead className="text-right px-8 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Actions</TableHead>
@@ -421,7 +421,7 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
                       <TableCell colSpan={4} className="py-20 text-center">
                         <div className="flex flex-col items-center">
                           <Store className="h-12 w-12 text-slate-100 mb-4" />
-                          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">No branch locations registered yet.</p>
+                          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">No outlet locations registered yet.</p>
                         </div>
                       </TableCell>
                     </TableRow>
