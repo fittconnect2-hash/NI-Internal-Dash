@@ -44,20 +44,20 @@ interface TenantConfigurationProps {
 }
 
 const configTabs = [
-  "General Settings", 
-  "Service Fees", 
-  "Gratuity Settings", 
-  "Contract Dates", 
-  "Payment Gateways", 
-  "Payout Settings", 
-  "Additional Charges", 
-  "Cancellation Policies", 
-  "SaaS Fees", 
-  "Small Order Fees"
+  "Currency", 
+  "Commission", 
+  "Tips", 
+  "Contract", 
+  "Payment Gateway", 
+  "Payouts", 
+  "Fees", 
+  "Penalties", 
+  "Platform", 
+  "Small Order"
 ]
 
 export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, onClose, onSave }: TenantConfigurationProps) {
-  const [activeTab, setActiveTab] = React.useState("General Settings")
+  const [activeTab, setActiveTab] = React.useState("Currency")
   const [tipsEnabled, setTipsEnabled] = React.useState(true)
   const [suggestedTipRates, setSuggestedTipRates] = React.useState([5, 10, 20])
   
@@ -221,7 +221,7 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
           <ScrollArea className="flex-1">
             <div className="p-10 max-w-4xl mx-auto space-y-12">
               
-              {activeTab === "General Settings" && (
+              {activeTab === "Currency" && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-400">
                   <div className="bg-blue-50/50 border border-blue-100 p-6 rounded-2xl flex items-start gap-4">
                     <Info className="h-5 w-5 text-blue-500 mt-1 shrink-0" />
@@ -277,7 +277,7 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
                 </div>
               )}
 
-              {activeTab === "Payment Gateways" && (
+              {activeTab === "Payment Gateway" && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-400">
                   <div className="bg-primary/5 border border-primary/10 p-6 rounded-2xl flex items-start gap-4">
                     <ShieldCheck className="h-6 w-6 text-primary mt-1 shrink-0" />
@@ -356,7 +356,7 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
                 </div>
               )}
 
-              {activeTab === "Service Fees" && (
+              {activeTab === "Commission" && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-400">
                   <div className="bg-amber-50/50 border border-amber-100 p-6 rounded-2xl flex items-start gap-4">
                     <Info className="h-5 w-5 text-amber-500 mt-1 shrink-0" />
@@ -387,7 +387,7 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
                 </div>
               )}
 
-              {activeTab === "Gratuity Settings" && (
+              {activeTab === "Tips" && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-400">
                    <div className="bg-green-50/50 border border-green-100 p-6 rounded-2xl flex items-start gap-4">
                     <Info className="h-5 w-5 text-green-500 mt-1 shrink-0" />
@@ -456,7 +456,7 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
                 </div>
               )}
 
-              {activeTab === "Contract Dates" && (
+              {activeTab === "Contract" && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-400">
                   <div className="bg-slate-50 border border-slate-200 p-6 rounded-2xl flex items-start gap-4">
                     <CalendarIcon className="h-5 w-5 text-slate-500 mt-1 shrink-0" />
@@ -521,7 +521,7 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
                 </div>
               )}
 
-              {activeTab === "Payout Settings" && (
+              {activeTab === "Payouts" && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-400">
                   <div className="bg-emerald-50/50 border border-emerald-100 p-6 rounded-2xl flex items-start gap-4">
                     <Info className="h-5 w-5 text-emerald-500 mt-1 shrink-0" />
