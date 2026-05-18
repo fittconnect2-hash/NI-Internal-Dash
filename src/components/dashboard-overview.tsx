@@ -442,7 +442,7 @@ export function DashboardOverview() {
                 )}
                 onClick={() => setTimeRange(range)}
               >
-                {range === 'Today' ? 'Today' : range === '7d' ? 'Last 7 Days' : 'This Month'}
+                {range}
               </Button>
             ))}
           </div>
@@ -452,7 +452,7 @@ export function DashboardOverview() {
             className={cn("h-10 border-slate-200 font-bold gap-2 text-slate-600", isRefreshing && "opacity-50 pointer-events-none")}
             onClick={handleRefresh}
           >
-            <RefreshCw className={cn("h-4 w-4", isRefreshing && "animate-spin")} /> Update Now
+            <RefreshCw className={cn("h-4 w-4", isRefreshing && "animate-spin")} /> Refresh
           </Button>
           <Button size="sm" className="h-10 bg-[#e91e63] hover:bg-[#d81b60] font-bold gap-2 shadow-lg shadow-[#e91e63]/20">
             <Share className="h-4 w-4" /> Save Report
