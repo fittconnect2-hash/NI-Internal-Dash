@@ -1,7 +1,21 @@
 "use client"
 
 import * as React from "react"
-import { ArrowLeft, Minus, Plus, Calendar as CalendarIcon, ShieldCheck, Globe, Store, Check, Info, Layout, ShoppingBag } from "lucide-react"
+import { 
+  ArrowLeft, 
+  Minus, 
+  Plus, 
+  Calendar as CalendarIcon, 
+  ShieldCheck, 
+  Globe, 
+  Store, 
+  Check, 
+  Info, 
+  Layout, 
+  ShoppingBag,
+  ChevronRight,
+  HelpCircle
+} from "lucide-react"
 import { Tenant, Gateway, Outlet } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import {
@@ -68,6 +82,16 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
   const [globalGwIds, setGlobalGwIds] = React.useState<string[]>([])
   const [outletGwMap, setOutletGwMap] = React.useState<Record<string, string[]>>({})
 
+  // Scroll identification state
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null)
+  const [showRightScrollIndicator, setShowRightScrollIndicator] = React.useState(true)
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget
+    const isAtEnd = target.scrollLeft + target.clientWidth >= target.scrollWidth - 10
+    setShowRightScrollIndicator(!isAtEnd)
+  }
+
   const tenantOutlets = React.useMemo(() => {
     return allOutlets.filter(o => o.tenantId === tenant?.id)
   }, [allOutlets, tenant?.id])
@@ -82,6 +106,15 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
         initialMap[o.id] = o.gatewayIds || []
       })
       setOutletGwMap(initialMap)
+      
+      // Reset scroll indicator
+      setTimeout(() => {
+        if (scrollContainerRef.current) {
+          const target = scrollContainerRef.current
+          const isAtEnd = target.scrollLeft + target.clientWidth >= target.scrollWidth - 10
+          setShowRightScrollIndicator(!isAtEnd)
+        }
+      }, 100)
     }
   }, [tenant, isOpen, tenantOutlets])
 
@@ -194,28 +227,57 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
             </div>
           </SheetHeader>
 
-          <div className="px-8 py-4 bg-slate-50/50 border-b border-slate-200">
-            <ScrollArea className="w-full whitespace-nowrap">
-              <div className="flex gap-2">
-                {configTabs.map((tab) => (
-                  <Button
-                    key={tab}
-                    variant={activeTab === tab ? "default" : "ghost"}
-                    onClick={() => setActiveTab(tab)}
-                    className={cn(
-                      "text-[12px] font-black uppercase tracking-widest px-6 h-10 transition-all rounded-full",
-                      activeTab === tab 
-                        ? "bg-primary text-white shadow-md hover:bg-primary/90" 
-                        : "text-slate-400 hover:text-slate-900 hover:bg-slate-200/50"
-                    )}
-                    size="sm"
-                  >
-                    {tab}
-                  </Button>
-                ))}
+          <div className="relative bg-slate-50/50 border-b border-slate-200">
+            {/* Horizontal Scroll Logic with Identification */}
+            <div 
+              ref={scrollContainerRef}
+              onScroll={handleScroll}
+              className="flex gap-2 p-4 overflow-x-auto scrollbar-hide scroll-smooth"
+            >
+              {configTabs.map((tab) => (
+                <Button
+                  key={tab}
+                  variant={activeTab === tab ? "default" : "ghost"}
+                  onClick={() => setActiveTab(tab)}
+                  className={cn(
+                    "text-[11px] font-black uppercase tracking-widest px-6 h-10 transition-all rounded-full shrink-0",
+                    activeTab === tab 
+                      ? "bg-primary text-white shadow-md hover:bg-primary/90" 
+                      : "text-slate-400 hover:text-slate-900 hover:bg-slate-200/50"
+                  )}
+                  size="sm"
+                >
+                  {tab}
+                </Button>
+              ))}
+            </div>
+
+            {/* Right Side Indicator Overlay */}
+            {showRightScrollIndicator && (
+              <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-slate-50 to-transparent pointer-events-none flex items-center justify-end pr-4">
+                <div className="bg-white/80 backdrop-blur-sm rounded-full p-1 border border-slate-200 shadow-sm flex items-center gap-2 px-3 animate-in fade-in slide-in-from-right-2 duration-300">
+                  <span className="text-[9px] font-black uppercase text-slate-400 tracking-tighter">More</span>
+                  <ChevronRight className="h-3 w-3 text-primary animate-bounce-horizontal" />
+                </div>
               </div>
-              <ScrollBar orientation="horizontal" />
-            </ScrollArea>
+            )}
+            
+            <style jsx global>{`
+              @keyframes bounce-horizontal {
+                0%, 100% { transform: translateX(0); }
+                50% { transform: translateX(3px); }
+              }
+              .animate-bounce-horizontal {
+                animation: bounce-horizontal 1s infinite;
+              }
+              .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+              }
+              .scrollbar-hide {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+              }
+            `}</style>
           </div>
 
           <ScrollArea className="flex-1">
@@ -224,7 +286,9 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
               {activeTab === "Currency" && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-400">
                   <div className="bg-blue-50/50 border border-blue-100 p-6 rounded-2xl flex items-start gap-4">
-                    <Info className="h-5 w-5 text-blue-500 mt-1 shrink-0" />
+                    <div className="h-10 w-10 rounded-xl bg-blue-100 flex items-center justify-center shrink-0">
+                      <Globe className="h-5 w-5 text-blue-600" />
+                    </div>
                     <div>
                       <h4 className="font-bold text-slate-900">Currency & Location</h4>
                       <p className="text-sm text-slate-600 mt-1">Set the primary money used for sales and the local time for this brand.</p>
@@ -233,7 +297,10 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-3">
-                      <Label className="text-[13px] font-bold text-slate-900">Which money should be used?</Label>
+                      <Label className="text-[13px] font-bold text-slate-900 flex items-center gap-2">
+                        Which money should be used?
+                        <HelpCircle className="h-3.5 w-3.5 text-slate-300 cursor-help" />
+                      </Label>
                       <Select defaultValue="AED">
                         <SelectTrigger className="h-12 bg-white border-slate-200 w-full text-base">
                           <SelectValue placeholder="Select currency" />
@@ -280,7 +347,9 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
               {activeTab === "Payment Gateway" && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-400">
                   <div className="bg-primary/5 border border-primary/10 p-6 rounded-2xl flex items-start gap-4">
-                    <ShieldCheck className="h-6 w-6 text-primary mt-1 shrink-0" />
+                    <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                      <ShieldCheck className="h-6 w-6 text-primary" />
+                    </div>
                     <div>
                       <h4 className="font-black text-slate-900">Payment Setup</h4>
                       <p className="text-sm text-slate-600 mt-1">Decide if every location uses the same payment system or if you want to set them individually.</p>
@@ -292,7 +361,7 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
                       htmlFor="gw-global"
                       className={cn(
                         "flex flex-col items-center justify-center rounded-2xl border-2 border-slate-100 bg-white p-8 hover:border-primary/50 cursor-pointer transition-all h-full",
-                        gwMode === 'global' && "border-primary bg-primary/5"
+                        gwMode === 'global' && "border-primary bg-primary/5 shadow-sm"
                       )}
                     >
                       <RadioGroupItem value="global" id="gw-global" className="sr-only" />
@@ -306,7 +375,7 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
                       htmlFor="gw-outlet"
                       className={cn(
                         "flex flex-col items-center justify-center rounded-2xl border-2 border-slate-100 bg-white p-8 hover:border-primary/50 cursor-pointer transition-all h-full",
-                        gwMode === 'by-outlet' && "border-primary bg-primary/5"
+                        gwMode === 'by-outlet' && "border-primary bg-primary/5 shadow-sm"
                       )}
                     >
                       <RadioGroupItem value="by-outlet" id="gw-outlet" className="sr-only" />
@@ -359,7 +428,9 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
               {activeTab === "Commission" && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-400">
                   <div className="bg-amber-50/50 border border-amber-100 p-6 rounded-2xl flex items-start gap-4">
-                    <Info className="h-5 w-5 text-amber-500 mt-1 shrink-0" />
+                    <div className="h-10 w-10 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
+                      <ShoppingBag className="h-5 w-5 text-amber-600" />
+                    </div>
                     <div>
                       <h4 className="font-bold text-slate-900">Standard Fees</h4>
                       <p className="text-sm text-slate-600 mt-1">Set the percentage we take from every order and any fixed caps.</p>
@@ -390,7 +461,9 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
               {activeTab === "Tips" && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-400">
                    <div className="bg-green-50/50 border border-green-100 p-6 rounded-2xl flex items-start gap-4">
-                    <Info className="h-5 w-5 text-green-500 mt-1 shrink-0" />
+                    <div className="h-10 w-10 rounded-xl bg-green-100 flex items-center justify-center shrink-0">
+                      <Info className="h-5 w-5 text-green-600" />
+                    </div>
                     <div>
                       <h4 className="font-bold text-slate-900">Handling Tips</h4>
                       <p className="text-sm text-slate-600 mt-1">Decide if staff can receive tips and how those tips are handled.</p>
@@ -459,7 +532,9 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
               {activeTab === "Contract" && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-400">
                   <div className="bg-slate-50 border border-slate-200 p-6 rounded-2xl flex items-start gap-4">
-                    <CalendarIcon className="h-5 w-5 text-slate-500 mt-1 shrink-0" />
+                    <div className="h-10 w-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0">
+                      <CalendarIcon className="h-5 w-5 text-slate-500" />
+                    </div>
                     <div>
                       <h4 className="font-bold text-slate-900">Contract Duration</h4>
                       <p className="text-sm text-slate-600 mt-1">Specify when the partnership agreement begins and expires.</p>
@@ -524,7 +599,9 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
               {activeTab === "Payouts" && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-400">
                   <div className="bg-emerald-50/50 border border-emerald-100 p-6 rounded-2xl flex items-start gap-4">
-                    <Info className="h-5 w-5 text-emerald-500 mt-1 shrink-0" />
+                    <div className="h-10 w-10 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
+                      <Info className="h-5 w-5 text-emerald-600" />
+                    </div>
                     <div>
                       <h4 className="font-bold text-slate-900">Payment Schedule</h4>
                       <p className="text-sm text-slate-600 mt-1">Set how often the brand receives their accumulated sales funds.</p>
@@ -551,7 +628,9 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
               {activeTab === "Fees" && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-400">
                   <div className="bg-indigo-50/50 border border-indigo-100 p-6 rounded-2xl flex items-start gap-4">
-                    <Info className="h-5 w-5 text-indigo-500 mt-1 shrink-0" />
+                    <div className="h-10 w-10 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0">
+                      <Info className="h-5 w-5 text-indigo-600" />
+                    </div>
                     <div>
                       <h4 className="font-bold text-slate-900">Service Fees</h4>
                       <p className="text-sm text-slate-600 mt-1">Manage extra costs for specific services like delivery, payments, and table bookings.</p>
@@ -560,7 +639,10 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
 
                   <div className="space-y-8">
                     <div className="p-6 bg-slate-50/50 rounded-2xl border border-slate-100 space-y-6">
-                      <h5 className="font-black text-[11px] text-indigo-500 uppercase tracking-widest">Delivery Service</h5>
+                      <h5 className="font-black text-[11px] text-indigo-500 uppercase tracking-widest flex items-center gap-2">
+                        Delivery Service
+                        <HelpCircle className="h-3.5 w-3.5 text-slate-300" />
+                      </h5>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-3">
                           <Label className="text-[13px] font-bold text-slate-900">Delivery Fee Commission Rate (%) <span className="text-red-500">*</span></Label>
@@ -607,7 +689,9 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
               {activeTab === "Penalties" && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-400">
                   <div className="bg-rose-50/50 border border-rose-100 p-6 rounded-2xl flex items-start gap-4">
-                    <Info className="h-5 w-5 text-rose-500 mt-1 shrink-0" />
+                    <div className="h-10 w-10 rounded-xl bg-rose-100 flex items-center justify-center shrink-0">
+                      <Info className="h-5 w-5 text-rose-600" />
+                    </div>
                     <div>
                       <h4 className="font-bold text-slate-900">Penalty Charges</h4>
                       <p className="text-sm text-slate-600 mt-1">Configure fees for when customers don't show up or cancel their bookings late.</p>
@@ -630,7 +714,9 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
               {activeTab === "Platform" && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-400">
                   <div className="bg-slate-50 border border-slate-200 p-6 rounded-2xl flex items-start gap-4">
-                    <Layout className="h-5 w-5 text-slate-500 mt-1 shrink-0" />
+                    <div className="h-10 w-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0">
+                      <Layout className="h-5 w-5 text-slate-500" />
+                    </div>
                     <div>
                       <h4 className="font-bold text-slate-900">Platform Access Fees</h4>
                       <p className="text-sm text-slate-600 mt-1">Set the recurring costs for using the platform. These are usually billed separately from order commissions.</p>
@@ -655,7 +741,9 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
               {activeTab === "Small Order" && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-400">
                   <div className="bg-orange-50/50 border border-orange-100 p-6 rounded-2xl flex items-start gap-4">
-                    <ShoppingBag className="h-5 w-5 text-orange-500 mt-1 shrink-0" />
+                    <div className="h-10 w-10 rounded-xl bg-orange-100 flex items-center justify-center shrink-0">
+                      <ShoppingBag className="h-5 w-5 text-orange-600" />
+                    </div>
                     <div>
                       <h4 className="font-bold text-slate-900">Small Order Policies</h4>
                       <p className="text-sm text-slate-600 mt-1">Manage minimum spending limits and surcharges for smaller transactions.</p>
