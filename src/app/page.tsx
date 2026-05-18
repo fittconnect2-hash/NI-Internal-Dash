@@ -42,7 +42,7 @@ const STORAGE_KEYS = {
   TENANTS: 'network-dine-tenants-v1',
   OUTLETS: 'network-dine-outlets-v1',
   USERS: 'network-dine-users-v1',
-  GATEWAYS: 'network-dine-gateways-v1',
+  GATEWAYS: 'network-dine-gateways-v2', // Incremented key to force refresh
 }
 
 export default function DashboardPage() {
@@ -253,7 +253,7 @@ export default function DashboardPage() {
       return (
         <GatewayManagement 
           allGateways={gateways}
-          setAllGateways={setGateways}
+          setAllGateways={setAllGateways}
         />
       )
     }
@@ -261,7 +261,7 @@ export default function DashboardPage() {
     if (activeTab === 'tenants') {
       return (
         <div className="p-6 md:p-8 flex flex-col h-full overflow-hidden bg-[#f8f9fc]">
-          <div className="w-full mx-auto flex-1 flex flex-col min-h-0">
+          <div className="w-full mx-auto flex-1 flex flex-col min-h-0 max-w-full">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
               <div>
                 <h1 className="text-3xl font-black text-slate-900 tracking-tight">Tenant Management</h1>

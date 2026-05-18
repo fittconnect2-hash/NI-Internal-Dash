@@ -155,7 +155,7 @@ export const initialGateways: Gateway[] = [
   {
     id: 'g-1',
     name: 'DPO (Direct Pay Online) - Live',
-    description: 'DPO (3G Direct Pay) live environment. Supports cards, mobile money, and bank transfers across Africa and...',
+    description: 'DPO (3G Direct Pay) live environment. Supports cards, mobile money, and bank transfers across Africa and',
     isEnabled: true,
     provider: 'DPO',
     type: 'Credit Card',
@@ -173,7 +173,7 @@ export const initialGateways: Gateway[] = [
   {
     id: 'g-3',
     name: 'Network International (NGenius) - Live UAE',
-    description: 'Network International (NGenius) live environment for UAE. Supports cards, ApplePay, Samsung Pay, and...',
+    description: 'Network International (NGenius) live environment for UAE. Supports cards, ApplePay, Samsung Pay, and',
     isEnabled: true,
     provider: 'NGenius',
     type: 'Credit Card',
@@ -182,7 +182,7 @@ export const initialGateways: Gateway[] = [
   {
     id: 'g-4',
     name: 'Network International (NGenius) - Sandbox',
-    description: 'Network International (NGenius) sandbox environment for testing payments. Supports cards, ApplePay,...',
+    description: 'Network International (NGenius) sandbox environment for testing payments. Supports cards, ApplePay,',
     isEnabled: true,
     provider: 'NGenius',
     type: 'Credit Card',
