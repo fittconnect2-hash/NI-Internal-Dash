@@ -279,7 +279,16 @@ export function OutletListView({ allOutlets, setAllOutlets, allTenants, onViewUs
             </div>
             <div className="space-y-2.5">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Status</label>
-              <Select onValueChange={(v) => setStatusFilter(v === 'all' ? null : v)} value={statusFilter || 'all'}><SelectTrigger className="h-11 bg-white"><SelectValue placeholder="All Statuses" /></SelectTrigger><SelectContent><SelectItem value="all">All Statuses</SelectItem><SelectItem value="Active">Active</SelectItem><SelectItem value="Inactive">Inactive</SelectItem></SelectContent></Select>
+              <Select onValueChange={(v) => setStatusFilter(v === 'all' ? null : v)} value={statusFilter || 'all'}>
+                <SelectTrigger className="h-11 bg-white">
+                  <SelectValue placeholder="All Statuses" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="Active">Active</SelectItem>
+                  <SelectItem value="Inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <Button variant="ghost" className="w-full h-11 text-slate-400 hover:text-[#1a73e8] gap-2 font-bold" onClick={resetFilters}><FilterX className="h-4 w-4" /> Reset Filters</Button>
           </div>
@@ -303,7 +312,7 @@ export function OutletListView({ allOutlets, setAllOutlets, allTenants, onViewUs
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2.5"><Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">NAME</Label><Input value={formName} onChange={e => handleNameChange(e.target.value)} placeholder="Marina Bay" className="h-11" /></div>
-                      <div className="space-y-2.5"><Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">SLUG</Label><Input value={formSlug} onChange={e => setFormSlug(e.target.value)} placeholder="marina-bay" className="h-11" /></div>
+                      <div className="space-y-2.5"><Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">SLUG</Label><Input value={formSlug} onChange={e => setFormSlug(e.target.value)} placeholder="marina-bay" className="h-11" disabled={!!editingOutlet} /></div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2.5"><Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">PHONE</Label><Input value={formPhone} onChange={e => setFormPhone(e.target.value)} placeholder="+971..." className="h-11" /></div>
@@ -334,7 +343,7 @@ export function OutletListView({ allOutlets, setAllOutlets, allTenants, onViewUs
               <Table>
                 <TableHeader className="bg-slate-50/50">
                   <TableRow className="hover:bg-transparent border-b border-slate-100">
-                    <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-8 uppercase tracking-widest">Outlet Name</TableHead>
+                    <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-8 uppercase tracking-widest">Outlet Profile</TableHead>
                     <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">Contact</TableHead>
                     <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">Location</TableHead>
                     <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest text-center">Status</TableHead>

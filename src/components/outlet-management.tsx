@@ -283,7 +283,7 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2"><Label className="text-[12px] font-bold text-slate-400 uppercase tracking-widest">OUTLET NAME</Label><Input value={formName} onChange={e => handleNameChange(e.target.value)} placeholder="e.g. Marina Bay" className="h-12" /></div>
-                      <div className="space-y-2"><Label className="text-[12px] font-bold text-slate-400 uppercase tracking-widest">OUTLET SLUG</Label><Input value={formSlug} onChange={e => setFormSlug(e.target.value)} placeholder="marina-bay" className="h-12" /></div>
+                      <div className="space-y-2"><Label className="text-[12px] font-bold text-slate-400 uppercase tracking-widest">OUTLET SLUG</Label><Input value={formSlug} onChange={e => setFormSlug(e.target.value)} placeholder="marina-bay" className="h-12" disabled={!!editingOutlet} /></div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
