@@ -365,7 +365,7 @@ export function OutletListView({ allOutlets, setAllOutlets, allTenants, onViewUs
                       </div>
                       <div className="space-y-2.5"><Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">CITY</Label>
                         <Select value={formCity} onValueChange={setFormCity} disabled={!formCountry}><SelectTrigger className="h-12 bg-slate-50/50"><SelectValue placeholder="City" /></SelectTrigger>
-                          <SelectContent>{(COUNTRY_CITY_MAP[formCountry] || []).map(ci => <SelectItem key={c} value={ci}>{ci}</SelectItem>)}</SelectContent>
+                          <SelectContent>{(COUNTRY_CITY_MAP[formCountry] || []).map(ci => <SelectItem key={ci} value={ci}>{ci}</SelectItem>)}</SelectContent>
                         </Select>
                       </div>
                     </div>
