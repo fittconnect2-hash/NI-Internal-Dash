@@ -168,35 +168,58 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
     return (
       <Popover>
         <PopoverTrigger asChild>
-          <Button variant="outline" className="w-full h-12 justify-between bg-white border-slate-200 text-sm">
+          <Button variant="outline" className="w-full h-12 justify-between bg-white border-slate-200 text-sm font-bold shadow-sm">
             <span className="truncate">
               {selectedIds.length === 0 
-                ? "Click to choose systems..." 
-                : `${selectedIds.length} systems chosen`}
+                ? "Choose payment systems..." 
+                : `${selectedIds.length} systems selected`}
             </span>
             <Plus className="h-4 w-4 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-80 p-2 shadow-2xl" align="start">
-          <div className="space-y-1">
-            <p className="px-2 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active Options</p>
-            {activeGateways.map(g => (
-              <div 
-                key={g.id} 
-                className="flex items-center gap-3 p-3 hover:bg-slate-50 rounded-lg cursor-pointer transition-colors"
-                onClick={() => onToggle(g.id)}
-              >
-                <Checkbox checked={selectedIds.includes(g.id)} onCheckedChange={() => onToggle(g.id)} />
-                <div className="flex flex-col">
-                  <span className="text-[13px] font-bold text-slate-900">{g.name}</span>
-                  <span className="text-[10px] text-slate-400 font-bold uppercase">{g.provider}</span>
-                </div>
-              </div>
-            ))}
-            {activeGateways.length === 0 && (
-              <p className="p-4 text-center text-xs text-slate-400">No active systems found</p>
-            )}
+        <PopoverContent className="w-80 p-0 shadow-2xl rounded-2xl overflow-hidden border-slate-200" align="start">
+          <div className="bg-slate-50/80 p-3 border-b border-slate-100">
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Options</p>
           </div>
+          <ScrollArea className="h-[320px]">
+            <div className="p-2 space-y-1">
+              {activeGateways.map(g => {
+                const isSelected = selectedIds.includes(g.id);
+                return (
+                  <div 
+                    key={g.id} 
+                    className={cn(
+                      "flex items-center gap-4 p-3.5 hover:bg-slate-50 rounded-xl cursor-pointer transition-all group active:scale-[0.98]",
+                      isSelected && "bg-primary/5"
+                    )}
+                    onClick={() => onToggle(g.id)}
+                  >
+                    <div className={cn(
+                      "h-6 w-6 rounded-full border-2 flex items-center justify-center transition-all shrink-0",
+                      isSelected 
+                        ? "bg-primary border-primary text-white shadow-md shadow-primary/20" 
+                        : "border-slate-200 bg-white group-hover:border-primary/30"
+                    )}>
+                      {isSelected && <Check className="h-3.5 w-3.5 stroke-[4]" />}
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <span className={cn(
+                        "text-[14px] font-extrabold truncate transition-colors leading-tight",
+                        isSelected ? "text-slate-900" : "text-slate-600 group-hover:text-slate-900"
+                      )}>{g.name}</span>
+                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tight mt-0.5">{g.provider}</span>
+                    </div>
+                  </div>
+                );
+              })}
+              {activeGateways.length === 0 && (
+                <div className="p-10 text-center flex flex-col items-center justify-center gap-3">
+                  <Info className="h-8 w-8 text-slate-200" />
+                  <p className="text-xs font-bold text-slate-400 italic">No active systems found</p>
+                </div>
+              )}
+            </div>
+          </ScrollArea>
         </PopoverContent>
       </Popover>
     )
@@ -228,7 +251,6 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
           </SheetHeader>
 
           <div className="relative bg-slate-50/50 border-b border-slate-200">
-            {/* Horizontal Scroll Logic with Identification */}
             <div 
               ref={scrollContainerRef}
               onScroll={handleScroll}
@@ -252,7 +274,6 @@ export function TenantConfiguration({ tenant, allGateways, allOutlets, isOpen, o
               ))}
             </div>
 
-            {/* Right Side Indicator Overlay */}
             {showRightScrollIndicator && (
               <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-slate-50 to-transparent pointer-events-none flex items-center justify-end pr-4">
                 <div className="bg-white/80 backdrop-blur-sm rounded-full p-1 border border-slate-200 shadow-sm flex items-center gap-2 px-3 animate-in fade-in slide-in-from-right-2 duration-300">
