@@ -139,7 +139,7 @@ export function UserManagement({
   const [formPassword, setFormPassword] = React.useState("")
   const [formConfirmPassword, setFormConfirmPassword] = React.useState("")
   const [showPassword, setShowPassword] = React.useState(false)
-  const [assignments, setAssignments] = React.useState<UserAssignment[]>([])
+  const [assignments, setAssignments] = React.useState<UserAssignment[]>([{ id: '1', outletId: "all", role: "Manager" }])
 
   const getTenantName = (tid: string) => allTenants.find(t => t.id === tid)?.tenantName || "Unknown"
   const getOutletName = (oid?: string) => {
@@ -204,12 +204,15 @@ export function UserManagement({
     })
   }, [allUsers, tenant, tenantFilter, userFilter, statusFilter, roleFilter, outletFilter])
 
+  const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE)
   const paginatedUsers = React.useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE
     return filteredUsers.slice(start, start + ITEMS_PER_PAGE)
   }, [filteredUsers, currentPage])
 
-  const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE)
+  React.useEffect(() => {
+    setCurrentPage(1)
+  }, [userFilter, tenantFilter, statusFilter, roleFilter, outletFilter])
 
   const isFormValid = React.useMemo(() => {
     const passwordsMatch = editingUser || (formPassword !== "" && formPassword === formConfirmPassword)
@@ -317,7 +320,7 @@ export function UserManagement({
                   <SheetTitle className="text-2xl font-black text-[#1e293b] tracking-tight">{isAddingNew ? (editingUser ? `Edit ${editingUser.fullName}` : "New Staff Member") : "User Management"}</SheetTitle>
                 </div>
               </div>
-              {!isAddingNew && <Button onClick={() => { setIsFormLoading(true); setIsAddingNew(true); resetForm(); setTimeout(() => setIsFormLoading(false), 400); }} className="h-10 px-6 font-black bg-primary hover:bg-primary/90"><Plus className="h-4 w-4 mr-2" /> New User</Button>}
+              {!isAddingNew && <Button onClick={() => { setIsFormLoading(true); setIsAddingNew(true); resetForm(); setTimeout(() => setIsFormLoading(false), 400); }} className="h-10 px-6 font-black bg-primary hover:bg-primary/90 text-white"><Plus className="h-4 w-4 mr-2" /> New User</Button>}
             </div>
           </SheetHeader>
 
@@ -421,6 +424,15 @@ export function UserManagement({
                       </TableBody>
                     </Table>
                   </ScrollArea>
+                  {totalPages > 1 && (
+                    <div className="px-8 py-4 border-t border-slate-100 flex items-center justify-between bg-white">
+                      <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">Page {currentPage} of {totalPages}</p>
+                      <div className="flex gap-1">
+                        <Button variant="outline" size="sm" className="h-8 px-2" disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}><ChevronLeft className="h-4 w-4" /></Button>
+                        <Button variant="outline" size="sm" className="h-8 px-2" disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)}><ChevronRight className="h-4 w-4" /></Button>
+                      </div>
+                    </div>
+                  )}
                </div>
             </div>
           ) : (
@@ -525,7 +537,7 @@ export function UserManagement({
                 <div className="p-8 border-t border-slate-100 flex justify-end gap-4 bg-slate-50/30">
                   <Button variant="outline" className="h-12 px-8 font-black" onClick={() => { setIsAddingNew(false); setEditingUser(null); }}>Cancel</Button>
                   <Button 
-                    className="h-12 px-10 font-black bg-primary hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/20" 
+                    className="h-12 px-10 font-black bg-primary hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/20 text-white" 
                     onClick={handleSaveUser}
                     disabled={!isFormValid}
                   >

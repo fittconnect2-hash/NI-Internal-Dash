@@ -334,7 +334,7 @@ export function OutletListView({ allOutlets, setAllOutlets, allTenants, onViewUs
                   </div>
                 )}
               </ScrollArea>
-              <div className="p-6 border-t border-slate-100 flex gap-4 bg-slate-50/30"><Button variant="outline" className="flex-1 h-12" onClick={handleCloseForm}>Cancel</Button><Button className="flex-1 h-12 bg-primary font-bold shadow-lg shadow-primary/20" onClick={handleSaveOutlet}>{editingOutlet ? "Save Changes" : "Create Outlet"}</Button></div>
+              <div className="p-6 border-t border-slate-100 flex gap-4 bg-slate-50/30"><Button variant="outline" className="flex-1 h-12" onClick={handleCloseForm}>Cancel</Button><Button className="flex-1 h-12 bg-primary font-bold shadow-lg shadow-primary/20 text-white" onClick={handleSaveOutlet}>{editingOutlet ? "Save Changes" : "Create Outlet"}</Button></div>
             </div>
           )}
 
@@ -383,6 +383,15 @@ export function OutletListView({ allOutlets, setAllOutlets, allTenants, onViewUs
                 </TableBody>
               </Table>
             </ScrollArea>
+            {totalPages > 1 && (
+              <div className="px-8 py-4 border-t border-slate-100 flex items-center justify-between bg-white">
+                <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">Page {currentPage} of {totalPages}</p>
+                <div className="flex gap-1">
+                  <Button variant="outline" size="sm" className="h-8 px-2" disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}><ChevronLeft className="h-4 w-4" /></Button>
+                  <Button variant="outline" size="sm" className="h-8 px-2" disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)}><ChevronRight className="h-4 w-4" /></Button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

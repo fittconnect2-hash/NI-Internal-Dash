@@ -171,6 +171,10 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
 
   const totalPages = Math.ceil(filteredOutlets.length / ITEMS_PER_PAGE)
 
+  React.useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, statusFilter, tenant])
+
   const handleSaveOutlet = () => {
     if (!formTenantId || !formName || !formSlug) {
       toast({ title: "Validation Error", description: "Identity parameters are required.", variant: "destructive" })
@@ -238,7 +242,7 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
               </div>
             </div>
             {!isAddingNew && (
-              <Button onClick={() => { setIsFormLoading(true); setIsAddingNew(true); setEditingOutlet(null); setTimeout(() => setIsFormLoading(false), 400); }} className="h-10 px-6 font-black bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20">
+              <Button onClick={() => { setIsFormLoading(true); setIsAddingNew(true); setEditingOutlet(null); setTimeout(() => setIsFormLoading(false), 400); }} className="h-10 px-6 font-black bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 text-white">
                 <Plus className="h-4 w-4 mr-2" /> Add Outlet
               </Button>
             )}
@@ -321,7 +325,7 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
 
               <div className="p-8 border-t bg-slate-50/50 flex gap-4">
                 <Button variant="outline" className="flex-1 h-12 font-bold" onClick={() => { setIsAddingNew(false); setEditingOutlet(null); }}>Cancel</Button>
-                <Button className="flex-1 h-12 bg-primary hover:bg-primary/90 font-black shadow-lg shadow-primary/20" onClick={handleSaveOutlet}>{editingOutlet ? "Update Outlet" : "Create Outlet"}</Button>
+                <Button className="flex-1 h-12 bg-primary hover:bg-primary/90 font-black shadow-lg shadow-primary/20 text-white" onClick={handleSaveOutlet}>{editingOutlet ? "Update Outlet" : "Create Outlet"}</Button>
               </div>
             </div>
           )}
@@ -386,6 +390,15 @@ export function OutletManagement({ tenant, allOutlets, setAllOutlets, allTenants
                 </TableBody>
               </Table>
             </ScrollArea>
+            {totalPages > 1 && (
+              <div className="px-8 py-4 border-t border-slate-100 flex items-center justify-between bg-white">
+                <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">Page {currentPage} of {totalPages}</p>
+                <div className="flex gap-1">
+                  <Button variant="outline" size="sm" className="h-8 px-2" disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}><ChevronLeft className="h-4 w-4" /></Button>
+                  <Button variant="outline" size="sm" className="h-8 px-2" disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)}><ChevronRightIcon className="h-4 w-4" /></Button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </SheetContent>
