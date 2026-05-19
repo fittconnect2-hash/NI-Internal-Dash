@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -88,19 +87,20 @@ export function UserListView({ allUsers, setAllUsers, allOrganizations, allOutle
   const [organizationSearch, setOrganizationSearch] = React.useState("")
   const [isOrganizationPopoverOpen, setIsOrganizationPopoverOpen] = React.useState(false)
 
+  const [outletSearch, setOutletSearch] = React.useState("")
+  const [isOutletPopoverOpen, setIsOutletPopoverOpen] = React.useState(false)
+
   // Dialog states
   const [confirmSuspend, setConfirmSuspend] = React.useState<User | null>(null)
   const [confirmReset, setConfirmReset] = React.useState<User | null>(null)
   const [confirmReactivate, setConfirmReactivate] = React.useState<User | null>(null)
   const [confirmDelete, setConfirmDelete] = React.useState<User | null>(null)
 
-  // Calculate counts for filters
-  const organizationsWithCounts = React.useMemo(() => {
-    return allOrganizations.map(org => ({
-      ...org,
-      count: allUsers.filter(u => u.organizationId === org.id).length
-    })).filter(org => org.count > 0)
-  }, [allUsers, allOrganizations])
+  const organizationsForDropdown = React.useMemo(() => {
+    return allOrganizations.filter(org => 
+      org.organizationName.toLowerCase().includes(organizationSearch.toLowerCase())
+    )
+  }, [allOrganizations, organizationSearch])
 
   const outletsWithCounts = React.useMemo(() => {
     // If organization filter is active, only show outlets for that org
@@ -108,17 +108,22 @@ export function UserListView({ allUsers, setAllUsers, allOrganizations, allOutle
       ? allOutlets.filter(o => o.organizationId === organizationFilter)
       : allOutlets;
 
-    return baseOutlets.map(outlet => ({
-      ...outlet,
-      staffCount: allUsers.filter(u => u.outletId === outlet.id).length
-    })).filter(outlet => outlet.staffCount > 0);
-  }, [allUsers, allOutlets, organizationFilter])
+    return baseOutlets.map(outlet => {
+      const org = allOrganizations.find(o => o.id === outlet.organizationId);
+      return {
+        ...outlet,
+        orgName: org?.organizationName || "Unknown",
+        staffCount: allUsers.filter(u => u.outletId === outlet.id).length
+      };
+    }).filter(outlet => outlet.staffCount > 0);
+  }, [allUsers, allOutlets, organizationFilter, allOrganizations])
 
-  const filteredOrganizationsForDropdown = React.useMemo(() => {
-    return organizationsWithCounts.filter(org => 
-      org.organizationName.toLowerCase().includes(organizationSearch.toLowerCase())
+  const filteredOutletsForDropdown = React.useMemo(() => {
+    return outletsWithCounts.filter(outlet => 
+      outlet.name.toLowerCase().includes(outletSearch.toLowerCase()) ||
+      outlet.orgName.toLowerCase().includes(outletSearch.toLowerCase())
     )
-  }, [organizationsWithCounts, organizationSearch])
+  }, [outletsWithCounts, outletSearch])
 
   const filteredUsers = React.useMemo(() => {
     return allUsers.filter(user => {
@@ -153,7 +158,10 @@ export function UserListView({ allUsers, setAllUsers, allOrganizations, allOutle
 
   const getOutletName = (outletId?: string) => {
     if (!outletId) return "Global Access"
-    return allOutlets.find(o => o.id === outletId)?.name || "Unknown"
+    const o = allOutlets.find(out => out.id === outletId)
+    if (!o) return "Unknown"
+    const org = allOrganizations.find(org => org.id === o.organizationId)
+    return `${org?.organizationName || "Unknown"}-${o.name}`
   }
 
   const resetFilters = () => {
@@ -163,6 +171,7 @@ export function UserListView({ allUsers, setAllUsers, allOrganizations, allOutle
     setRoleFilter(null)
     setStatusFilter(null)
     setOrganizationSearch("")
+    setOutletSearch("")
   }
 
   const handleSuspendUser = (user: User) => {
@@ -228,10 +237,9 @@ export function UserListView({ allUsers, setAllUsers, allOrganizations, allOutle
                   <ScrollArea className="h-60">
                     <div className="p-1">
                       <Button variant="ghost" className="w-full justify-start h-10" onClick={() => { setOrganizationFilter(null); setOutletFilter(null); setIsOrganizationPopoverOpen(false); }}>All Organizations</Button>
-                      {filteredOrganizationsForDropdown.map((org) => (
-                        <Button key={org.id} variant="ghost" className="w-full justify-start h-10 group" onClick={() => { setOrganizationFilter(org.id); setOutletFilter(null); setIsOrganizationPopoverOpen(false); }}>
+                      {organizationsForDropdown.map((org) => (
+                        <Button key={org.id} variant="ghost" className="w-full justify-start h-10" onClick={() => { setOrganizationFilter(org.id); setOutletFilter(null); setIsOrganizationPopoverOpen(false); }}>
                           <span className="truncate flex-1 text-left">{org.organizationName}</span>
-                          <span className="ml-auto text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded group-hover:bg-white">{org.count} Staff</span>
                         </Button>
                       ))}
                     </div>
@@ -242,17 +250,31 @@ export function UserListView({ allUsers, setAllUsers, allOrganizations, allOutle
 
             <div className="space-y-2.5">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Outlet</label>
-              <Select onValueChange={(v) => setOutletFilter(v === 'all' ? null : v)} value={outletFilter || 'all'}>
-                <SelectTrigger className="h-11 bg-white">
-                  <SelectValue placeholder="All Outlets" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Outlets</SelectItem>
-                  {outletsWithCounts.map(o => (
-                    <SelectItem key={o.id} value={o.id}>{o.name} ({o.staffCount})</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Popover open={isOutletPopoverOpen} onOpenChange={setIsOutletPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full h-11 justify-between bg-white px-3 text-sm font-medium">
+                    <span className="truncate">{outletFilter ? getOutletName(outletFilter) : "All Outlets"}</span>
+                    <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-0 shadow-2xl" align="start">
+                  <div className="flex items-center border-b px-3">
+                    <Search className="mr-2 h-4 w-4 opacity-50" />
+                    <Input className="flex h-11 w-full border-none shadow-none focus-visible:ring-0 bg-transparent" placeholder="Search outlets..." value={outletSearch} onChange={(e) => setOutletSearch(e.target.value)} />
+                  </div>
+                  <ScrollArea className="h-60">
+                    <div className="p-1">
+                      <Button variant="ghost" className="w-full justify-start h-10" onClick={() => { setOutletFilter(null); setIsOutletPopoverOpen(false); }}>All Outlets</Button>
+                      {filteredOutletsForDropdown.map((outlet) => (
+                        <Button key={outlet.id} variant="ghost" className="w-full justify-start h-10 group" onClick={() => { setOutletFilter(outlet.id); setIsOutletPopoverOpen(false); }}>
+                          <span className="truncate flex-1 text-left">{outlet.orgName}-{outlet.name}</span>
+                          <span className="ml-auto text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded group-hover:bg-white">{outlet.staffCount} Staffs</span>
+                        </Button>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </PopoverContent>
+              </Popover>
             </div>
 
             <div className="space-y-2.5">
@@ -312,7 +334,7 @@ export function UserListView({ allUsers, setAllUsers, allOrganizations, allOutle
                     <TableCell className="px-4">
                       <Badge className="bg-slate-100 text-slate-600 border-none px-2 py-0.5 text-[10px] font-bold uppercase rounded-md mb-1">{user.role}</Badge>
                       <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-bold uppercase"><Building2 className="h-3 w-3" /> {getOrganizationName(user.organizationId)}</div>
-                      <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-bold uppercase mt-0.5"><Store className="h-3 w-3" /> {getOutletName(user.outletId)}</div>
+                      <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-bold uppercase mt-0.5"><Store className="h-3 w-3" /> {user.outletId ? allOutlets.find(o => o.id === user.outletId)?.name : "Global Access"}</div>
                     </TableCell>
                     <TableCell className="px-4 text-center">
                       <Badge className={cn("rounded-full px-4 py-1 text-[10px] font-bold uppercase", user.status === 'Active' ? "bg-[#e1f9ef] text-[#22c55e]" : "bg-rose-100 text-rose-500")}>
