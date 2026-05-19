@@ -1,84 +1,95 @@
-# DineNet Admin Dashboard Design Document
+# DineNet Admin Dashboard - 100% Comprehensive Design Specification
 
-## 1. Overview
-DineNet is a proactive restaurant property management platform designed for multi-unit hospitality brands. The platform centralizes management for organizations, individual outlets, staff access, and financial configurations, providing system administrators with high-level analytical insights and granular operational control.
+## 1. Design System & Brand Identity
 
-## 2. Design System
+### 1.1 Color Palette (Strict HSL)
+All colors must be implemented using CSS variables in `globals.css`.
+- **Primary (Brand Blue)**: `hsl(204 100% 35%)`
+- **Secondary**: `hsl(210 40% 96.1%)`
+- **Background (Canvas)**: `#f8f9fc` (Main app workspace)
+- **Foreground (Text)**: `hsl(222 47% 11%)`
+- **Muted Foreground**: `hsl(215.4 16.3% 46.9%)`
+- **Surface**: `hsl(0 0% 100%)` (Used for Cards, Sheets, and Popovers)
+- **Status Colors (System Defaults)**:
+  - **Active/Success**: `bg-[#e1f9ef]`, `text-[#22c55e]`
+  - **Pending/Warning**: `bg-amber-100`, `text-amber-700`
+  - **Suspended/Error**: `bg-rose-100`, `text-rose-500`
+  - **Neutral**: `bg-slate-100`, `text-slate-500`
 
-### 2.1 Color Palette
-DineNet uses a high-contrast, professional palette designed for long-session productivity.
-- **Primary (Brand)**: `hsl(204 100% 35%)` - A deep, trust-inspiring blue used for primary actions, sidebar highlights, and navigation.
-- **Background**: `hsl(0 0% 100%)` for components; `#f8f9fc` for the main canvas to provide depth.
-- **Surface**: Card-based architecture with `bg-white`, `border-slate-200`, and `shadow-sm`.
-- **Status Colors**:
-  - **Active**: `bg-[#e1f9ef]`, `text-[#22c55e]` (Success)
-  - **Pending**: `bg-amber-100`, `text-amber-700` (Warning/Action Required)
-  - **Inactive/Suspended**: `bg-rose-100`, `text-rose-500` (Error/Restricted)
-  - **Neutral**: `bg-slate-100`, `text-slate-500` (Secondary Info)
+### 1.2 Typography (Inter Stack)
+- **Font Family**: `'Inter', sans-serif`
+- **Weights**: 400 (Regular), 500 (Medium), 600 (Semibold), 700 (Bold), 800 (Extrabold), 900 (Black)
+- **Hierarchy**:
+  - **Main Titles**: 30px / Black (900) / Tracking-tight
+  - **Section Headers**: 18px / Extrabold (800)
+  - **Sub-headers**: 15px / Bold (700)
+  - **Meta Labels**: 10px or 11px / Bold (700) / Uppercase / Tracking-widest
+  - **Body Copy**: 14px / Medium (500)
 
-### 2.2 Typography
-- **Font Family**: `Inter` (Sans-serif)
-- **Scale**:
-  - **H1**: 30px / Black (900) - Main view titles.
-  - **H3**: 18px / Extrabold (800) - Card titles and section headers.
-  - **Labels**: 10px / Bold (700) / Uppercase / Tracking-widest - Metadata and filter labels.
-  - **Body**: 14px / Medium (500) - Standard readable text.
+### 1.3 Layout & Spacing
+- **Container Width**: `max-w-7xl` (1280px) for management views.
+- **Global Padding**: `p-6` (24px) for mobile, `p-8` or `p-10` (32px/40px) for desktop.
+- **Grid Gap**: `gap-4` (16px) for cards, `gap-8` (32px) for complex forms.
+- **Border Radius**: 
+  - `var(--radius)`: `0.75rem` (12px) - Standard for Cards, Inputs, and Buttons.
+  - `rounded-2xl`: `1rem` (16px) - Inner Card containers.
+  - `rounded-3xl`: `1.5rem` (24px) - Complex management panels.
+  - `rounded-full`: Used for Status Badges and Profile Icons.
 
-### 2.3 Iconography & Interaction
-- **Icons**: `Lucide React` (Stroke width: 2).
-- **Radius**: `0.75rem` (12px) for cards and inputs; `full` for status badges and circular checkmarks.
-- **Shadows**: Soft `shadow-sm` for standard cards; `shadow-xl` for interactive Sheets and Drawers.
-- **Transitions**: 300ms ease-in-out for all hover states and drawer entries.
+### 1.4 Shadows & Elevation
+- **Card Shadow**: `shadow-sm` (subtle border-like depth).
+- **Interactive Shadow**: `shadow-lg shadow-primary/20` (used on primary buttons).
+- **Overlay Shadow**: `shadow-2xl` (used on Sheets and Popovers).
 
-## 3. Core Architecture
+## 2. Core UI Components
 
-### 3.1 Tech Stack
-- **Framework**: Next.js 15 (App Router).
-- **Styling**: Tailwind CSS with HSL variable mapping.
-- **Components**: ShadCN UI (Radix UI primitives).
-- **AI**: Genkit with Google Gemini 1.5 Flash.
-- **State/Persistence**: React State with Local Storage synchronization (versioned).
+### 2.1 Side Sidebar (Collapsible)
+- **Width**: `16rem` (256px) expanded, `3rem` (48px) collapsed.
+- **Background**: `#f8f9fc`.
+- **Interaction**: Active items use `bg-white`, `text-primary`, and a `ring-1 ring-slate-200`.
+- **Logo Transition**: Smooth SVG scaling between full brand and icon-only modes.
 
-### 3.2 Layout Strategy
-- **Sidebar-Centric**: A collapsible sidebar manages primary navigation groups (Overview, Management, Payment).
-- **Contextual Management**: Heavy reliance on **Side Sheets** for editing and creation, ensuring the user never loses their place in a list.
-- **Searchable Filtering**: Multi-layered filters using Popovers and searchable Inputs for high-density datasets.
+### 2.2 Side Sheets (Management Drawers)
+- **Widths**:
+  - **Forms (Standard)**: `sm:max-w-[750px]`
+  - **Management (Extended)**: `sm:max-w-[1200px]`
+- **Header**: Sticky `p-8` with white background and `border-b`.
+- **Scroll Behavior**: Inner `ScrollArea` for content with sticky `SheetFooter` buttons.
 
-## 4. Key Modules
+### 2.3 Management Tables
+- **Row Height**: `py-5` (approx 80px per row).
+- **Hover State**: `hover:bg-slate-50/50`.
+- **Styling**: `border-b border-slate-50`. No vertical borders between columns.
 
-### 4.1 Dashboard Overview
-- **Analytical Cards**: Real-time sales, order volume, and efficiency metrics.
-- **Dynamic Charting**: Recharts-powered Area and Bar charts for revenue trends and serving performance.
-- **Live Feed**: Monitoring of recent network orders.
+## 3. Sophisticated Patterns
 
-### 4.2 Organization Management
-- **Directory**: Supports both Grid (profile focus) and List (data focus) views.
-- **Enrollment**: Comprehensive form for business identity, contact details, and location.
-- **Detail View**: Deep-dive into organization profiles and admin enrollment.
+### 3.1 Multi-Selection (Payment Gateways)
+- **Architecture**: Non-modal `Popover` to prevent focus-stealing in Sheets.
+- **Selection Row**: Full-width clickable `button` with `p-3`.
+- **Circular Checkmark**: 
+  - Default: `h-6 w-6`, `border-2 border-slate-300`, `bg-white`.
+  - Selected: `bg-primary`, `border-primary`, displaying a `white` bold check icon.
+- **Persistence**: Selections updated via `useCallback` to ensure high-performance re-renders.
 
-### 4.3 Outlet Management
-- **Property Profiling**: Management of branch-specific data (Timezone, Phone, Mapping).
-- **Quick-Stats**: Displays total outlets and total staff counts in real-time.
-- **Slug Control**: Automatic slug generation for unique URL identification.
+### 3.2 Advanced Searchable Filters (Popovers)
+- **Width**: `w-[480px]` (standardized for Org/Outlet filters to prevent truncation).
+- **Header**: Integrated `Input` search with `focus-visible:ring-0`.
+- **Formatting**:
+  - **Organization**: `Name`.
+  - **Outlet**: `Organization-Branch (X Staffs)` format.
+- **Behavior**: Auto-resets page to 1 on filter change.
 
-### 4.4 User Management
-- **RBAC**: Support for Organization Admins, Managers, and Partner Admins.
-- **Intelligent Filtering**: 
-  - **Outlet Filter**: Searchable popover with `Organization-Outlet (X Staffs)` format.
-  - **Status Control**: Quick actions for Suspension, Reactivation, and Password Resets.
-- **Windowed Pagination**: Clean navigation showing max 5 pages to avoid UI clutter.
+### 3.3 Windowed Pagination
+- **Capacity**: Maximum of 5 numeric buttons shown at once.
+- **Logic**: Windows dynamically move based on current selection (e.g., if on page 10, shows 8, 9, 10, 11, 12).
+- **Design**: `h-8 w-8` buttons, `text-[11px] font-black`. Active state is `bg-primary`.
 
-### 4.5 Payment Gateway Configuration
-- **Interaction Model**: A non-modal selection layer using high-contrast circular checkmarks.
-- **Configuration Modes**:
-  - **Global (Same for Everyone)**: Apply a set of providers to the entire brand.
-  - **Granular (Unique by Outlet)**: Individual gateway mapping for specific branches.
+### 3.4 Status Assistant (AI)
+- **Trigger**: `rounded-full` button with `Sparkles` icon.
+- **UI**: Side-popover with `ScrollArea`.
+- **Logic**: Uses Genkit to analyze configuration completeness (Merchant ID, Gateway Count, etc.).
 
-## 5. AI Features
-- **AI Status Assistant**: Powered by Genkit, this assistant analyzes configuration completion, identifies missing data (like Merchant IDs), and suggests proactive improvements for organization profiles.
-
-## 6. Data Model
-- **Organization**: Business identity, status, location, and global payment settings.
-- **Outlet**: Physical branch details, linked to an Organization, with branch-specific gateway overrides.
-- **User**: Authentication profile, role assignment, and mapping to specific outlets.
-- **Gateway**: Provider type (DPO/NGenius), currency support, and environment status.
+## 4. Interaction Principles
+- **Transitions**: `duration-300` or `duration-500` for all Sheet entries and hover effects.
+- **Feedback**: Immediate `Toast` notifications for CRUD operations (Create, Update, Delete).
+- **Safety**: Multi-step `AlertDialog` for all destructive actions (Delete, Suspend, Decommission).
