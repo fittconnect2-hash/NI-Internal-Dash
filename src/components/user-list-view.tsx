@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -93,17 +94,7 @@ export function UserListView({ allUsers, setAllUsers, allOrganizations, allOutle
   const [confirmReactivate, setConfirmReactivate] = React.useState<User | null>(null)
   const [confirmDelete, setConfirmDelete] = React.useState<User | null>(null)
 
-  // Safety Effect: Force interactivity cleanup when confirmation boxes close
-  React.useEffect(() => {
-    if (!confirmSuspend && !confirmReset && !confirmReactivate && !confirmDelete) {
-      const timer = setTimeout(() => {
-        document.body.style.pointerEvents = '';
-        document.body.style.overflow = '';
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [confirmSuspend, confirmReset, confirmReactivate, confirmDelete]);
-
+  // Calculate counts for filters
   const organizationsWithCounts = React.useMemo(() => {
     return allOrganizations.map(org => ({
       ...org,
@@ -111,16 +102,23 @@ export function UserListView({ allUsers, setAllUsers, allOrganizations, allOutle
     })).filter(org => org.count > 0)
   }, [allUsers, allOrganizations])
 
+  const outletsWithCounts = React.useMemo(() => {
+    // If organization filter is active, only show outlets for that org
+    const baseOutlets = organizationFilter 
+      ? allOutlets.filter(o => o.organizationId === organizationFilter)
+      : allOutlets;
+
+    return baseOutlets.map(outlet => ({
+      ...outlet,
+      staffCount: allUsers.filter(u => u.outletId === outlet.id).length
+    })).filter(outlet => outlet.staffCount > 0);
+  }, [allUsers, allOutlets, organizationFilter])
+
   const filteredOrganizationsForDropdown = React.useMemo(() => {
     return organizationsWithCounts.filter(org => 
       org.organizationName.toLowerCase().includes(organizationSearch.toLowerCase())
     )
   }, [organizationsWithCounts, organizationSearch])
-
-  const availableOutlets = React.useMemo(() => {
-    if (!organizationFilter) return allOutlets
-    return allOutlets.filter(o => o.organizationId === organizationFilter)
-  }, [allOutlets, organizationFilter])
 
   const filteredUsers = React.useMemo(() => {
     return allUsers.filter(user => {
@@ -144,17 +142,18 @@ export function UserListView({ allUsers, setAllUsers, allOrganizations, allOutle
     return filteredUsers.slice(start, start + ITEMS_PER_PAGE)
   }, [filteredUsers, currentPage])
 
+  // Reset page when filters change
   React.useEffect(() => {
     setCurrentPage(1)
   }, [searchQuery, organizationFilter, outletFilter, roleFilter, statusFilter])
 
   const getOrganizationName = (organizationId: string) => {
-    return allOrganizations.find(org => org.id === organizationId)?.organizationName || "Unknown Organization"
+    return allOrganizations.find(org => org.id === organizationId)?.organizationName || "Unknown"
   }
 
   const getOutletName = (outletId?: string) => {
     if (!outletId) return "Global Access"
-    return allOutlets.find(o => o.id === outletId)?.name || "Unknown Outlet"
+    return allOutlets.find(o => o.id === outletId)?.name || "Unknown"
   }
 
   const resetFilters = () => {
@@ -166,26 +165,26 @@ export function UserListView({ allUsers, setAllUsers, allOrganizations, allOutle
     setOrganizationSearch("")
   }
 
-  const handleResetPassword = (user: User) => {
-    toast({ title: "Password Reset Sent", description: `Reset link dispatched to ${user.email}.` })
-    setConfirmReset(null)
-  }
-
   const handleSuspendUser = (user: User) => {
     setAllUsers(prev => prev.map(u => u.id === user.id ? { ...u, status: 'Suspended' } : u))
-    toast({ title: "User Suspended", description: `${user.fullName}'s access revoked.` })
+    toast({ title: "User Suspended", description: `${user.fullName}'s access has been revoked.` })
     setConfirmSuspend(null)
   }
 
   const handleReactivateUser = (user: User) => {
     setAllUsers(prev => prev.map(u => u.id === user.id ? { ...u, status: 'Active' } : u))
-    toast({ title: "User Reactivated", description: `${user.fullName}'s access restored.` })
+    toast({ title: "User Reactivated", description: `${user.fullName}'s access has been restored.` })
     setConfirmReactivate(null)
+  }
+
+  const handleResetPassword = (user: User) => {
+    toast({ title: "Reset Link Sent", description: `A recovery email has been sent to ${user.email}.` })
+    setConfirmReset(null)
   }
 
   const handleDeleteUser = (user: User) => {
     setAllUsers(prev => prev.filter(u => u.id !== user.id))
-    toast({ title: "User Deleted", description: `${user.fullName} removed from the platform.` })
+    toast({ title: "User Deleted", description: "Record has been permanently removed." })
     setConfirmDelete(null)
   }
 
@@ -195,7 +194,7 @@ export function UserListView({ allUsers, setAllUsers, allOrganizations, allOutle
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-black text-slate-900 tracking-tight">User Management</h1>
-            <p className="text-sm text-slate-500 mt-1">Manage platform administrators, organization managers, and outlet staff.</p>
+            <p className="text-sm text-slate-500 mt-1">Review and manage access for organization administrators and outlet staff.</p>
           </div>
           <Button size="sm" className="h-10 px-6 font-black bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20" onClick={onAddUser}>
             <Plus className="h-4 w-4 mr-2" /> Add New User
@@ -208,7 +207,7 @@ export function UserListView({ allUsers, setAllUsers, allOrganizations, allOutle
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Search Staff</label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
-                <Input placeholder="Name, username or email..." className="pl-9 h-11 text-sm bg-white border-slate-200" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                <Input placeholder="Name, @username or email..." className="pl-9 h-11 text-sm bg-white" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
               </div>
             </div>
 
@@ -216,23 +215,23 @@ export function UserListView({ allUsers, setAllUsers, allOrganizations, allOutle
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Organization</label>
               <Popover open={isOrganizationPopoverOpen} onOpenChange={setIsOrganizationPopoverOpen}>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" role="combobox" className="w-full h-11 justify-between bg-white border-slate-200 text-sm font-medium px-3">
+                  <Button variant="outline" className="w-full h-11 justify-between bg-white px-3 text-sm font-medium">
                     <span className="truncate">{organizationFilter ? getOrganizationName(organizationFilter) : "All Organizations"}</span>
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-80 p-0 shadow-2xl border-slate-200" align="start">
+                <PopoverContent className="w-80 p-0 shadow-2xl" align="start">
                   <div className="flex items-center border-b px-3">
-                    <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-                    <Input className="flex h-11 w-full border-none shadow-none focus-visible:ring-0 bg-transparent py-3 text-sm outline-none" placeholder="Search..." value={organizationSearch} onChange={(e) => setOrganizationSearch(e.target.value)} />
+                    <Search className="mr-2 h-4 w-4 opacity-50" />
+                    <Input className="flex h-11 w-full border-none shadow-none focus-visible:ring-0 bg-transparent" placeholder="Search brands..." value={organizationSearch} onChange={(e) => setOrganizationSearch(e.target.value)} />
                   </div>
                   <ScrollArea className="h-60">
                     <div className="p-1">
-                      <Button variant="ghost" className="w-full justify-start font-normal text-sm h-10" onClick={() => { setOrganizationFilter(null); setOutletFilter(null); setIsOrganizationPopoverOpen(false); }}>All Organizations</Button>
+                      <Button variant="ghost" className="w-full justify-start h-10" onClick={() => { setOrganizationFilter(null); setOutletFilter(null); setIsOrganizationPopoverOpen(false); }}>All Organizations</Button>
                       {filteredOrganizationsForDropdown.map((org) => (
-                        <Button key={org.id} variant="ghost" className="w-full justify-start font-normal text-sm h-10 group" onClick={() => { setOrganizationFilter(org.id); setOutletFilter(null); setIsOrganizationPopoverOpen(false); }}>
+                        <Button key={org.id} variant="ghost" className="w-full justify-start h-10 group" onClick={() => { setOrganizationFilter(org.id); setOutletFilter(null); setIsOrganizationPopoverOpen(false); }}>
                           <span className="truncate flex-1 text-left">{org.organizationName}</span>
-                          <span className="ml-auto text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded group-hover:bg-white transition-colors">{org.count} Staff</span>
+                          <span className="ml-auto text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded group-hover:bg-white">{org.count} Staff</span>
                         </Button>
                       ))}
                     </div>
@@ -244,13 +243,13 @@ export function UserListView({ allUsers, setAllUsers, allOrganizations, allOutle
             <div className="space-y-2.5">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Outlet</label>
               <Select onValueChange={(v) => setOutletFilter(v === 'all' ? null : v)} value={outletFilter || 'all'}>
-                <SelectTrigger className="h-11 bg-white border-slate-200 text-sm">
+                <SelectTrigger className="h-11 bg-white">
                   <SelectValue placeholder="All Outlets" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Outlets</SelectItem>
-                  {availableOutlets.map(o => (
-                    <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>
+                  {outletsWithCounts.map(o => (
+                    <SelectItem key={o.id} value={o.id}>{o.name} ({o.staffCount})</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -259,10 +258,10 @@ export function UserListView({ allUsers, setAllUsers, allOrganizations, allOutle
             <div className="space-y-2.5">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Role</label>
               <Select onValueChange={(v) => setRoleFilter(v === 'all' ? null : v)} value={roleFilter || 'all'}>
-                <SelectTrigger className="h-11 bg-white border-slate-200 text-sm"><SelectValue placeholder="All Roles" /></SelectTrigger>
+                <SelectTrigger className="h-11 bg-white"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Roles</SelectItem>
-                  <SelectItem value="Organization Admin">Organization Admin</SelectItem>
+                  <SelectItem value="Organization Admin">Org Admin</SelectItem>
                   <SelectItem value="Manager">Manager</SelectItem>
                   <SelectItem value="Partner Admin">Partner Admin</SelectItem>
                 </SelectContent>
@@ -272,21 +271,18 @@ export function UserListView({ allUsers, setAllUsers, allOrganizations, allOutle
             <div className="space-y-2.5">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Status</label>
               <Select onValueChange={(v) => setStatusFilter(v === 'all' ? null : v)} value={statusFilter || 'all'}>
-                <SelectTrigger className="h-11 bg-white border-slate-200 text-sm"><SelectValue placeholder="All Statuses" /></SelectTrigger>
+                <SelectTrigger className="h-11 bg-white"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Statuses</SelectItem>
                   <SelectItem value="Active">Active</SelectItem>
-                  <SelectItem value="Inactive">Inactive</SelectItem>
                   <SelectItem value="Suspended">Suspended</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <div>
-              <Button variant="ghost" className="w-full h-11 text-slate-400 hover:text-primary gap-2 font-bold" onClick={resetFilters}>
-                <FilterX className="h-4 w-4" /> Reset
-              </Button>
-            </div>
+            <Button variant="ghost" className="h-11 text-slate-400 font-bold gap-2" onClick={resetFilters}>
+              <FilterX className="h-4 w-4" /> Reset
+            </Button>
           </div>
         </div>
 
@@ -297,32 +293,35 @@ export function UserListView({ allUsers, setAllUsers, allOrganizations, allOutle
                 <TableRow className="hover:bg-transparent border-b border-slate-100">
                   <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-8 uppercase tracking-widest">Username</TableHead>
                   <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">Contact</TableHead>
-                  <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">Role & Organization</TableHead>
+                  <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest">Role & Assignment</TableHead>
                   <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-4 uppercase tracking-widest text-center">Status</TableHead>
                   <TableHead className="text-[10px] font-bold text-slate-400 h-12 px-8 text-right uppercase tracking-widest">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {paginatedUsers.map((user) => (
-                  <TableRow key={user.id} className="group hover:bg-slate-50/50 transition-all border-b border-slate-50">
+                  <TableRow key={user.id} className="group hover:bg-slate-50/50 border-b border-slate-50">
                     <TableCell className="py-5 px-8">
-                      <div className="font-extrabold text-[#1e293b] text-[15px] group-hover:text-primary transition-colors">{user.fullName}</div>
-                      <div className="text-[11px] text-primary font-bold uppercase opacity-70">@{user.username}</div>
+                      <div className="font-extrabold text-[#1e293b] group-hover:text-primary transition-colors">{user.fullName}</div>
+                      <div className="text-[11px] text-slate-400 font-bold">@{user.username}</div>
                     </TableCell>
                     <TableCell className="px-4">
-                      <div className="text-xs font-bold text-slate-700 truncate max-w-[180px]"><Mail className="h-3 w-3 inline mr-1 opacity-40" />{user.email}</div>
+                      <div className="text-xs font-bold text-slate-700 truncate max-w-[200px]"><Mail className="h-3 w-3 inline mr-1 opacity-40" />{user.email}</div>
                       <div className="text-[11px] text-slate-400"><Phone className="h-3 w-3 inline mr-1 opacity-40" />{user.phone}</div>
                     </TableCell>
                     <TableCell className="px-4">
                       <Badge className="bg-slate-100 text-slate-600 border-none px-2 py-0.5 text-[10px] font-bold uppercase rounded-md mb-1">{user.role}</Badge>
                       <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-bold uppercase"><Building2 className="h-3 w-3" /> {getOrganizationName(user.organizationId)}</div>
+                      <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-bold uppercase mt-0.5"><Store className="h-3 w-3" /> {getOutletName(user.outletId)}</div>
                     </TableCell>
                     <TableCell className="px-4 text-center">
-                      <Badge className={cn("rounded-full px-4 py-1 text-[10px] font-bold border uppercase", user.status === 'Active' ? "bg-[#e1f9ef] text-[#22c55e] border-[#e1f9ef]" : user.status === 'Suspended' ? "bg-rose-100 text-rose-500 border-rose-200" : "bg-slate-100 text-slate-500 border-slate-200")}>{user.status}</Badge>
+                      <Badge className={cn("rounded-full px-4 py-1 text-[10px] font-bold uppercase", user.status === 'Active' ? "bg-[#e1f9ef] text-[#22c55e]" : "bg-rose-100 text-rose-500")}>
+                        {user.status}
+                      </Badge>
                     </TableCell>
                     <TableCell className="text-right px-8">
                       <DropdownMenu>
-                        <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-slate-400"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                        <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="text-slate-400"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48 p-2">
                           <DropdownMenuItem className="font-bold py-2.5" onClick={() => onEditUser(user)}><Edit2 className="h-4 w-4 mr-3 text-slate-400" /> Edit Profile</DropdownMenuItem>
                           <DropdownMenuItem className="font-bold py-2.5" onClick={() => setConfirmReset(user)}><RotateCcw className="h-4 w-4 mr-3 text-slate-400" /> Reset Password</DropdownMenuItem>
@@ -347,45 +346,11 @@ export function UserListView({ allUsers, setAllUsers, allOrganizations, allOutle
                 Showing <span className="text-primary">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to <span className="text-primary">{Math.min(currentPage * ITEMS_PER_PAGE, filteredUsers.length)}</span> of <span className="text-primary">{filteredUsers.length}</span> results
               </p>
               <div className="flex items-center gap-1">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="h-8 px-2 border-slate-200"
-                  disabled={currentPage === 1}
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  let pageNum = i + 1;
-                  if (totalPages > 5 && currentPage > 3) {
-                    pageNum = currentPage - 2 + i;
-                    if (pageNum > totalPages) pageNum = totalPages - (4 - i);
-                  }
-                  
-                  return (
-                    <Button
-                      key={pageNum}
-                      variant={currentPage === pageNum ? "default" : "outline"}
-                      size="sm"
-                      className={cn("h-8 w-8 p-0 text-[11px] font-black border-slate-200", currentPage === pageNum ? "bg-primary border-primary text-white" : "text-slate-500")}
-                      onClick={() => setCurrentPage(pageNum)}
-                    >
-                      {pageNum}
-                    </Button>
-                  );
-                })}
-                
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="h-8 px-2 border-slate-200"
-                  disabled={currentPage === totalPages}
-                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
+                <Button variant="outline" size="sm" className="h-8 px-2" disabled={currentPage === 1} onClick={() => setCurrentPage(p => Math.max(1, p - 1))}><ChevronLeft className="h-4 w-4" /></Button>
+                {Array.from({ length: totalPages }, (_, i) => (
+                  <Button key={i} variant={currentPage === i + 1 ? "default" : "outline"} size="sm" className="h-8 w-8 p-0" onClick={() => setCurrentPage(i + 1)}>{i + 1}</Button>
+                ))}
+                <Button variant="outline" size="sm" className="h-8 px-2" disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}><ChevronRight className="h-4 w-4" /></Button>
               </div>
             </div>
           )}
@@ -394,28 +359,28 @@ export function UserListView({ allUsers, setAllUsers, allOrganizations, allOutle
 
       <AlertDialog open={!!confirmSuspend} onOpenChange={(o) => { if (!o) setConfirmSuspend(null); }}>
         <AlertDialogContent>
-          <AlertDialogHeader><AlertDialogTitle>Suspend Staff Access?</AlertDialogTitle><AlertDialogDescription>Revoke all platform access for <strong>{confirmSuspend?.fullName}</strong>?</AlertDialogDescription></AlertDialogHeader>
-          <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction className="bg-rose-500" onClick={() => confirmSuspend && handleSuspendUser(confirmSuspend)}>Confirm Suspension</AlertDialogAction></AlertDialogFooter>
+          <AlertDialogHeader><AlertDialogTitle>Suspend Staff Access?</AlertDialogTitle><AlertDialogDescription>Revoke access for <strong>{confirmSuspend?.fullName}</strong>?</AlertDialogDescription></AlertDialogHeader>
+          <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction className="bg-rose-500" onClick={() => confirmSuspend && handleSuspendUser(confirmSuspend)}>Suspend Access</AlertDialogAction></AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
       <AlertDialog open={!!confirmReactivate} onOpenChange={(o) => { if (!o) setConfirmReactivate(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader><AlertDialogTitle>Reactivate Access?</AlertDialogTitle><AlertDialogDescription>Restore platform access for <strong>{confirmReactivate?.fullName}</strong>?</AlertDialogDescription></AlertDialogHeader>
-          <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction className="bg-green-600" onClick={() => confirmReactivate && handleReactivateUser(confirmReactivate)}>Confirm</AlertDialogAction></AlertDialogFooter>
+          <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction className="bg-green-600" onClick={() => confirmReactivate && handleReactivateUser(confirmReactivate)}>Reactivate</AlertDialogAction></AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
       <AlertDialog open={!!confirmReset} onOpenChange={(o) => { if (!o) setConfirmReset(null); }}>
         <AlertDialogContent>
-          <AlertDialogHeader><AlertDialogTitle>Reset Password?</AlertDialogTitle><AlertDialogDescription>Send secure reset link to <strong>{confirmReset?.email}</strong>?</AlertDialogDescription></AlertDialogHeader>
+          <AlertDialogHeader><AlertDialogTitle>Reset Password?</AlertDialogTitle><AlertDialogDescription>Send a reset link to <strong>{confirmReset?.email}</strong>?</AlertDialogDescription></AlertDialogHeader>
           <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => confirmReset && handleResetPassword(confirmReset)}>Send Link</AlertDialogAction></AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
       <AlertDialog open={!!confirmDelete} onOpenChange={(o) => { if (!o) setConfirmDelete(null); }}>
         <AlertDialogContent>
-          <AlertDialogHeader><AlertDialogTitle>Delete Staff Member?</AlertDialogTitle><AlertDialogDescription>Permanently remove <strong>{confirmDelete?.fullName}</strong> and their records? This cannot be undone.</AlertDialogDescription></AlertDialogHeader>
+          <AlertDialogHeader><AlertDialogTitle>Delete User?</AlertDialogTitle><AlertDialogDescription>Permanently remove <strong>{confirmDelete?.fullName}</strong>? This action cannot be undone.</AlertDialogDescription></AlertDialogHeader>
           <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction className="bg-destructive" onClick={() => confirmDelete && handleDeleteUser(confirmDelete)}>Delete Permanently</AlertDialogAction></AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
