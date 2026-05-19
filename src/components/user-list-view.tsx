@@ -110,9 +110,18 @@ export function UserListView({ allUsers, setAllUsers, allOrganizations, allOutle
 
     return baseOutlets.map(outlet => {
       const org = allOrganizations.find(o => o.id === outlet.organizationId);
+      const orgName = org?.organizationName || "Unknown";
+      
+      // Extract branch name from "Brand - Branch" format to avoid repetition in filter label
+      let branchName = outlet.name;
+      if (branchName.startsWith(orgName)) {
+        branchName = branchName.substring(orgName.length).replace(/^[-\s]+/, '');
+      }
+
       return {
         ...outlet,
-        orgName: org?.organizationName || "Unknown",
+        orgName,
+        branchName,
         staffCount: allUsers.filter(u => u.outletId === outlet.id).length
       };
     }).filter(outlet => outlet.staffCount > 0);
@@ -156,12 +165,16 @@ export function UserListView({ allUsers, setAllUsers, allOrganizations, allOutle
     return allOrganizations.find(org => org.id === organizationId)?.organizationName || "Unknown"
   }
 
-  const getOutletName = (outletId?: string) => {
-    if (!outletId) return "Global Access"
+  const getOutletLabelForButton = (outletId: string) => {
     const o = allOutlets.find(out => out.id === outletId)
     if (!o) return "Unknown"
     const org = allOrganizations.find(org => org.id === o.organizationId)
-    return `${org?.organizationName || "Unknown"}-${o.name}`
+    const orgName = org?.organizationName || "Unknown";
+    let branch = o.name;
+    if (branch.startsWith(orgName)) {
+      branch = branch.substring(orgName.length).replace(/^[-\s]+/, '');
+    }
+    return `${orgName}-${branch}`
   }
 
   const resetFilters = () => {
@@ -229,12 +242,12 @@ export function UserListView({ allUsers, setAllUsers, allOrganizations, allOutle
                     <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-80 p-0 shadow-2xl" align="start">
+                <PopoverContent className="w-[480px] p-0 shadow-2xl" align="start">
                   <div className="flex items-center border-b px-3">
                     <Search className="mr-2 h-4 w-4 opacity-50" />
                     <Input className="flex h-11 w-full border-none shadow-none focus-visible:ring-0 bg-transparent" placeholder="Search brands..." value={organizationSearch} onChange={(e) => setOrganizationSearch(e.target.value)} />
                   </div>
-                  <ScrollArea className="h-60">
+                  <ScrollArea className="h-72">
                     <div className="p-1">
                       <Button variant="ghost" className="w-full justify-start h-10" onClick={() => { setOrganizationFilter(null); setOutletFilter(null); setIsOrganizationPopoverOpen(false); }}>All Organizations</Button>
                       {organizationsForDropdown.map((org) => (
@@ -253,22 +266,31 @@ export function UserListView({ allUsers, setAllUsers, allOrganizations, allOutle
               <Popover open={isOutletPopoverOpen} onOpenChange={setIsOutletPopoverOpen}>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-full h-11 justify-between bg-white px-3 text-sm font-medium">
-                    <span className="truncate">{outletFilter ? getOutletName(outletFilter) : "All Outlets"}</span>
+                    <span className="truncate">{outletFilter ? getOutletLabelForButton(outletFilter) : "All Outlets"}</span>
                     <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-80 p-0 shadow-2xl" align="start">
+                <PopoverContent className="w-[480px] p-0 shadow-2xl" align="start">
                   <div className="flex items-center border-b px-3">
                     <Search className="mr-2 h-4 w-4 opacity-50" />
                     <Input className="flex h-11 w-full border-none shadow-none focus-visible:ring-0 bg-transparent" placeholder="Search outlets..." value={outletSearch} onChange={(e) => setOutletSearch(e.target.value)} />
                   </div>
-                  <ScrollArea className="h-60">
+                  <ScrollArea className="h-72">
                     <div className="p-1">
                       <Button variant="ghost" className="w-full justify-start h-10" onClick={() => { setOutletFilter(null); setIsOutletPopoverOpen(false); }}>All Outlets</Button>
                       {filteredOutletsForDropdown.map((outlet) => (
-                        <Button key={outlet.id} variant="ghost" className="w-full justify-start h-10 group" onClick={() => { setOutletFilter(outlet.id); setIsOutletPopoverOpen(false); }}>
-                          <span className="truncate flex-1 text-left">{outlet.orgName}-{outlet.name}</span>
-                          <span className="ml-auto text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded group-hover:bg-white">{outlet.staffCount} Staffs</span>
+                        <Button key={outlet.id} variant="ghost" className="w-full justify-start h-auto py-2.5 px-3 group" onClick={() => { setOutletFilter(outlet.id); setIsOutletPopoverOpen(false); }}>
+                          <div className="flex flex-col items-start min-w-0 flex-1">
+                            <span className="font-bold text-slate-900 leading-tight">
+                              {outlet.orgName}-{outlet.branchName}
+                            </span>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mt-0.5">
+                              {outlet.city}, {outlet.country}
+                            </span>
+                          </div>
+                          <span className="ml-4 text-[10px] font-black text-primary bg-primary/5 px-2 py-1 rounded-full group-hover:bg-primary group-hover:text-white transition-colors shrink-0">
+                            {outlet.staffCount} STAFFS
+                          </span>
                         </Button>
                       ))}
                     </div>
