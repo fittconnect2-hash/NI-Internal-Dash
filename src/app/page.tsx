@@ -235,6 +235,7 @@ export default function DashboardPage() {
         allOutlets={outlets}
         setAllOutlets={setOutlets}
         allOrganizations={organizations}
+        allUsers={users}
         onViewUsers={(outlet) => {
           const owner = organizations.find(o => o.id === outlet.organizationId)
           setSelectedOrganization(owner || null)
@@ -385,7 +386,7 @@ export default function DashboardPage() {
       <OrganizationForm isOpen={isFormOpen} onClose={() => {setIsFormOpen(false); setEditingOrganization(null)}} organization={editingOrganization} onSubmit={handleAddOrganization} />
       <OrganizationConfiguration isOpen={isConfigOpen} onClose={() => {setIsConfigOpen(false); setConfiguringOrganization(null)}} organization={configuringOrganization} allGateways={gateways} allOutlets={outlets} onSave={handleSaveConfiguration} />
       <OrganizationDetail isOpen={isDetailOpen} onClose={() => {setIsDetailOpen(false); setViewingOrganization(null)}} organization={viewingOrganization} />
-      <OutletManagement organization={selectedOrganization} allOutlets={outlets} setAllOutlets={setOutlets} allOrganizations={organizations} isOpen={isOutletsDrawerOpen} onClose={() => {setIsOutletsDrawerOpen(false); setSelectedOrganization(null)}} onViewUsers={(outlet) => { setIsOutletsDrawerOpen(false); setIsUsersDrawerOpen(true); setIsAddingNewUser(false); }} />
+      <OutletManagement organization={selectedOrganization} allOutlets={outlets} setAllOutlets={setOutlets} allOrganizations={organizations} allUsers={users} isOpen={isOutletsDrawerOpen} onClose={() => {setIsOutletsDrawerOpen(false); setSelectedOrganization(null)}} onViewUsers={(outlet) => { setIsOutletsDrawerOpen(false); setIsUsersDrawerOpen(true); setIsAddingNewUser(false); }} />
       <UserManagement organization={selectedOrganization} propEditingUser={editingUser} allUsers={users} setAllUsers={setUsers} allOrganizations={organizations} allOutlets={outlets} isOpen={isUsersDrawerOpen} defaultAdding={isAddingNewUser} onClose={() => { setIsUsersDrawerOpen(false); setSelectedOrganization(null); setEditingUser(null); setIsAddingNewUser(false); }} onSaved={handleUserSaved} />
     </SidebarProvider>
   )

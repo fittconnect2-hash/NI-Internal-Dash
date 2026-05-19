@@ -317,7 +317,19 @@ export function UserManagement({
                     <ChevronRight className="h-2.5 w-2.5 opacity-30" />
                     <span className="text-primary font-black">{organization?.organizationName.toUpperCase() || "STAFF LIST"}</span>
                   </div>
-                  <SheetTitle className="text-2xl font-black text-[#1e293b] tracking-tight">{isAddingNew ? (editingUser ? `Edit ${editingUser.fullName}` : "New Staff Member") : "User Management"}</SheetTitle>
+                  <div className="flex items-center gap-3">
+                    <SheetTitle className="text-2xl font-black text-[#1e293b] tracking-tight">{isAddingNew ? (editingUser ? `Edit ${editingUser.fullName}` : "New Staff Member") : "User Management"}</SheetTitle>
+                    {!isAddingNew && (
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-primary/5 text-primary border-none font-bold text-[10px] uppercase px-3 py-1">
+                          {filteredUsers.length} Staffs
+                        </Badge>
+                        <Badge className="bg-slate-100 text-slate-500 border-none font-bold text-[10px] uppercase px-3 py-1">
+                          {organization ? allOutlets.filter(o => o.organizationId === organization.id).length : allOutlets.length} Outlets
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
               {!isAddingNew && <Button onClick={() => { setIsFormLoading(true); setIsAddingNew(true); resetForm(); setTimeout(() => setIsFormLoading(false), 400); }} className="h-10 px-6 font-black bg-primary hover:bg-primary/90 text-white"><Plus className="h-4 w-4 mr-2" /> New User</Button>}

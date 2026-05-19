@@ -43,7 +43,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
-import { Outlet, Organization } from "@/lib/types"
+import { Outlet, Organization, User } from "@/lib/types"
 import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
 import { 
@@ -79,12 +79,13 @@ interface OutletManagementProps {
   allOutlets: Outlet[];
   setAllOutlets: React.Dispatch<React.SetStateAction<Outlet[]>>;
   allOrganizations: Organization[];
+  allUsers: User[];
   isOpen: boolean;
   onClose: () => void;
   onViewUsers: (outlet: Outlet) => void;
 }
 
-export function OutletManagement({ organization, allOutlets, setAllOutlets, allOrganizations, isOpen, onClose, onViewUsers }: OutletManagementProps) {
+export function OutletManagement({ organization, allOutlets, setAllOutlets, allOrganizations, allUsers, isOpen, onClose, onViewUsers }: OutletManagementProps) {
   const { toast } = useToast()
   const [searchQuery, setSearchQuery] = React.useState("")
   const [statusFilter, setStatusFilter] = React.useState<string | null>(null)
@@ -236,9 +237,21 @@ export function OutletManagement({ organization, allOutlets, setAllOutlets, allO
                   <ChevronRight className="h-2.5 w-2.5 opacity-30" />
                   <span className="text-primary font-black">{organization?.organizationName.toUpperCase() || "PROPERTY NETWORK"}</span>
                 </div>
-                <SheetTitle className="text-2xl font-black text-[#1e293b] tracking-tight">
-                  {isAddingNew ? (editingOutlet ? `Edit ${editingOutlet.name}` : "Outlet Registration") : `Outlet Management ${organization?.organizationName || ""}`}
-                </SheetTitle>
+                <div className="flex items-center gap-3">
+                  <SheetTitle className="text-2xl font-black text-[#1e293b] tracking-tight">
+                    {isAddingNew ? (editingOutlet ? `Edit ${editingOutlet.name}` : "Outlet Registration") : `Outlet Management`}
+                  </SheetTitle>
+                  {!isAddingNew && (
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-primary/5 text-primary border-none font-bold text-[10px] uppercase px-3 py-1">
+                        {filteredOutlets.length} Outlets
+                      </Badge>
+                      <Badge className="bg-slate-100 text-slate-500 border-none font-bold text-[10px] uppercase px-3 py-1">
+                        {organization ? allUsers.filter(u => u.organizationId === organization.id).length : allUsers.length} Staffs
+                      </Badge>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
             {!isAddingNew && (
@@ -418,7 +431,7 @@ export function OutletManagement({ organization, allOutlets, setAllOutlets, allO
                         key={pageNum}
                         variant={currentPage === pageNum ? "default" : "outline"}
                         size="sm"
-                        className={cn("h-8 w-8 p-0 text-[11px] font-black border-slate-200", currentPage === pageNum ? "bg-primary border-primary text-white" : "text-slate-500")}
+                        className={cn("h-8 w-8 p-0 text-[11px] font-black border-slate-200", currentPage === pageNum ? "bg-primary border-primary text-white" : "text-slate-50")}
                         onClick={() => setCurrentPage(pageNum)}
                       >
                         {pageNum}

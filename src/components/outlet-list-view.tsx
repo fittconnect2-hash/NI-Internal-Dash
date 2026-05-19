@@ -48,7 +48,7 @@ import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Label } from "@/components/ui/label"
-import { Outlet, Organization } from "@/lib/types"
+import { Outlet, Organization, User } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 
@@ -72,10 +72,11 @@ interface OutletListViewProps {
   allOutlets: Outlet[];
   setAllOutlets: React.Dispatch<React.SetStateAction<Outlet[]>>;
   allOrganizations: Organization[];
+  allUsers: User[];
   onViewUsers: (outlet: Outlet) => void;
 }
 
-export function OutletListView({ allOutlets, setAllOutlets, allOrganizations, onViewUsers }: OutletListViewProps) {
+export function OutletListView({ allOutlets, setAllOutlets, allOrganizations, allUsers, onViewUsers }: OutletListViewProps) {
   const { toast } = useToast()
   const [searchQuery, setSearchQuery] = React.useState("")
   const [organizationFilter, setOrganizationFilter] = React.useState<string | null>(null)
@@ -251,7 +252,17 @@ export function OutletListView({ allOutlets, setAllOutlets, allOrganizations, on
       <div className="max-w-7xl mx-auto w-full flex-1 flex flex-col min-h-0">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-black text-slate-900 tracking-tight">Outlet Management</h1>
+            <div className="flex items-center gap-4">
+              <h1 className="text-3xl font-black text-slate-900 tracking-tight">Outlet Management</h1>
+              <div className="flex items-center gap-2">
+                <Badge className="bg-primary/10 text-primary border-none font-black text-[10px] uppercase px-3 py-1">
+                  {allOutlets.length} Outlets
+                </Badge>
+                <Badge className="bg-slate-100 text-slate-500 border-none font-black text-[10px] uppercase px-3 py-1">
+                  {allUsers.length} Staffs
+                </Badge>
+              </div>
+            </div>
             <p className="text-sm text-slate-500 mt-1">Configure and monitor your global property network.</p>
           </div>
           <Button size="sm" className="h-10 px-6 font-black bg-primary shadow-lg shadow-primary/20" onClick={handleAddOutlet}>
