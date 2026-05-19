@@ -1,65 +1,84 @@
 # DineNet Admin Dashboard Design Document
 
 ## 1. Overview
-DineNet is a proactive restaurant property management platform designed for multi-unit hospitality brands. The platform allows system administrators to manage a global network of organizations, their individual outlets, staff access, and financial configurations.
+DineNet is a proactive restaurant property management platform designed for multi-unit hospitality brands. The platform centralizes management for organizations, individual outlets, staff access, and financial configurations, providing system administrators with high-level analytical insights and granular operational control.
 
-## 2. Core Architecture
-The application is built using the **Next.js 15 App Router** (React 19) and follows a single-page dashboard architecture with centralized state management for mock data persistence (Local Storage).
+## 2. Design System
 
-### 2.1 Tech Stack
-- **Framework**: Next.js 15 (App Router)
-- **Styling**: Tailwind CSS
-- **Components**: ShadCN UI (Radix UI primitives)
-- **Icons**: Lucide React
-- **Charts**: Recharts
-- **AI Integration**: Genkit (Google Gemini 1.5 Flash)
-- **Forms**: React Hook Form + Zod
+### 2.1 Color Palette
+DineNet uses a high-contrast, professional palette designed for long-session productivity.
+- **Primary (Brand)**: `hsl(204 100% 35%)` - A deep, trust-inspiring blue used for primary actions, sidebar highlights, and navigation.
+- **Background**: `hsl(0 0% 100%)` for components; `#f8f9fc` for the main canvas to provide depth.
+- **Surface**: Card-based architecture with `bg-white`, `border-slate-200`, and `shadow-sm`.
+- **Status Colors**:
+  - **Active**: `bg-[#e1f9ef]`, `text-[#22c55e]` (Success)
+  - **Pending**: `bg-amber-100`, `text-amber-700` (Warning/Action Required)
+  - **Inactive/Suspended**: `bg-rose-100`, `text-rose-500` (Error/Restricted)
+  - **Neutral**: `bg-slate-100`, `text-slate-500` (Secondary Info)
 
-## 3. Key Modules
+### 2.2 Typography
+- **Font Family**: `Inter` (Sans-serif)
+- **Scale**:
+  - **H1**: 30px / Black (900) - Main view titles.
+  - **H3**: 18px / Extrabold (800) - Card titles and section headers.
+  - **Labels**: 10px / Bold (700) / Uppercase / Tracking-widest - Metadata and filter labels.
+  - **Body**: 14px / Medium (500) - Standard readable text.
 
-### 3.1 Dashboard Overview
-- **Analytical Cards**: Real-time stats for Total Sales, Order Volume, Total Restaurants, and Average Service Time.
-- **Data Visualization**: 
-  - Revenue Trend (Area/Line Chart)
-  - Revenue Source Distribution (Progress bars)
-  - Network Distribution by City (Vertical Bar Chart)
-  - Kitchen Efficiency & Service Performance (Bar Charts)
-- **Live Monitoring**: A real-time feed of orders across the network.
+### 2.3 Iconography & Interaction
+- **Icons**: `Lucide React` (Stroke width: 2).
+- **Radius**: `0.75rem` (12px) for cards and inputs; `full` for status badges and circular checkmarks.
+- **Shadows**: Soft `shadow-sm` for standard cards; `shadow-xl` for interactive Sheets and Drawers.
+- **Transitions**: 300ms ease-in-out for all hover states and drawer entries.
 
-### 3.2 Organization Management
-- **Centralized Brand Directory**: Grid and List views for all hospitality partners.
-- **Profile Detail**: Deep-dive into brand information, including primary contact details and administrator enrollment.
-- **Windowed Pagination**: Clean navigation for large datasets (max 5 pages shown at once).
+## 3. Core Architecture
 
-### 3.3 Outlet Management
-- **Property Profiling**: Management of branch-specific data (Timezone, Location, Contact).
-- **Searchable Filters**: Deep-filtering by Organization and Status.
-- **Quick-Stats**: Displays total outlets and total staff counts in the header.
+### 3.1 Tech Stack
+- **Framework**: Next.js 15 (App Router).
+- **Styling**: Tailwind CSS with HSL variable mapping.
+- **Components**: ShadCN UI (Radix UI primitives).
+- **AI**: Genkit with Google Gemini 1.5 Flash.
+- **State/Persistence**: React State with Local Storage synchronization (versioned).
 
-### 3.4 User Management
-- **Role-Based Access**: Support for Organization Admins, Managers, and Partner Admins.
-- **Searchable Selectors**: 
-  - **Organization Filter**: Search brands.
-  - **Outlet Filter**: Searchable popover showing `Brand-Branch (X Staffs)` format for high-density networks.
-- **Account Actions**: Suspend, Reactivate, Password Reset, and Permanent Deletion via secure confirmation dialogs.
+### 3.2 Layout Strategy
+- **Sidebar-Centric**: A collapsible sidebar manages primary navigation groups (Overview, Management, Payment).
+- **Contextual Management**: Heavy reliance on **Side Sheets** for editing and creation, ensuring the user never loses their place in a list.
+- **Searchable Filtering**: Multi-layered filters using Popovers and searchable Inputs for high-density datasets.
 
-### 3.5 Payment Gateway Configuration
+## 4. Key Modules
+
+### 4.1 Dashboard Overview
+- **Analytical Cards**: Real-time sales, order volume, and efficiency metrics.
+- **Dynamic Charting**: Recharts-powered Area and Bar charts for revenue trends and serving performance.
+- **Live Feed**: Monitoring of recent network orders.
+
+### 4.2 Organization Management
+- **Directory**: Supports both Grid (profile focus) and List (data focus) views.
+- **Enrollment**: Comprehensive form for business identity, contact details, and location.
+- **Detail View**: Deep-dive into organization profiles and admin enrollment.
+
+### 4.3 Outlet Management
+- **Property Profiling**: Management of branch-specific data (Timezone, Phone, Mapping).
+- **Quick-Stats**: Displays total outlets and total staff counts in real-time.
+- **Slug Control**: Automatic slug generation for unique URL identification.
+
+### 4.4 User Management
+- **RBAC**: Support for Organization Admins, Managers, and Partner Admins.
+- **Intelligent Filtering**: 
+  - **Outlet Filter**: Searchable popover with `Organization-Outlet (X Staffs)` format.
+  - **Status Control**: Quick actions for Suspension, Reactivation, and Password Resets.
+- **Windowed Pagination**: Clean navigation showing max 5 pages to avoid UI clutter.
+
+### 4.5 Payment Gateway Configuration
+- **Interaction Model**: A non-modal selection layer using high-contrast circular checkmarks.
 - **Configuration Modes**:
-  - **Global**: Apply a set of gateways to every outlet in the organization.
-  - **Unique by Outlet**: Granular control to pick different payment systems for individual branches.
-- **MultiGatewaySelector**: A specialized, non-modal Popover component that ensures stable selection of multiple providers (e.g., DPO, NGenius UAE, NGenius KSA) with high-contrast circular checkmarks.
+  - **Global (Same for Everyone)**: Apply a set of providers to the entire brand.
+  - **Granular (Unique by Outlet)**: Individual gateway mapping for specific branches.
 
-## 4. AI Features
-- **AI Status Assistant**: Powered by Genkit, this assistant analyzes an organization's profile and configuration to proactively identify "Configuration pending" statuses, missing merchant IDs, or operational inefficiencies.
+## 5. AI Features
+- **AI Status Assistant**: Powered by Genkit, this assistant analyzes configuration completion, identifies missing data (like Merchant IDs), and suggests proactive improvements for organization profiles.
 
-## 5. UI/UX Principles
-- **Modern Aesthetic**: High-contrast typography, soft shadows (`shadow-xl`), and generous spacing.
-- **Feedback Loops**: Immediate toast notifications for all data mutations (Add/Edit/Delete).
-- **Interactive Layers**: Heavy use of "Sheets" (Drawers) for complex management tasks to keep the user in the context of the main list.
-- **Empty States**: All configuration modules default to zero selection for a clean starting experience.
-
-## 6. Data Model (Mock)
-- **Organizations**: IDs, Names, Status, Gateway Config, Stats.
-- **Outlets**: Linked to Organizations, Location Data, Mapping to Gateways.
-- **Users**: Linked to Organizations and optional specific Outlets.
-- **Gateways**: Provider type (DPO/NGenius), Currency support, and Status.
+## 6. Data Model
+- **Organization**: Business identity, status, location, and global payment settings.
+- **Outlet**: Physical branch details, linked to an Organization, with branch-specific gateway overrides.
+- **User**: Authentication profile, role assignment, and mapping to specific outlets.
+- **Gateway**: Provider type (DPO/NGenius), currency support, and environment status.
