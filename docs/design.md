@@ -2,94 +2,118 @@
 
 ## 1. Design System & Brand Identity
 
-### 1.1 Color Palette (Strict HSL)
-All colors must be implemented using CSS variables in `globals.css`.
-- **Primary (Brand Blue)**: `hsl(204 100% 35%)`
+### 1.1 Color Palette (Strict HSL & Hex)
+All colors are implemented using CSS variables in `globals.css`.
+- **Primary (Brand Blue)**: `hsl(204 100% 35%)` / `#0069B1`
 - **Secondary**: `hsl(210 40% 96.1%)`
 - **Background (Canvas)**: `#f8f9fc` (Main app workspace)
 - **Foreground (Text)**: `hsl(222 47% 11%)`
 - **Muted Foreground**: `hsl(215.4 16.3% 46.9%)`
 - **Surface**: `hsl(0 0% 100%)` (Used for Cards, Sheets, and Popovers)
-- **Status Colors (System Defaults)**:
-  - **Active/Success**: `bg-[#e1f9ef]`, `text-[#22c55e]`
-  - **Pending/Warning**: `bg-amber-100`, `text-amber-700`
-  - **Suspended/Error**: `bg-rose-100`, `text-rose-500`
-  - **Neutral**: `bg-slate-100`, `text-slate-500`
+- **Status Colors (Semantic)**:
+  - **Active/Success**: `bg-[#e1f9ef]`, `text-[#22c55e]` (Success green)
+  - **Pending/Warning**: `bg-amber-100`, `text-amber-700` (Amber)
+  - **Suspended/Error**: `bg-rose-100`, `text-rose-500` (Rose)
+  - **Neutral**: `bg-slate-100`, `text-slate-500` (Slate)
 
-### 1.2 Typography (Inter Stack)
-- **Font Family**: `'Inter', sans-serif`
+### 1.2 Typography (Inter Font Family)
+- **Font Stack**: `'Inter', sans-serif`
 - **Weights**: 400 (Regular), 500 (Medium), 600 (Semibold), 700 (Bold), 800 (Extrabold), 900 (Black)
 - **Hierarchy**:
-  - **Main Titles**: 30px / Black (900) / Tracking-tight
-  - **Section Headers**: 18px / Extrabold (800)
-  - **Sub-headers**: 15px / Bold (700)
-  - **Meta Labels**: 10px or 11px / Bold (700) / Uppercase / Tracking-widest
-  - **Body Copy**: 14px / Medium (500)
+  - **Page Titles**: `text-3xl font-black text-slate-900 tracking-tight` (30px)
+  - **Section Headers**: `text-lg font-extrabold text-[#1e293b]` (18px)
+  - **Sub-headers**: `text-[15px] font-bold` (15px)
+  - **Meta Labels**: `text-[10px] font-bold uppercase tracking-widest text-slate-400`
+  - **Body Copy**: `text-sm font-medium text-slate-500` (14px)
 
-### 1.3 Layout & Spacing
-- **Container Width**: `max-w-7xl` (1280px) for management views.
-- **Global Padding**: `p-6` (24px) for mobile, `p-8` or `p-10` (32px/40px) for desktop.
-- **Grid Gap**: `gap-4` (16px) for cards, `gap-8` (32px) for complex forms.
+### 1.3 Layout & Spacing Tokens
+- **Container**: `max-w-7xl` (1280px) centered for management views.
+- **Global Padding**: `p-6` (mobile) to `p-8/p-10` (desktop).
+- **Component Spacing**:
+  - Grid Gap: `gap-4` or `gap-6`.
+  - Form Gap: `gap-8` for vertical sections, `gap-12` for horizontal pairs.
 - **Border Radius**: 
-  - `var(--radius)`: `0.75rem` (12px) - Standard for Cards, Inputs, and Buttons.
-  - `rounded-2xl`: `1rem` (16px) - Inner Card containers.
-  - `rounded-3xl`: `1.5rem` (24px) - Complex management panels.
-  - `rounded-full`: Used for Status Badges and Profile Icons.
+  - `var(--radius)`: `0.75rem` (12px) - Default for buttons/inputs.
+  - `rounded-2xl`: `1rem` (16px) - Standard card container.
+  - `rounded-3xl`: `1.5rem` (24px) - Form containers and side drawers.
+  - `rounded-full`: Status badges and action icons.
 
-### 1.4 Shadows & Elevation
-- **Card Shadow**: `shadow-sm` (subtle border-like depth).
-- **Interactive Shadow**: `shadow-lg shadow-primary/20` (used on primary buttons).
-- **Overlay Shadow**: `shadow-2xl` (used on Sheets and Popovers).
+### 1.4 Shadows & Depth
+- **Card Base**: `shadow-sm` (Subtle 1px border feel).
+- **Interactive Elements**: `shadow-lg shadow-primary/20` (Buttons).
+- **Overlays**: `shadow-2xl` (Popovers and Sheets).
 
-## 2. Core UI Components
+## 2. Core UI Component Specs
 
-### 2.1 Side Sidebar (Collapsible)
-- **Width**: `16rem` (256px) expanded, `3rem` (48px) collapsed.
-- **Background**: `#f8f9fc`.
-- **Interaction**: Active items use `bg-white`, `text-primary`, and a `ring-1 ring-slate-200`.
-- **Logo Transition**: Smooth SVG scaling between full brand and icon-only modes.
+### 2.1 Sidebar (Proactive Navigation)
+- **Widths**: `w-64` (expanded) / `w-20` (collapsed).
+- **Styling**: `bg-[#f8f9fc] border-r border-slate-200`.
+- **Active State**: `bg-white text-primary shadow-sm ring-1 ring-slate-200 font-bold`.
+- **Interactive Element**: `[data-active="true"]::after` vertical indicator (4px width, rounded).
 
-### 2.2 Side Sheets (Management Drawers)
+### 2.2 Side Management Sheets
 - **Widths**:
-  - **Forms (Standard)**: `sm:max-w-[750px]`
-  - **Management (Extended)**: `sm:max-w-[1200px]`
-- **Header**: Sticky `p-8` with white background and `border-b`.
-- **Scroll Behavior**: Inner `ScrollArea` for content with sticky `SheetFooter` buttons.
+  - **Standard (Forms)**: `sm:max-w-[750px]`.
+  - **Extended (Management)**: `sm:max-w-[1200px]`.
+- **Header**: Sticky `p-8 border-b bg-white`.
+- **Content**: `ScrollArea` with `p-6` or `p-8` depending on context.
+- **Footer**: Sticky `p-8 border-t bg-white flex justify-end gap-4`.
 
 ### 2.3 Management Tables
-- **Row Height**: `py-5` (approx 80px per row).
-- **Hover State**: `hover:bg-slate-50/50`.
-- **Styling**: `border-b border-slate-50`. No vertical borders between columns.
+- **Row Height**: `py-5` (approx 80px total height).
+- **Header**: `bg-slate-50/50 h-12 uppercase text-[10px] font-bold text-slate-400`.
+- **Cell Styling**: `px-8` for start/end, `px-4` for middle.
+- **Hover**: `hover:bg-slate-50/50`.
 
-## 3. Sophisticated Patterns
+## 3. Advanced Implementation Logic
 
-### 3.1 Multi-Selection (Payment Gateways)
-- **Architecture**: Non-modal `Popover` to prevent focus-stealing in Sheets.
-- **Selection Row**: Full-width clickable `button` with `p-3`.
-- **Circular Checkmark**: 
-  - Default: `h-6 w-6`, `border-2 border-slate-300`, `bg-white`.
-  - Selected: `bg-primary`, `border-primary`, displaying a `white` bold check icon.
-- **Persistence**: Selections updated via `useCallback` to ensure high-performance re-renders.
+### 3.1 Multi-Selection (Payment Gateway)
+- **Architecture**: `Popover` with `modal={false}` to prevent focus theft.
+- **Interactive Row**: `button type="button"` or `div` with `onClick` and `e.stopPropagation()`.
+- **Circular Checkmark**:
+  - **Default**: `h-6 w-6 rounded-full border-2 border-slate-300 bg-white`.
+  - **Selected**: `bg-primary border-primary shadow-sm`, displaying a `white stroke-[4px]` check icon.
+- **Persistence**: Toggles `gatewayIds` array via `useCallback` hook.
 
-### 3.2 Advanced Searchable Filters (Popovers)
-- **Width**: `w-[480px]` (standardized for Org/Outlet filters to prevent truncation).
-- **Header**: Integrated `Input` search with `focus-visible:ring-0`.
+### 3.2 Searchable Popover Filters
+- **Standard Width**: `w-[480px]` (standardized for both Organization and Outlet filters).
+- **Header**: `Input` search integrated into `PopoverContent`.
 - **Formatting**:
-  - **Organization**: `Name`.
-  - **Outlet**: `Organization-Branch (X Staffs)` format.
-- **Behavior**: Auto-resets page to 1 on filter change.
+  - **Organization**: `Name` (Plain).
+  - **Outlet**: `BrandName-BranchName (X Staffs)` format.
+- **Staff Count Logic**: Dynamically derived from `allUsers.filter(u => u.outletId === outlet.id).length`.
 
 ### 3.3 Windowed Pagination
 - **Capacity**: Maximum of 5 numeric buttons shown at once.
-- **Logic**: Windows dynamically move based on current selection (e.g., if on page 10, shows 8, 9, 10, 11, 12).
-- **Design**: `h-8 w-8` buttons, `text-[11px] font-black`. Active state is `bg-primary`.
+- **Window Logic**:
+  - If `totalPages <= 5`: Show all.
+  - If `currentPage > 3`: Shift window to `currentPage - 2` to `currentPage + 2`.
+  - Handles edge cases at start and end of total page range.
+- **Visuals**: `h-8 w-8 text-[11px] font-black`. Active: `bg-primary text-white`.
 
-### 3.4 Status Assistant (AI)
-- **Trigger**: `rounded-full` button with `Sparkles` icon.
-- **UI**: Side-popover with `ScrollArea`.
-- **Logic**: Uses Genkit to analyze configuration completeness (Merchant ID, Gateway Count, etc.).
+### 3.4 Summary Badges (New Pattern)
+- **Header Info**: `bg-primary/5 text-primary` and `bg-slate-100 text-slate-500`.
+- **Styling**: `font-black text-[10px] uppercase px-3 py-1 border-none`.
+- **Usage**: Displayed next to titles in Outlet and User management to show "Total Network" vs "Organization specific" metrics.
 
-## 4. Interaction Principles
-- **Transitions**: `duration-300` or `duration-500` for all Sheet entries and hover effects.
-- **Feedback**: Immediate `Toast` notifications for CRUD operations (Create, Update, Delete).
-- **Safety**: Multi-step `AlertDialog` for all destructive actions (Delete, Suspend, Decommission).
+## 4. CSS Globals & Utility Classes
+```css
+/* Custom variables exported to theme */
+--background: 0 0% 100%;
+--primary: 204 100% 35%;
+--sidebar-background: 210 40% 99%;
+--radius: 0.75rem;
+
+/* Interaction states */
+.active-status { @apply bg-[#e1f9ef] text-[#22c55e]; }
+.pending-status { @apply bg-amber-100 text-amber-700; }
+```
+
+## 5. Technical Stack Map
+- **Framework**: Next.js 15 (App Router).
+- **Styling**: Tailwind CSS 3.4+.
+- **Components**: Radix UI (Sheet, Popover, Select, Dialog) with ShadCN UI patterns.
+- **Icons**: Lucide React.
+- **AI**: Genkit (Status Assistant).
+- **State**: React `useState` + `useMemo` for filtering + `localStorage` for persistence.
+```
