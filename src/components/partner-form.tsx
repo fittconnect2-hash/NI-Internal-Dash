@@ -32,6 +32,7 @@ import {
   SelectValue 
 } from "@/components/ui/select"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
 
 const COUNTRY_DATA: Record<string, { cities: string[], states: string[] }> = {
@@ -52,6 +53,13 @@ const COUNTRY_DATA: Record<string, { cities: string[], states: string[] }> = {
     states: ["England", "Scotland", "Wales", "Northern Ireland"]
   }
 }
+
+const AVAILABLE_FEATURES = [
+  { id: "orders", title: "Orders service access", description: "Organization can use the orders service." },
+  { id: "reservations", title: "Reservations service access", description: "Organization can use the reservations service." },
+  { id: "roles", title: "Custom Roles", description: "Organization can create custom roles beyond the system catalog." },
+  { id: "multi-order", title: "Multi-Order View", description: "Organization can view multiple orders in a single view." },
+]
 
 const formSchema = z.object({
   partnerName: z.string().min(1, "Company name is required"),
@@ -83,6 +91,7 @@ const steps = [
 export function PartnerForm({ partner, isOpen, onClose, onSubmit }: PartnerFormProps) {
   const [isLoading, setIsLoading] = React.useState(false)
   const [currentStep, setCurrentStep] = React.useState(1)
+  const [selectedFeatures, setSelectedFeatures] = React.useState<string[]>([])
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -107,6 +116,7 @@ export function PartnerForm({ partner, isOpen, onClose, onSubmit }: PartnerFormP
     if (isOpen) {
       setIsLoading(true)
       setCurrentStep(1)
+      setSelectedFeatures([])
       if (partner) {
         form.reset({
           partnerName: partner.partnerName,
@@ -150,6 +160,22 @@ export function PartnerForm({ partner, isOpen, onClose, onSubmit }: PartnerFormP
     })
     return () => subscription.unsubscribe()
   }, [form])
+
+  const handleToggleFeature = (id: string) => {
+    setSelectedFeatures(prev => 
+      prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]
+    )
+  }
+
+  const handleToggleAllFeatures = (checked: boolean) => {
+    if (checked) {
+      setSelectedFeatures(AVAILABLE_FEATURES.map(f => f.id))
+    } else {
+      setSelectedFeatures([])
+    }
+  }
+
+  const isAllSelected = selectedFeatures.length === AVAILABLE_FEATURES.length
 
   const handleNext = async () => {
     if (currentStep === 1) {
@@ -435,20 +461,50 @@ export function PartnerForm({ partner, isOpen, onClose, onSubmit }: PartnerFormP
 
                     {currentStep === 2 && (
                       <div className="space-y-8 animate-in slide-in-from-right duration-400">
-                        <div className="bg-primary/5 border border-primary/10 p-8 rounded-3xl">
-                          <h4 className="font-black text-slate-900 text-lg">Platform Features</h4>
-                          <p className="text-sm text-slate-500 mt-1">Select the capabilities this partner can access.</p>
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-black text-slate-900 text-lg">Features</h4>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-bold text-slate-600">Select all</span>
+                            <Checkbox 
+                              checked={isAllSelected} 
+                              onCheckedChange={handleToggleAllFeatures}
+                              className="h-5 w-5 border-2 border-slate-300 data-[state=checked]:border-primary"
+                            />
+                          </div>
                         </div>
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {["Organizations Assignment", "Advanced Analytics", "Gateway Management", "Financial Payouts", "Customer Support", "API Access"].map((f) => (
-                            <div key={f} className="p-5 bg-white border border-slate-100 rounded-2xl flex items-center justify-between hover:border-primary/30 transition-all cursor-pointer group">
-                              <span className="font-bold text-slate-700 group-hover:text-primary transition-colors">{f}</span>
-                              <div className="h-6 w-6 rounded-full border-2 border-slate-200 flex items-center justify-center transition-all peer-checked:bg-primary">
-                                <Check className="h-3 w-3 text-white opacity-0 transition-opacity" />
+                          {AVAILABLE_FEATURES.map((feature) => {
+                            const isSelected = selectedFeatures.includes(feature.id)
+                            return (
+                              <div 
+                                key={feature.id} 
+                                className={cn(
+                                  "p-5 bg-white border-2 rounded-2xl flex gap-4 transition-all cursor-pointer group",
+                                  isSelected ? "border-primary bg-primary/5" : "border-slate-100 hover:border-slate-200"
+                                )}
+                                onClick={() => handleToggleFeature(feature.id)}
+                              >
+                                <Checkbox 
+                                  checked={isSelected} 
+                                  className="mt-1 h-5 w-5 border-2 border-slate-300 data-[state=checked]:border-primary"
+                                />
+                                <div className="space-y-1">
+                                  <p className={cn(
+                                    "font-black text-[15px] leading-tight transition-colors",
+                                    isSelected ? "text-slate-900" : "text-slate-700 group-hover:text-slate-900"
+                                  )}>{feature.title}</p>
+                                  <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                                    {feature.description}
+                                  </p>
+                                </div>
                               </div>
-                            </div>
-                          ))}
+                            )
+                          })}
                         </div>
+                        <p className="text-[13px] text-slate-400 font-medium italic">
+                          Select the features available to this partner.
+                        </p>
                       </div>
                     )}
 
