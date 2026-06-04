@@ -143,7 +143,7 @@ export function DashboardSidebar({
         ))}
       </SidebarContent>
 
-      <SidebarFooter className="p-3 border-t border-slate-800 bg-[#0f172a]">
+      <SidebarFooter className="p-3 border-t border-slate-800 bg-[#0f172a] rounded-t-[17.6px]">
         <Popover open={isPartnerOpen} onOpenChange={setIsPartnerOpen}>
           <PopoverTrigger asChild>
             <button className={cn(
