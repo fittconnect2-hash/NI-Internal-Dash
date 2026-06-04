@@ -65,10 +65,17 @@ export interface Gateway {
 
 export interface Partner {
   id: string;
-  partnerName: string;
-  adminName: string;
+  partnerName: string; // Company
+  adminName: string; // Contact Name
   email: string;
   phone: string;
+  phoneCountryCode?: string;
+  businessType?: string;
+  country?: string;
+  state?: string;
+  city?: string;
+  zipCode?: string;
+  address?: string;
   status: 'Active' | 'Inactive';
   since: string;
 }

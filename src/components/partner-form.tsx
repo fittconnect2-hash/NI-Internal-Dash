@@ -4,7 +4,7 @@ import * as React from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { ArrowLeft, Loader2 } from "lucide-react"
+import { ArrowLeft, Loader2, Check, Shield, Layers, UserCircle } from "lucide-react"
 import { Partner } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import {
@@ -24,13 +24,28 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { cn } from "@/lib/utils"
 
 const formSchema = z.object({
-  partnerName: z.string().min(1, "Partner Name is required"),
-  adminName: z.string().min(1, "Admin Name is required"),
+  partnerName: z.string().min(1, "Company name is required"),
+  adminName: z.string().min(1, "Contact name is required"),
   email: z.string().email("Invalid email address"),
   phone: z.string().min(1, "Phone number is required"),
+  phoneCountryCode: z.string().default("+971"),
+  businessType: z.string().min(1, "Business type is required"),
+  country: z.string().min(1, "Country is required"),
+  state: z.string().min(1, "State is required"),
+  city: z.string().min(1, "City is required"),
+  zipCode: z.string().min(1, "Zip code is required"),
+  address: z.string().min(1, "Street address is required"),
 })
 
 interface PartnerFormProps {
@@ -40,8 +55,15 @@ interface PartnerFormProps {
   onSubmit: (data: Partial<Partner>) => void;
 }
 
+const steps = [
+  { id: 1, title: "Partner Configuration", icon: Layers },
+  { id: 2, title: "Features", icon: Shield },
+  { id: 3, title: "Admin Account", icon: UserCircle },
+]
+
 export function PartnerForm({ partner, isOpen, onClose, onSubmit }: PartnerFormProps) {
   const [isLoading, setIsLoading] = React.useState(false)
+  const [currentStep, setCurrentStep] = React.useState(1)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -50,18 +72,33 @@ export function PartnerForm({ partner, isOpen, onClose, onSubmit }: PartnerFormP
       adminName: "",
       email: "",
       phone: "",
+      phoneCountryCode: "+971",
+      businessType: "",
+      country: "",
+      state: "",
+      city: "",
+      zipCode: "",
+      address: "",
     },
   })
 
   React.useEffect(() => {
     if (isOpen) {
       setIsLoading(true)
+      setCurrentStep(1)
       if (partner) {
         form.reset({
           partnerName: partner.partnerName,
           adminName: partner.adminName,
           email: partner.email,
           phone: partner.phone,
+          phoneCountryCode: partner.phoneCountryCode || "+971",
+          businessType: partner.businessType || "",
+          country: partner.country || "",
+          state: partner.state || "",
+          city: partner.city || "",
+          zipCode: partner.zipCode || "",
+          address: partner.address || "",
         })
       } else {
         form.reset({
@@ -69,125 +106,365 @@ export function PartnerForm({ partner, isOpen, onClose, onSubmit }: PartnerFormP
           adminName: "",
           email: "",
           phone: "",
+          phoneCountryCode: "+971",
+          businessType: "",
+          country: "",
+          state: "",
+          city: "",
+          zipCode: "",
+          address: "",
         })
       }
       setTimeout(() => setIsLoading(false), 500)
     }
   }, [partner, form, isOpen])
 
+  const handleNext = async () => {
+    if (currentStep === 1) {
+      const isValid = await form.trigger()
+      if (isValid) {
+        setCurrentStep(2)
+      }
+    } else if (currentStep === 2) {
+      setCurrentStep(3)
+    } else {
+      form.handleSubmit(onSubmit)()
+    }
+  }
+
+  const handleBack = () => {
+    if (currentStep > 1) {
+      setCurrentStep(prev => prev - 1)
+    }
+  }
+
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent side="right" className="w-full sm:max-w-[600px] p-0 border-l border-slate-200 bg-[#f8f9fc]">
+      <SheetContent side="right" className="w-full sm:max-w-[850px] p-0 border-l border-slate-200 bg-white flex flex-col">
         <div className="flex flex-col h-full">
-          <SheetHeader className="p-8 bg-white border-b border-slate-100 flex-shrink-0">
-            <div className="flex items-center gap-4">
-              <button 
-                onClick={onClose}
-                className="p-1 hover:bg-slate-100 rounded-md transition-colors"
-              >
-                <ArrowLeft className="h-5 w-5 text-slate-400 hover:text-slate-900" />
-              </button>
-              <div>
-                <SheetTitle className="text-2xl font-black text-slate-900 tracking-tight">
-                  {partner ? "Edit Partner" : "Create Partner"}
-                </SheetTitle>
-                <SheetDescription className="text-sm font-medium text-slate-500 mt-1">
-                  {partner ? "Update partner administrative profile." : "Enroll a new platform administrative partner."}
-                </SheetDescription>
-              </div>
+          {/* Header */}
+          <SheetHeader className="p-8 bg-white border-b border-slate-50 flex-shrink-0">
+            <div>
+              <SheetTitle className="text-3xl font-black text-slate-900 tracking-tight">
+                {partner ? "Edit Partner" : "Create Partner"}
+              </SheetTitle>
+              <SheetDescription className="text-[15px] font-medium text-slate-500 mt-1">
+                Provide the partner's basic information.
+              </SheetDescription>
             </div>
           </SheetHeader>
 
-          <ScrollArea className="flex-1">
-            <div className="p-8">
-              <div className="bg-white rounded-[24px] border border-slate-100 p-10 shadow-sm ring-1 ring-slate-100/50">
-                {isLoading ? (
-                  <div className="flex flex-col items-center justify-center py-40 space-y-4">
-                    <Loader2 className="h-10 w-10 animate-spin text-primary" />
-                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Preparing Form...</p>
+          {/* Stepper */}
+          <div className="px-8 py-8 flex items-center justify-center bg-white border-b border-slate-50">
+            <div className="flex items-center gap-12">
+              {steps.map((step, idx) => (
+                <div key={step.id} className="flex items-center group">
+                  <div className="flex items-center gap-3">
+                    <div className={cn(
+                      "h-9 w-9 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300",
+                      currentStep === step.id ? "bg-primary text-white shadow-lg shadow-primary/20 scale-110" : 
+                      currentStep > step.id ? "bg-green-100 text-green-600" : "bg-slate-100 text-slate-400"
+                    )}>
+                      {currentStep > step.id ? <Check className="h-5 w-5 stroke-[3px]" /> : step.id}
+                    </div>
+                    <span className={cn(
+                      "text-sm font-bold tracking-tight whitespace-nowrap transition-colors",
+                      currentStep === step.id ? "text-slate-900" : "text-slate-400"
+                    )}>
+                      {step.title}
+                    </span>
                   </div>
-                ) : (
-                  <Form {...form}>
-                    <form className="space-y-8">
-                      <FormField
-                        control={form.control}
-                        name="partnerName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-[13px] font-bold text-[#1e293b]">Partner Identity <span className="text-red-500 font-black">*</span></FormLabel>
-                            <FormControl>
-                              <Input placeholder="Enter partner or company name" {...field} className="h-12 bg-white border-slate-200 focus-visible:ring-1 ring-primary/20" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                  {idx < steps.length - 1 && (
+                    <div className="mx-6 w-12 h-[1px] bg-slate-200" />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
 
-                      <FormField
-                        control={form.control}
-                        name="adminName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-[13px] font-bold text-[#1e293b]">Admin Name <span className="text-red-500 font-black">*</span></FormLabel>
-                            <FormControl>
-                              <Input placeholder="Enter primary administrator name" {...field} className="h-12 bg-white border-slate-200" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <ScrollArea className="flex-1 bg-[#fcfcfd]">
+            <div className="p-8 max-w-4xl mx-auto">
+              {isLoading ? (
+                <div className="flex flex-col items-center justify-center py-40 space-y-4">
+                  <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Preparing Workspace...</p>
+                </div>
+              ) : (
+                <Form {...form}>
+                  <form className="space-y-12 animate-in fade-in duration-500">
+                    {currentStep === 1 && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+                        {/* Company */}
                         <FormField
                           control={form.control}
-                          name="email"
+                          name="partnerName"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-[13px] font-bold text-[#1e293b]">Email <span className="text-red-500 font-black">*</span></FormLabel>
+                              <FormLabel className="text-[14px] font-extrabold text-slate-700 flex items-center gap-1">Company <span className="text-red-500">*</span></FormLabel>
                               <FormControl>
-                                <Input type="email" placeholder="admin@partner.com" {...field} className="h-12 bg-white border-slate-200" />
+                                <Input placeholder="Enter the company name" {...field} className="h-12 bg-white border-slate-200 focus-visible:ring-1 ring-primary/20 rounded-xl" />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
 
+                        {/* Name */}
                         <FormField
                           control={form.control}
-                          name="phone"
+                          name="adminName"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-[13px] font-bold text-[#1e293b]">Phone <span className="text-red-500 font-black">*</span></FormLabel>
+                              <FormLabel className="text-[14px] font-extrabold text-slate-700">Name <span className="text-red-500">*</span></FormLabel>
                               <FormControl>
-                                <Input placeholder="+971..." {...field} className="h-12 bg-white border-slate-200" />
+                                <Input placeholder="Enter the contact name" {...field} className="h-12 bg-white border-slate-200 rounded-xl" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        {/* Email */}
+                        <FormField
+                          control={form.control}
+                          name="email"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-[14px] font-extrabold text-slate-700">Email <span className="text-red-500">*</span></FormLabel>
+                              <FormControl>
+                                <Input type="email" placeholder="Enter the email address" {...field} className="h-12 bg-white border-slate-200 rounded-xl" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        {/* Phone */}
+                        <div className="space-y-2">
+                          <FormLabel className="text-[14px] font-extrabold text-slate-700">Phone <span className="text-red-500">*</span></FormLabel>
+                          <div className="flex gap-3">
+                            <FormField
+                              control={form.control}
+                              name="phoneCountryCode"
+                              render={({ field }) => (
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                  <SelectTrigger className="w-[110px] h-12 bg-white border-slate-200 font-bold rounded-xl">
+                                    <SelectValue placeholder="+971" />
+                                  </SelectTrigger>
+                                  <SelectContent className="rounded-xl border-slate-200">
+                                    <SelectItem value="+971">+971</SelectItem>
+                                    <SelectItem value="+1">+1</SelectItem>
+                                    <SelectItem value="+44">+44</SelectItem>
+                                    <SelectItem value="+966">+966</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name="phone"
+                              render={({ field }) => (
+                                <FormControl className="flex-1">
+                                  <Input placeholder="Enter the phone number" {...field} className="h-12 bg-white border-slate-200 rounded-xl" />
+                                </FormControl>
+                              )}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Business Type */}
+                        <FormField
+                          control={form.control}
+                          name="businessType"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-[14px] font-extrabold text-slate-700">Business Type <span className="text-red-500">*</span></FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger className="h-12 bg-white border-slate-200 rounded-xl">
+                                    <SelectValue placeholder="Select a business type" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent className="rounded-xl border-slate-200">
+                                  <SelectItem value="Hospitality">Hospitality</SelectItem>
+                                  <SelectItem value="Retail">Retail</SelectItem>
+                                  <SelectItem value="Logistics">Logistics</SelectItem>
+                                  <SelectItem value="Real Estate">Real Estate</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        {/* Country */}
+                        <FormField
+                          control={form.control}
+                          name="country"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-[14px] font-extrabold text-slate-700">Country <span className="text-red-500">*</span></FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger className="h-12 bg-white border-slate-200 rounded-xl">
+                                    <SelectValue placeholder="Select a country" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent className="rounded-xl border-slate-200">
+                                  <SelectItem value="UAE">United Arab Emirates</SelectItem>
+                                  <SelectItem value="USA">United States</SelectItem>
+                                  <SelectItem value="UK">United Kingdom</SelectItem>
+                                  <SelectItem value="KSA">Saudi Arabia</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        {/* State */}
+                        <FormField
+                          control={form.control}
+                          name="state"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-[14px] font-extrabold text-slate-700">State <span className="text-red-500">*</span></FormLabel>
+                              <FormControl>
+                                <Input placeholder="Enter the state" {...field} className="h-12 bg-white border-slate-200 rounded-xl" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        {/* City */}
+                        <FormField
+                          control={form.control}
+                          name="city"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-[14px] font-extrabold text-slate-700">City <span className="text-red-500">*</span></FormLabel>
+                              <FormControl>
+                                <Input placeholder="Enter the city" {...field} className="h-12 bg-white border-slate-200 rounded-xl" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        {/* Zip Code */}
+                        <FormField
+                          control={form.control}
+                          name="zipCode"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-[14px] font-extrabold text-slate-700">Zip Code <span className="text-red-500">*</span></FormLabel>
+                              <FormControl>
+                                <Input placeholder="Enter the zip code" {...field} className="h-12 bg-white border-slate-200 rounded-xl" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        {/* Address */}
+                        <FormField
+                          control={form.control}
+                          name="address"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-[14px] font-extrabold text-slate-700">Address <span className="text-red-500">*</span></FormLabel>
+                              <FormControl>
+                                <Input placeholder="Enter the street address" {...field} className="h-12 bg-white border-slate-200 rounded-xl" />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
                       </div>
-                    </form>
-                  </Form>
-                )}
-              </div>
+                    )}
+
+                    {currentStep === 2 && (
+                      <div className="space-y-8 animate-in slide-in-from-right duration-400">
+                        <div className="bg-primary/5 border border-primary/10 p-8 rounded-3xl">
+                          <h4 className="font-black text-slate-900 text-lg">Platform Features</h4>
+                          <p className="text-sm text-slate-500 mt-1">Select the capabilities this partner can access.</p>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {["Organizations Assignment", "Advanced Analytics", "Gateway Management", "Financial Payouts", "Customer Support", "API Access"].map((f) => (
+                            <div key={f} className="p-5 bg-white border border-slate-100 rounded-2xl flex items-center justify-between hover:border-primary/30 transition-all cursor-pointer group">
+                              <span className="font-bold text-slate-700 group-hover:text-primary transition-colors">{f}</span>
+                              <div className="h-6 w-6 rounded-full border-2 border-slate-200 flex items-center justify-center transition-all peer-checked:bg-primary">
+                                <Check className="h-3 w-3 text-white opacity-0 transition-opacity" />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {currentStep === 3 && (
+                      <div className="space-y-8 animate-in slide-in-from-right duration-400">
+                         <div className="bg-amber-50 border border-amber-100 p-8 rounded-3xl">
+                          <h4 className="font-black text-slate-900 text-lg">Administrative Account</h4>
+                          <p className="text-sm text-slate-500 mt-1">Setup the primary credentials for this partner.</p>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                          <div className="space-y-2.5">
+                            <FormLabel className="text-[14px] font-extrabold text-slate-700">Login Username</FormLabel>
+                            <Input placeholder="@partner_admin" className="h-12 rounded-xl" />
+                          </div>
+                          <div className="space-y-2.5">
+                            <FormLabel className="text-[14px] font-extrabold text-slate-700">Account Role</FormLabel>
+                            <Select defaultValue="Partner Admin">
+                              <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
+                              <SelectContent className="rounded-xl"><SelectItem value="Partner Admin">Partner Admin</SelectItem><SelectItem value="Super Partner">Super Partner</SelectItem></SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2.5">
+                            <FormLabel className="text-[14px] font-extrabold text-slate-700">New Password</FormLabel>
+                            <Input type="password" placeholder="••••••••" className="h-12 rounded-xl" />
+                          </div>
+                          <div className="space-y-2.5">
+                            <FormLabel className="text-[14px] font-extrabold text-slate-700">Verify Password</FormLabel>
+                            <Input type="password" placeholder="••••••••" className="h-12 rounded-xl" />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </form>
+                </Form>
+              )}
             </div>
           </ScrollArea>
 
-          <SheetFooter className="p-8 bg-white border-t border-slate-100 flex sm:justify-end gap-4 flex-shrink-0">
+          {/* Footer */}
+          <SheetFooter className="p-8 bg-white border-t border-slate-100 flex items-center justify-between sm:justify-between flex-shrink-0">
             <Button 
               variant="outline" 
-              onClick={onClose} 
-              className="px-8 h-12 font-bold text-slate-500 border-slate-200 hover:bg-slate-50 active:scale-95 transition-all"
+              onClick={handleBack}
+              disabled={currentStep === 1}
+              className="px-10 h-14 font-bold text-slate-500 bg-slate-50/50 border-slate-200 rounded-xl disabled:opacity-30"
             >
-              Cancel
+              Back
             </Button>
-            <Button 
-              type="submit" 
-              onClick={form.handleSubmit(onSubmit)}
-              className="px-10 h-12 font-black bg-primary hover:bg-primary/90 text-white border-none shadow-lg shadow-primary/20 active:scale-95 transition-all"
-            >
-              {partner ? "Save Changes" : "Create Partner"}
-            </Button>
+            
+            <div className="flex gap-4">
+              <Button 
+                variant="ghost" 
+                onClick={onClose} 
+                className="px-8 h-14 font-bold text-slate-500 hover:text-slate-900"
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="button" 
+                onClick={handleNext}
+                className="px-12 h-14 font-black bg-[#0069B1] hover:bg-[#005a96] text-white rounded-xl shadow-xl shadow-primary/20 transition-all active:scale-95"
+              >
+                {currentStep === 3 ? "Complete Registration" : "Save & Next"}
+              </Button>
+            </div>
           </SheetFooter>
         </div>
       </SheetContent>
