@@ -12,7 +12,9 @@ import {
   Plus,
   Edit2,
   Trash2,
-  FilterX
+  FilterX,
+  Building2,
+  SlidersHorizontal
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -25,6 +27,12 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Partner } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
@@ -127,9 +135,24 @@ export function PartnerListView({ allPartners, setAllPartners, onAddPartner, onE
                       )}>
                         {partner.status}
                       </Badge>
-                      <button className="p-1 text-slate-300 hover:text-slate-900 transition-colors">
-                        <MoreVertical className="h-4 w-4" />
-                      </button>
+                      
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button className="p-1 text-slate-300 hover:text-slate-900 transition-colors focus:outline-none">
+                            <MoreVertical className="h-4 w-4" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-64 p-2 rounded-xl shadow-2xl border-slate-200">
+                          <DropdownMenuItem className="py-2.5 px-3 font-medium flex items-center gap-3 cursor-pointer">
+                            <Building2 className="h-4 w-4 text-slate-400" />
+                            <span>Organizations assignment</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="py-2.5 px-3 font-medium flex items-center gap-3 cursor-pointer">
+                            <SlidersHorizontal className="h-4 w-4 text-slate-400" />
+                            <span>Features</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
 
