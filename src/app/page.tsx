@@ -13,8 +13,10 @@ import { DashboardOverview } from "@/components/dashboard-overview"
 import { OutletListView } from "@/components/outlet-list-view"
 import { UserListView } from "@/components/user-list-view"
 import { GatewayManagement } from "@/components/gateway-management"
-import { initialOrganizations, initialOutlets, initialUsers, initialGateways } from "@/lib/mock-data"
-import { Organization, User, Outlet, Gateway } from "@/lib/types"
+import { PartnerListView } from "@/components/partner-list-view"
+import { PartnerForm } from "@/components/partner-form"
+import { initialOrganizations, initialOutlets, initialUsers, initialGateways, initialPartners } from "@/lib/mock-data"
+import { Organization, User, Outlet, Gateway, Partner } from "@/lib/types"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { 
   Search, 
@@ -43,6 +45,7 @@ const STORAGE_KEYS = {
   OUTLETS: 'dine-net-outlets-v6',
   USERS: 'dine-net-users-v6',
   GATEWAYS: 'dine-net-gateways-v6',
+  PARTNERS: 'dine-net-partners-v6',
 }
 
 export default function DashboardPage() {
@@ -52,6 +55,7 @@ export default function DashboardPage() {
   const [outlets, setOutlets] = React.useState<Outlet[]>([])
   const [users, setUsers] = React.useState<User[]>([])
   const [gateways, setGateways] = React.useState<Gateway[]>([])
+  const [partners, setPartners] = React.useState<Partner[]>([])
   const [isLoaded, setIsLoaded] = React.useState(false)
 
   const [searchQuery, setSearchQuery] = React.useState("")
@@ -64,17 +68,19 @@ export default function DashboardPage() {
   const [isDetailOpen, setIsDetailOpen] = React.useState(false)
   const [isOutletsDrawerOpen, setIsOutletsDrawerOpen] = React.useState(false)
   const [isUsersDrawerOpen, setIsUsersDrawerOpen] = React.useState(false)
+  const [isPartnerFormOpen, setIsPartnerFormOpen] = React.useState(false)
   
   const [editingOrganization, setEditingOrganization] = React.useState<Organization | null>(null)
   const [configuringOrganization, setConfiguringOrganization] = React.useState<Organization | null>(null)
   const [viewingOrganization, setViewingOrganization] = React.useState<Organization | null>(null)
   const [selectedOrganization, setSelectedOrganization] = React.useState<Organization | null>(null)
   const [editingUser, setEditingUser] = React.useState<User | null>(null)
+  const [editingPartner, setEditingPartner] = React.useState<Partner | null>(null)
   const [isAddingNewUser, setIsAddingNewUser] = React.useState(false)
 
   // Interaction Safeguard
   React.useEffect(() => {
-    const isAnyOverlayOpen = isFormOpen || isConfigOpen || isDetailOpen || isOutletsDrawerOpen || isUsersDrawerOpen;
+    const isAnyOverlayOpen = isFormOpen || isConfigOpen || isDetailOpen || isOutletsDrawerOpen || isUsersDrawerOpen || isPartnerFormOpen;
     if (!isAnyOverlayOpen) {
       const timer = setTimeout(() => {
         document.body.style.pointerEvents = 'auto';
@@ -83,7 +89,7 @@ export default function DashboardPage() {
       }, 150);
       return () => clearTimeout(timer);
     }
-  }, [isFormOpen, isConfigOpen, isDetailOpen, isOutletsDrawerOpen, isUsersDrawerOpen]);
+  }, [isFormOpen, isConfigOpen, isDetailOpen, isOutletsDrawerOpen, isUsersDrawerOpen, isPartnerFormOpen]);
 
   // Persistence Logic
   React.useEffect(() => {
@@ -91,11 +97,13 @@ export default function DashboardPage() {
     const out = localStorage.getItem(STORAGE_KEYS.OUTLETS)
     const u = localStorage.getItem(STORAGE_KEYS.USERS)
     const g = localStorage.getItem(STORAGE_KEYS.GATEWAYS)
+    const p = localStorage.getItem(STORAGE_KEYS.PARTNERS)
 
     setOrganizations(o ? JSON.parse(o) : initialOrganizations)
     setOutlets(out ? JSON.parse(out) : initialOutlets)
     setUsers(u ? JSON.parse(u) : initialUsers)
     setGateways(g ? JSON.parse(g) : initialGateways)
+    setPartners(p ? JSON.parse(p) : initialPartners)
     setIsLoaded(true)
   }, [])
 
@@ -105,8 +113,9 @@ export default function DashboardPage() {
       localStorage.setItem(STORAGE_KEYS.OUTLETS, JSON.stringify(outlets))
       localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users))
       localStorage.setItem(STORAGE_KEYS.GATEWAYS, JSON.stringify(gateways))
+      localStorage.setItem(STORAGE_KEYS.PARTNERS, JSON.stringify(partners))
     }
-  }, [organizations, outlets, users, gateways, isLoaded])
+  }, [organizations, outlets, users, gateways, partners, isLoaded])
 
   // Filter logic
   const filteredOrganizations = React.useMemo(() => {
@@ -214,6 +223,29 @@ export default function DashboardPage() {
     document.body.style.overflow = 'auto';
   }
 
+  const handleAddPartner = (data: Partial<Partner>) => {
+    if (editingPartner) {
+      setPartners(prev => prev.map(p => p.id === editingPartner.id ? { ...p, ...data } as Partner : p))
+      toast({ title: "Partner Updated" })
+    } else {
+      const newPartner: Partner = {
+        ...data,
+        id: `p-${Math.random().toString(36).substr(2, 9)}`,
+        status: 'Active',
+        since: new Date().toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' })
+      } as Partner
+      setPartners(prev => [newPartner, ...prev])
+      toast({ title: "Partner Created" })
+    }
+    setIsPartnerFormOpen(false)
+    setEditingPartner(null)
+  }
+
+  const handleDeletePartner = (id: string) => {
+    setPartners(prev => prev.filter(p => p.id !== id))
+    toast({ title: "Partner Deleted" })
+  }
+
   // Sync counts
   React.useEffect(() => {
     if (isLoaded) {
@@ -230,6 +262,16 @@ export default function DashboardPage() {
 
     if (activeTab === 'dashboard') return <DashboardOverview />
     
+    if (activeTab === 'partners') return (
+      <PartnerListView 
+        allPartners={partners}
+        setAllPartners={setPartners}
+        onAddPartner={() => { setEditingPartner(null); setIsPartnerFormOpen(true); }}
+        onEditPartner={(p) => { setEditingPartner(p); setIsPartnerFormOpen(true); }}
+        onDeletePartner={handleDeletePartner}
+      />
+    )
+
     if (activeTab === 'outlets') return (
       <OutletListView 
         allOutlets={outlets}
@@ -263,7 +305,7 @@ export default function DashboardPage() {
     if (activeTab === 'gateways') return (
       <GatewayManagement 
         allGateways={gateways}
-        setGateways={setGateways}
+        setAllGateways={setGateways}
       />
     )
 
@@ -428,6 +470,7 @@ export default function DashboardPage() {
       <OrganizationDetail isOpen={isDetailOpen} onClose={() => {setIsDetailOpen(false); setViewingOrganization(null)}} organization={viewingOrganization} />
       <OutletManagement organization={selectedOrganization} allOutlets={outlets} setAllOutlets={setOutlets} allOrganizations={organizations} allUsers={users} isOpen={isOutletsDrawerOpen} onClose={() => {setIsOutletsDrawerOpen(false); setSelectedOrganization(null)}} onViewUsers={(outlet) => { setIsOutletsDrawerOpen(false); setIsUsersDrawerOpen(true); setIsAddingNewUser(false); }} />
       <UserManagement organization={selectedOrganization} propEditingUser={editingUser} allUsers={users} setAllUsers={setUsers} allOrganizations={organizations} allOutlets={outlets} isOpen={isUsersDrawerOpen} defaultAdding={isAddingNewUser} onClose={() => { setIsUsersDrawerOpen(false); setSelectedOrganization(null); setEditingUser(null); setIsAddingNewUser(false); }} onSaved={handleUserSaved} />
+      <PartnerForm isOpen={isPartnerFormOpen} onClose={() => {setIsPartnerFormOpen(false); setEditingPartner(null)}} partner={editingPartner} onSubmit={handleAddPartner} />
     </SidebarProvider>
   )
 }

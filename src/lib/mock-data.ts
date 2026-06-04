@@ -1,4 +1,4 @@
-import { Organization, Outlet, User, Gateway } from './types';
+import { Organization, Outlet, User, Gateway, Partner } from './types';
 
 const businessTypes = ['Hotel', 'Fast Food', 'Restaurant', 'Cafe', 'Catering', 'Fine Dining', 'Bakery', 'Pizzeria'];
 const statusOptions: ('Active' | 'Configuration pending' | 'Inactive')[] = ['Active', 'Configuration pending', 'Active', 'Active', 'Inactive'];
@@ -194,6 +194,81 @@ export const initialGateways: Gateway[] = [
     provider: 'NGenius',
     type: 'Credit Card',
     supportedCurrencies: ['AED', 'SAR']
+  }
+];
+
+export const initialPartners: Partner[] = [
+  {
+    id: 'p-1',
+    partnerName: 'testuser-123124...',
+    adminName: 'Usman Hussain',
+    email: 'usman+051@kptac.com',
+    phone: '+971527463826',
+    status: 'Active',
+    since: 'June 03, 2026'
+  },
+  {
+    id: 'p-2',
+    partnerName: 'pool bank',
+    adminName: 'Pool',
+    email: 'pool.bank@test.xyz',
+    phone: '+971558668997',
+    status: 'Active',
+    since: 'June 02, 2026'
+  },
+  {
+    id: 'p-3',
+    partnerName: 'Poole Blankensh...',
+    adminName: 'Gage Banks',
+    email: 'qyrebigabu@mailinator.com',
+    phone: '+971545841254',
+    status: 'Active',
+    since: 'May 27, 2026'
+  },
+  {
+    id: 'p-4',
+    partnerName: 'Talentelgia',
+    adminName: 'Test partner',
+    email: 'atul.mishra@talentelgia.com',
+    phone: '+971501009898',
+    status: 'Active',
+    since: 'May 25, 2026'
+  },
+  {
+    id: 'p-5',
+    partnerName: 'Demo Partner',
+    adminName: 'Demo Partner Name',
+    email: 'farhan+staff63@kptac.com',
+    phone: '+971501001263',
+    status: 'Active',
+    since: 'May 22, 2026'
+  },
+  {
+    id: 'p-6',
+    partnerName: 'Das and Co',
+    adminName: 'Leo Das',
+    email: 'test+3@gmail.com',
+    phone: '+971584571744',
+    status: 'Active',
+    since: 'May 22, 2026'
+  },
+  {
+    id: 'p-7',
+    partnerName: 'NONAME Partner',
+    adminName: 'NONAME Partner Name',
+    email: 'farhan+noname@kptac.com',
+    phone: '+971501091256',
+    status: 'Active',
+    since: 'May 21, 2026'
+  },
+  {
+    id: 'p-8',
+    partnerName: 'testuser-123124...',
+    adminName: 'Usman Hussain',
+    email: 'usman545454@kptac.com',
+    phone: '+971525252545',
+    status: 'Active',
+    since: 'May 21, 2026'
   }
 ];
 

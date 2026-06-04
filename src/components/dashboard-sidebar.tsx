@@ -8,6 +8,7 @@ import {
   User,
   Mail,
   Key,
+  Handshake,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
@@ -33,6 +34,7 @@ const navGroups = [
   {
     label: "MANAGEMENT",
     items: [
+      { icon: Handshake, label: "Partners", id: "partners" },
       { icon: Users, label: "Organizations", id: "organizations" },
       { icon: Store, label: "Outlets", id: "outlets" },
       { icon: User, label: "Users", id: "users" },

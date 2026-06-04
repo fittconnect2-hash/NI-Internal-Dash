@@ -62,3 +62,13 @@ export interface Gateway {
   type: 'Credit Card' | 'Digital Wallet' | 'Bank Transfer';
   supportedCurrencies: string[];
 }
+
+export interface Partner {
+  id: string;
+  partnerName: string;
+  adminName: string;
+  email: string;
+  phone: string;
+  status: 'Active' | 'Inactive';
+  since: string;
+}
