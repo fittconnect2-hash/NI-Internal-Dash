@@ -75,6 +75,7 @@ interface TenantFormProps {
 
 export function TenantForm({ tenant, isOpen, onClose, onSubmit }: TenantFormProps) {
   const [isLoading, setIsLoading] = React.useState(false)
+  const initializedRef = React.useRef(false)
 
   const defaultValues = React.useMemo(() => ({
     tenantName: "",
@@ -100,7 +101,12 @@ export function TenantForm({ tenant, isOpen, onClose, onSubmit }: TenantFormProp
   const watchCountry = form.watch("country")
 
   React.useEffect(() => {
-    if (isOpen) {
+    if (!isOpen) {
+      initializedRef.current = false
+      return
+    }
+
+    if (isOpen && !initializedRef.current) {
       setIsLoading(true)
       if (tenant) {
         form.reset({
@@ -119,17 +125,19 @@ export function TenantForm({ tenant, isOpen, onClose, onSubmit }: TenantFormProp
       } else {
         form.reset(defaultValues)
       }
+      
+      initializedRef.current = true
       const timer = setTimeout(() => setIsLoading(false), 500)
       return () => clearTimeout(timer)
     }
-  }, [tenant, isOpen, defaultValues])
+  }, [tenant?.id, isOpen, defaultValues, form])
 
   // Handle country change to reset city/state
   React.useEffect(() => {
     const subscription = form.watch((value, { name }) => {
       if (name === "country") {
-        form.setValue("city", "")
-        form.setValue("state", "")
+        form.setValue("city", "", { shouldDirty: true })
+        form.setValue("state", "", { shouldDirty: true })
       }
     })
     return () => subscription.unsubscribe()

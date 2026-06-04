@@ -75,6 +75,7 @@ interface OrganizationFormProps {
 
 export function OrganizationForm({ organization, isOpen, onClose, onSubmit }: OrganizationFormProps) {
   const [isLoading, setIsLoading] = React.useState(false)
+  const initializedRef = React.useRef(false)
 
   const defaultValues = React.useMemo(() => ({
     organizationName: "",
@@ -100,7 +101,12 @@ export function OrganizationForm({ organization, isOpen, onClose, onSubmit }: Or
   const watchCountry = form.watch("country")
 
   React.useEffect(() => {
-    if (isOpen) {
+    if (!isOpen) {
+      initializedRef.current = false
+      return
+    }
+
+    if (isOpen && !initializedRef.current) {
       setIsLoading(true)
       if (organization) {
         form.reset({
@@ -119,17 +125,19 @@ export function OrganizationForm({ organization, isOpen, onClose, onSubmit }: Or
       } else {
         form.reset(defaultValues)
       }
+      
+      initializedRef.current = true
       const timer = setTimeout(() => setIsLoading(false), 500)
       return () => clearTimeout(timer)
     }
-  }, [organization, isOpen, defaultValues])
+  }, [organization?.id, isOpen, defaultValues, form])
 
   // Handle country change to reset city/state
   React.useEffect(() => {
     const subscription = form.watch((value, { name }) => {
       if (name === "country") {
-        form.setValue("city", "")
-        form.setValue("state", "")
+        form.setValue("city", "", { shouldDirty: true })
+        form.setValue("state", "", { shouldDirty: true })
       }
     })
     return () => subscription.unsubscribe()

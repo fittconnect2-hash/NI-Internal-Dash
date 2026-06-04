@@ -92,6 +92,7 @@ export function PartnerForm({ partner, isOpen, onClose, onSubmit }: PartnerFormP
   const [isLoading, setIsLoading] = React.useState(false)
   const [currentStep, setCurrentStep] = React.useState(1)
   const [selectedFeatures, setSelectedFeatures] = React.useState<string[]>([])
+  const initializedRef = React.useRef(false)
 
   const defaultValues = React.useMemo(() => ({
     partnerName: "",
@@ -116,8 +117,14 @@ export function PartnerForm({ partner, isOpen, onClose, onSubmit }: PartnerFormP
 
   const watchCountry = form.watch("country")
 
+  // Reset logic with ref protection to prevent infinite loops
   React.useEffect(() => {
-    if (isOpen) {
+    if (!isOpen) {
+      initializedRef.current = false
+      return
+    }
+
+    if (isOpen && !initializedRef.current) {
       setIsLoading(true)
       setCurrentStep(1)
       setSelectedFeatures([])
@@ -140,17 +147,18 @@ export function PartnerForm({ partner, isOpen, onClose, onSubmit }: PartnerFormP
         form.reset(defaultValues)
       }
       
+      initializedRef.current = true
       const timer = setTimeout(() => setIsLoading(false), 400)
       return () => clearTimeout(timer)
     }
-  }, [partner, isOpen, defaultValues])
+  }, [partner?.id, isOpen, defaultValues, form])
 
   // Handle country change to reset city/state
   React.useEffect(() => {
     const subscription = form.watch((value, { name }) => {
       if (name === "country") {
-        form.setValue("city", "")
-        form.setValue("state", "")
+        form.setValue("city", "", { shouldDirty: true })
+        form.setValue("state", "", { shouldDirty: true })
       }
     })
     return () => subscription.unsubscribe()
@@ -478,12 +486,17 @@ export function PartnerForm({ partner, isOpen, onClose, onSubmit }: PartnerFormP
                                   "p-5 bg-white border-2 rounded-2xl flex gap-4 transition-all cursor-pointer group",
                                   isSelected ? "border-primary bg-primary/5" : "border-slate-100 hover:border-slate-200"
                                 )}
-                                onClick={() => handleToggleFeature(feature.id)}
+                                onClick={(e) => {
+                                  e.preventDefault()
+                                  handleToggleFeature(feature.id)
+                                }}
                               >
-                                <Checkbox 
-                                  checked={isSelected} 
-                                  className="mt-1 h-5 w-5 border-2 border-slate-300 data-[state=checked]:border-primary"
-                                />
+                                <div className="pointer-events-none">
+                                  <Checkbox 
+                                    checked={isSelected} 
+                                    className="mt-1 h-5 w-5 border-2 border-slate-300 data-[state=checked]:border-primary"
+                                  />
+                                </div>
                                 <div className="space-y-1">
                                   <p className={cn(
                                     "font-black text-[15px] leading-tight transition-colors",
