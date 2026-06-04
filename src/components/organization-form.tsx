@@ -76,21 +76,23 @@ interface OrganizationFormProps {
 export function OrganizationForm({ organization, isOpen, onClose, onSubmit }: OrganizationFormProps) {
   const [isLoading, setIsLoading] = React.useState(false)
 
+  const defaultValues = React.useMemo(() => ({
+    organizationName: "",
+    contactName: "",
+    contactEmail: "",
+    contactPhone: "",
+    businessType: "",
+    country: "",
+    state: "",
+    city: "",
+    zipCode: "",
+    addressLine1: "",
+    addressLine2: "",
+  }), [])
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      organizationName: "",
-      contactName: "",
-      contactEmail: "",
-      contactPhone: "",
-      businessType: "",
-      country: "",
-      state: "",
-      city: "",
-      zipCode: "",
-      addressLine1: "",
-      addressLine2: "",
-    },
+    defaultValues,
   })
 
   const watchCountry = form.watch("country")
@@ -113,23 +115,12 @@ export function OrganizationForm({ organization, isOpen, onClose, onSubmit }: Or
           addressLine2: organization.addressLine2 || "",
         })
       } else {
-        form.reset({
-          organizationName: "",
-          contactName: "",
-          contactEmail: "",
-          contactPhone: "",
-          businessType: "",
-          country: "",
-          state: "",
-          city: "",
-          zipCode: "",
-          addressLine1: "",
-          addressLine2: "",
-        })
+        form.reset(defaultValues)
       }
-      setTimeout(() => setIsLoading(false), 500)
+      const timer = setTimeout(() => setIsLoading(false), 500)
+      return () => clearTimeout(timer)
     }
-  }, [organization, form, isOpen])
+  }, [organization, isOpen, defaultValues, form])
 
   // Handle country change to reset city/state
   React.useEffect(() => {
@@ -283,7 +274,7 @@ export function OrganizationForm({ organization, isOpen, onClose, onSubmit }: Or
                           name="country"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-[13px] font-bold text-[#1e293b]">Country <span className="text-red-500 font-black">*</span></FormLabel>
+                              <FormLabel className="text-[14px] font-extrabold text-slate-700">Country <span className="text-red-500">*</span></FormLabel>
                               <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
                                   <SelectTrigger className="h-12 bg-white border-slate-200">
@@ -308,7 +299,7 @@ export function OrganizationForm({ organization, isOpen, onClose, onSubmit }: Or
                           name="state"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-[13px] font-bold text-[#1e293b]">State / Region <span className="text-red-500 font-black">*</span></FormLabel>
+                              <FormLabel className="text-[14px] font-extrabold text-slate-700">State / Region <span className="text-red-500">*</span></FormLabel>
                               <Select onValueChange={field.onChange} value={field.value} disabled={!watchCountry}>
                                 <FormControl>
                                   <SelectTrigger className="h-12 bg-white border-slate-200">
@@ -330,7 +321,7 @@ export function OrganizationForm({ organization, isOpen, onClose, onSubmit }: Or
                           name="city"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-[13px] font-bold text-[#1e293b]">City <span className="text-red-500 font-black">*</span></FormLabel>
+                              <FormLabel className="text-[14px] font-extrabold text-slate-700">City <span className="text-red-500">*</span></FormLabel>
                               <Select onValueChange={field.onChange} value={field.value} disabled={!watchCountry}>
                                 <FormControl>
                                   <SelectTrigger className="h-12 bg-white border-slate-200">

@@ -93,21 +93,23 @@ export function PartnerForm({ partner, isOpen, onClose, onSubmit }: PartnerFormP
   const [currentStep, setCurrentStep] = React.useState(1)
   const [selectedFeatures, setSelectedFeatures] = React.useState<string[]>([])
 
+  const defaultValues = React.useMemo(() => ({
+    partnerName: "",
+    adminName: "",
+    email: "",
+    phone: "",
+    phoneCountryCode: "+971",
+    businessType: "",
+    country: "",
+    state: "",
+    city: "",
+    zipCode: "",
+    address: "",
+  }), [])
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      partnerName: "",
-      adminName: "",
-      email: "",
-      phone: "",
-      phoneCountryCode: "+971",
-      businessType: "",
-      country: "",
-      state: "",
-      city: "",
-      zipCode: "",
-      address: "",
-    },
+    defaultValues,
   })
 
   const watchCountry = form.watch("country")
@@ -117,6 +119,7 @@ export function PartnerForm({ partner, isOpen, onClose, onSubmit }: PartnerFormP
       setIsLoading(true)
       setCurrentStep(1)
       setSelectedFeatures([])
+      
       if (partner) {
         form.reset({
           partnerName: partner.partnerName,
@@ -132,23 +135,13 @@ export function PartnerForm({ partner, isOpen, onClose, onSubmit }: PartnerFormP
           address: partner.address || "",
         })
       } else {
-        form.reset({
-          partnerName: "",
-          adminName: "",
-          email: "",
-          phone: "",
-          phoneCountryCode: "+971",
-          businessType: "",
-          country: "",
-          state: "",
-          city: "",
-          zipCode: "",
-          address: "",
-        })
+        form.reset(defaultValues)
       }
-      setTimeout(() => setIsLoading(false), 500)
+      
+      const timer = setTimeout(() => setIsLoading(false), 400)
+      return () => clearTimeout(timer)
     }
-  }, [partner, form, isOpen])
+  }, [partner, isOpen, defaultValues, form])
 
   // Handle country change to reset city/state
   React.useEffect(() => {
