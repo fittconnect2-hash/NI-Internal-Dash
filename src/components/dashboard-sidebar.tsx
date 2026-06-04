@@ -11,10 +11,12 @@ import {
   Handshake,
   Search,
   Check,
-  ChevronsUpDown,
+  ChevronDown,
   Building2,
   Settings,
-  ShieldCheck
+  ShieldCheck,
+  UserCircle,
+  HelpCircle
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
@@ -38,6 +40,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 const navGroups = [
   {
@@ -143,41 +146,46 @@ export function DashboardSidebar({
         ))}
       </SidebarContent>
 
-      <SidebarFooter className="p-3 border-t border-slate-800 bg-[#0f172a] rounded-t-[17.6px]">
+      <SidebarFooter className="p-4 border-t border-slate-800 bg-[#0f172a] rounded-t-[17.6px] space-y-4">
+        {/* Partners Dropdown Section */}
         <Popover open={isPartnerOpen} onOpenChange={setIsPartnerOpen}>
           <PopoverTrigger asChild>
             <button className={cn(
-              "flex items-center gap-3 w-full p-2 rounded-xl transition-all duration-300 hover:bg-slate-800 border border-transparent hover:border-slate-700 outline-none",
-              isCollapsed && "justify-center"
+              "flex items-center gap-3 w-full p-3 rounded-2xl transition-all duration-300 bg-slate-800/40 hover:bg-slate-800 border border-slate-700/50 hover:border-slate-600 outline-none group",
+              isCollapsed && "justify-center p-2"
             )}>
-              <div className="h-9 w-9 rounded-xl bg-primary flex items-center justify-center text-white font-black text-[10px] shrink-0 shadow-lg shadow-primary/20">
-                {selectedPartner ? selectedPartner.partnerName.substring(0, 2).toUpperCase() : "GW"}
+              <div className="relative shrink-0">
+                <Avatar className="h-9 w-9 border-2 border-primary/20 shadow-lg">
+                  <AvatarFallback className="bg-primary text-white font-black text-[10px]">
+                    {selectedPartner ? selectedPartner.partnerName.substring(0, 2).toUpperCase() : "GA"}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="absolute -top-0.5 -right-0.5 h-3 w-3 rounded-full bg-green-500 border-2 border-[#0f172a]" />
               </div>
+              
               {!isCollapsed && (
                 <div className="flex flex-col min-w-0 text-left flex-1 animate-in fade-in slide-in-from-left-2">
-                  <span className="text-xs font-black text-white leading-none mb-1 truncate">
-                    {selectedPartner ? selectedPartner.partnerName : "Global Access"}
+                  <span className="text-[10px] font-black text-[#0069B1] uppercase tracking-wider leading-none mb-1 truncate">
+                    {selectedPartner ? "PARTNER PORTFOLIO" : "SYSTEM ACCESS"}
                   </span>
-                  <div className="flex items-center gap-1">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
-                      {selectedPartner ? "Partner Portfolio" : "System Admin"}
-                    </span>
-                    <ChevronsUpDown className="h-3 w-3 text-slate-500" />
-                  </div>
+                  <span className="text-sm font-black text-white leading-none truncate">
+                    {selectedPartner ? selectedPartner.partnerName : "Global Platform"}
+                  </span>
                 </div>
               )}
+              {!isCollapsed && <ChevronDown className="h-4 w-4 text-slate-500 group-hover:text-white transition-colors" />}
             </button>
           </PopoverTrigger>
-          <PopoverContent className="w-72 p-0 shadow-2xl rounded-2xl overflow-hidden border-slate-200" align="start" side="right" sideOffset={10}>
+          <PopoverContent className="w-80 p-0 shadow-2xl rounded-2xl overflow-hidden border-slate-200" align="start" side="right" sideOffset={10}>
             <div className="bg-slate-50/80 p-4 border-b border-slate-100">
               <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
                 <ShieldCheck className="h-3 w-3" />
-                Select Management Partner
+                Select Operations Scope
               </div>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
                 <Input 
-                  placeholder="Search partners..." 
+                  placeholder="Search portfolio..." 
                   className="pl-9 h-9 text-xs bg-white border-slate-200 rounded-lg"
                   value={partnerSearch}
                   onChange={(e) => setPartnerSearch(e.target.value)}
@@ -188,7 +196,7 @@ export function DashboardSidebar({
             <ScrollArea className="max-h-[350px]">
               <div className="p-2 space-y-1">
                 <div className="px-2 py-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                  System Admin
+                  Platform Administration
                 </div>
                 <button
                   className={cn(
@@ -219,7 +227,7 @@ export function DashboardSidebar({
                 <div className="h-px bg-slate-100 my-2 mx-2" />
 
                 <div className="px-2 py-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                  Partner Portfolio
+                  Partner Portfolios
                 </div>
                 {filteredPartners.map((partner) => (
                   <button
@@ -252,21 +260,34 @@ export function DashboardSidebar({
 
                 {filteredPartners.length === 0 && (
                   <div className="p-8 text-center">
-                    <p className="text-xs text-slate-400 font-bold">No partners found matching "{partnerSearch}"</p>
+                    <p className="text-xs text-slate-400 font-bold">No results found for "{partnerSearch}"</p>
                   </div>
                 )}
               </div>
             </ScrollArea>
-
-            <div className="p-2 bg-slate-50 border-t border-slate-100 flex items-center justify-between px-4 py-3">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">System Version v8.0</span>
-              <button className="text-[10px] font-black text-primary uppercase tracking-widest flex items-center gap-1.5 hover:underline">
-                <Settings className="h-2.5 w-2.5" />
-                Settings
-              </button>
-            </div>
           </PopoverContent>
         </Popover>
+
+        {/* Admin User Section (styled as Help & Support structure) */}
+        {!isCollapsed && (
+          <button className="flex items-center gap-4 w-full px-4 py-2 hover:bg-white/5 rounded-xl transition-colors group">
+            <div className="h-6 w-6 rounded-full border-2 border-slate-600 flex items-center justify-center group-hover:border-primary transition-colors shrink-0">
+              <HelpCircle className="h-3.5 w-3.5 text-slate-400 group-hover:text-primary transition-colors" />
+            </div>
+            <div className="flex flex-col text-left">
+              <span className="text-sm font-medium text-slate-400 group-hover:text-white transition-colors">Admin Support</span>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">System Admin User</span>
+            </div>
+          </button>
+        )}
+        
+        {isCollapsed && (
+          <div className="flex justify-center">
+            <button className="h-8 w-8 rounded-full bg-slate-800 flex items-center justify-center hover:bg-primary transition-colors">
+              <UserCircle className="h-4 w-4 text-white" />
+            </button>
+          </div>
+        )}
       </SidebarFooter>
     </Sidebar>
   )
