@@ -146,34 +146,34 @@ export function DashboardSidebar({
         ))}
       </SidebarContent>
 
-      <SidebarFooter className="p-4 border-t border-slate-800 bg-[#0f172a] rounded-t-[17.6px] space-y-4">
+      <SidebarFooter className="p-2.5 border-t border-slate-800 bg-[#0f172a] rounded-t-[17.6px] space-y-2">
         {/* Partners Dropdown Section */}
         <Popover open={isPartnerOpen} onOpenChange={setIsPartnerOpen}>
           <PopoverTrigger asChild>
             <button className={cn(
-              "flex items-center gap-3 w-full p-3 rounded-2xl transition-all duration-300 bg-slate-800/40 hover:bg-slate-800 border border-slate-700/50 hover:border-slate-600 outline-none group",
-              isCollapsed && "justify-center p-2"
+              "flex items-center gap-3 w-full p-2 rounded-2xl transition-all duration-300 bg-slate-800/40 hover:bg-slate-800 border border-slate-700/50 hover:border-slate-600 outline-none group",
+              isCollapsed && "justify-center p-1.5"
             )}>
               <div className="relative shrink-0">
-                <Avatar className="h-9 w-9 border-2 border-primary/20 shadow-lg">
-                  <AvatarFallback className="bg-primary text-white font-black text-[10px]">
+                <Avatar className="h-8 w-8 border-2 border-primary/20 shadow-lg">
+                  <AvatarFallback className="bg-primary text-white font-black text-[9px]">
                     {selectedPartner ? selectedPartner.partnerName.substring(0, 2).toUpperCase() : "GA"}
                   </AvatarFallback>
                 </Avatar>
-                <div className="absolute -top-0.5 -right-0.5 h-3 w-3 rounded-full bg-green-500 border-2 border-[#0f172a]" />
+                <div className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-[#0f172a]" />
               </div>
               
               {!isCollapsed && (
                 <div className="flex flex-col min-w-0 text-left flex-1 animate-in fade-in slide-in-from-left-2">
-                  <span className="text-[10px] font-black text-[#0069B1] uppercase tracking-wider leading-none mb-1 truncate">
+                  <span className="text-[9px] font-black text-[#0069B1] uppercase tracking-wider leading-none mb-0.5 truncate">
                     {selectedPartner ? "PARTNER PORTFOLIO" : "SYSTEM ACCESS"}
                   </span>
-                  <span className="text-sm font-black text-white leading-none truncate">
+                  <span className="text-[13px] font-black text-white leading-none truncate">
                     {selectedPartner ? selectedPartner.partnerName : "Global Platform"}
                   </span>
                 </div>
               )}
-              {!isCollapsed && <ChevronDown className="h-4 w-4 text-slate-500 group-hover:text-white transition-colors" />}
+              {!isCollapsed && <ChevronDown className="h-3.5 w-3.5 text-slate-500 group-hover:text-white transition-colors" />}
             </button>
           </PopoverTrigger>
           <PopoverContent className="w-80 p-0 shadow-2xl rounded-2xl overflow-hidden border-slate-200" align="start" side="right" sideOffset={10}>
@@ -270,21 +270,21 @@ export function DashboardSidebar({
 
         {/* Admin User Section (styled as Help & Support structure) */}
         {!isCollapsed && (
-          <button className="flex items-center gap-4 w-full px-4 py-2 hover:bg-white/5 rounded-xl transition-colors group">
+          <button className="flex items-center gap-3 w-full px-3 py-1.5 hover:bg-white/5 rounded-xl transition-colors group">
             <div className="h-6 w-6 rounded-full border-2 border-slate-600 flex items-center justify-center group-hover:border-primary transition-colors shrink-0">
               <UserCircle className="h-3.5 w-3.5 text-slate-400 group-hover:text-primary transition-colors" />
             </div>
             <div className="flex flex-col text-left">
-              <span className="text-sm font-medium text-slate-400 group-hover:text-white transition-colors">Admin</span>
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">Super Admin</span>
+              <span className="text-[13px] font-medium text-slate-400 group-hover:text-white transition-colors">Admin</span>
+              <span className="text-[9px] font-bold text-slate-500 uppercase tracking-tight">Super Admin</span>
             </div>
           </button>
         )}
         
         {isCollapsed && (
           <div className="flex justify-center">
-            <button className="h-8 w-8 rounded-full bg-slate-800 flex items-center justify-center hover:bg-primary transition-colors">
-              <UserCircle className="h-4 w-4 text-white" />
+            <button className="h-7 w-7 rounded-full bg-slate-800 flex items-center justify-center hover:bg-primary transition-colors">
+              <UserCircle className="h-3.5 w-3.5 text-white" />
             </button>
           </div>
         )}
