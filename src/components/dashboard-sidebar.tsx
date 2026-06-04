@@ -272,11 +272,11 @@ export function DashboardSidebar({
         {!isCollapsed && (
           <button className="flex items-center gap-4 w-full px-4 py-2 hover:bg-white/5 rounded-xl transition-colors group">
             <div className="h-6 w-6 rounded-full border-2 border-slate-600 flex items-center justify-center group-hover:border-primary transition-colors shrink-0">
-              <HelpCircle className="h-3.5 w-3.5 text-slate-400 group-hover:text-primary transition-colors" />
+              <UserCircle className="h-3.5 w-3.5 text-slate-400 group-hover:text-primary transition-colors" />
             </div>
             <div className="flex flex-col text-left">
-              <span className="text-sm font-medium text-slate-400 group-hover:text-white transition-colors">Admin Support</span>
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">System Admin User</span>
+              <span className="text-sm font-medium text-slate-400 group-hover:text-white transition-colors">Admin</span>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">Super Admin</span>
             </div>
           </button>
         )}
