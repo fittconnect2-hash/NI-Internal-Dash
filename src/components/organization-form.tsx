@@ -90,8 +90,10 @@ export function OrganizationForm({ organization, isOpen, onClose, onSubmit }: Or
     addressLine2: "",
   }), [])
 
+  const resolver = React.useMemo(() => zodResolver(formSchema), [])
+
   const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+    resolver,
     defaultValues,
   })
 
@@ -120,7 +122,7 @@ export function OrganizationForm({ organization, isOpen, onClose, onSubmit }: Or
       const timer = setTimeout(() => setIsLoading(false), 500)
       return () => clearTimeout(timer)
     }
-  }, [organization, isOpen, defaultValues, form])
+  }, [organization, isOpen, defaultValues])
 
   // Handle country change to reset city/state
   React.useEffect(() => {

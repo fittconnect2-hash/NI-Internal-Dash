@@ -107,8 +107,10 @@ export function PartnerForm({ partner, isOpen, onClose, onSubmit }: PartnerFormP
     address: "",
   }), [])
 
+  const resolver = React.useMemo(() => zodResolver(formSchema), [])
+
   const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+    resolver,
     defaultValues,
   })
 
@@ -141,7 +143,7 @@ export function PartnerForm({ partner, isOpen, onClose, onSubmit }: PartnerFormP
       const timer = setTimeout(() => setIsLoading(false), 400)
       return () => clearTimeout(timer)
     }
-  }, [partner, isOpen, defaultValues, form])
+  }, [partner, isOpen, defaultValues])
 
   // Handle country change to reset city/state
   React.useEffect(() => {

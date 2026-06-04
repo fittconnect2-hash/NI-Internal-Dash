@@ -79,19 +79,6 @@ export default function DashboardPage() {
   const [editingPartner, setEditingPartner] = React.useState<Partner | null>(null)
   const [isAddingNewUser, setIsAddingNewUser] = React.useState(false)
 
-  // Interaction Safeguard
-  React.useEffect(() => {
-    const isAnyOverlayOpen = isFormOpen || isConfigOpen || isDetailOpen || isOutletsDrawerOpen || isUsersDrawerOpen || isPartnerFormOpen;
-    if (!isAnyOverlayOpen) {
-      const timer = setTimeout(() => {
-        document.body.style.pointerEvents = 'auto';
-        document.body.style.overflow = 'auto';
-        document.documentElement.style.pointerEvents = 'auto';
-      }, 150);
-      return () => clearTimeout(timer);
-    }
-  }, [isFormOpen, isConfigOpen, isDetailOpen, isOutletsDrawerOpen, isUsersDrawerOpen, isPartnerFormOpen]);
-
   // Persistence Logic
   React.useEffect(() => {
     const o = localStorage.getItem(STORAGE_KEYS.ORGANIZATIONS)
@@ -220,8 +207,6 @@ export default function DashboardPage() {
       setEditingUser(null)
       setIsAddingNewUser(false)
     } 
-    document.body.style.pointerEvents = 'auto';
-    document.body.style.overflow = 'auto';
   }
 
   const handleAddPartner = (data: Partial<Partner>) => {

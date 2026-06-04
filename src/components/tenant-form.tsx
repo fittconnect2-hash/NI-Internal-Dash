@@ -90,8 +90,10 @@ export function TenantForm({ tenant, isOpen, onClose, onSubmit }: TenantFormProp
     addressLine2: "",
   }), [])
 
+  const resolver = React.useMemo(() => zodResolver(formSchema), [])
+
   const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+    resolver,
     defaultValues,
   })
 
@@ -120,7 +122,7 @@ export function TenantForm({ tenant, isOpen, onClose, onSubmit }: TenantFormProp
       const timer = setTimeout(() => setIsLoading(false), 500)
       return () => clearTimeout(timer)
     }
-  }, [tenant, isOpen, defaultValues, form])
+  }, [tenant, isOpen, defaultValues])
 
   // Handle country change to reset city/state
   React.useEffect(() => {

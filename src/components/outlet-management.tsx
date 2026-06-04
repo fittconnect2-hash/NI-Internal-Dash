@@ -110,17 +110,6 @@ export function OutletManagement({ organization, allOutlets, setAllOutlets, allO
   const [formZipCode, setFormZipCode] = React.useState("")
 
   React.useEffect(() => {
-    if (!isOpen) {
-      const timer = setTimeout(() => {
-        document.body.style.pointerEvents = 'auto';
-        document.body.style.overflow = 'auto';
-        document.documentElement.style.pointerEvents = 'auto';
-      }, 150);
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen]);
-
-  React.useEffect(() => {
     if (isOpen) {
       if (editingOutlet) {
         setFormOrganizationId(editingOutlet.organizationId)
