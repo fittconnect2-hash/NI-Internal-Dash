@@ -143,26 +143,26 @@ export function DashboardSidebar({
         ))}
       </SidebarContent>
 
-      <SidebarFooter className="p-3 border-t border-slate-100 bg-slate-50/30">
+      <SidebarFooter className="p-3 border-t border-slate-800 bg-[#0f172a]">
         <Popover open={isPartnerOpen} onOpenChange={setIsPartnerOpen}>
           <PopoverTrigger asChild>
             <button className={cn(
-              "flex items-center gap-3 w-full p-2 rounded-xl transition-all duration-300 hover:bg-white hover:shadow-md border border-transparent hover:border-slate-100",
+              "flex items-center gap-3 w-full p-2 rounded-xl transition-all duration-300 hover:bg-slate-800 border border-transparent hover:border-slate-700 outline-none",
               isCollapsed && "justify-center"
             )}>
-              <div className="h-9 w-9 rounded-xl bg-[#0f172a] flex items-center justify-center text-white font-black text-[10px] shrink-0 shadow-lg">
+              <div className="h-9 w-9 rounded-xl bg-primary flex items-center justify-center text-white font-black text-[10px] shrink-0 shadow-lg shadow-primary/20">
                 {selectedPartner ? selectedPartner.partnerName.substring(0, 2).toUpperCase() : "GW"}
               </div>
               {!isCollapsed && (
                 <div className="flex flex-col min-w-0 text-left flex-1 animate-in fade-in slide-in-from-left-2">
-                  <span className="text-xs font-black text-slate-900 leading-none mb-1 truncate">
+                  <span className="text-xs font-black text-white leading-none mb-1 truncate">
                     {selectedPartner ? selectedPartner.partnerName : "Global Access"}
                   </span>
                   <div className="flex items-center gap-1">
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
-                      {selectedPartner ? "Management Partner" : "System Admin"}
+                      {selectedPartner ? "Partner Portfolio" : "System Admin"}
                     </span>
-                    <ChevronsUpDown className="h-2.5 w-2.5 text-slate-300" />
+                    <ChevronsUpDown className="h-3 w-3 text-slate-500" />
                   </div>
                 </div>
               )}
@@ -253,7 +253,7 @@ export function DashboardSidebar({
             </ScrollArea>
 
             <div className="p-2 bg-slate-50 border-t border-slate-100 flex items-center justify-between px-4 py-3">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">System Version v7.0</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">System Version v8.0</span>
               <button className="text-[10px] font-black text-primary uppercase tracking-widest flex items-center gap-1.5 hover:underline">
                 <Settings className="h-2.5 w-2.5" />
                 Settings
