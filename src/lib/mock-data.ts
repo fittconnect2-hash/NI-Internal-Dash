@@ -3,6 +3,63 @@ import { Organization, Outlet, User, Gateway, Partner } from './types';
 const businessTypes = ['Hotel', 'Fast Food', 'Restaurant', 'Cafe', 'Catering', 'Fine Dining', 'Bakery', 'Pizzeria'];
 const statusOptions: ('Active' | 'Configuration pending' | 'Inactive')[] = ['Active', 'Configuration pending', 'Active', 'Active', 'Inactive'];
 
+export const initialPartners: Partner[] = [
+  {
+    id: 'p-1',
+    partnerName: 'Global Hospitality Solutions',
+    adminName: 'Marcus Vane',
+    email: 'm.vane@global-hospitality.com',
+    phone: '+971 50 111 2222',
+    status: 'Active',
+    since: 'June 03, 2026'
+  },
+  {
+    id: 'p-2',
+    partnerName: 'Urban Dining Partners',
+    adminName: 'Sarah Chen',
+    email: 's.chen@urbandining.ae',
+    phone: '+971 52 333 4444',
+    status: 'Active',
+    since: 'June 02, 2026'
+  },
+  {
+    id: 'p-3',
+    partnerName: 'Elite Management Group',
+    adminName: 'James Sterling',
+    email: 'j.sterling@elitemgmt.com',
+    phone: '+1 212 555 0198',
+    status: 'Active',
+    since: 'May 27, 2026'
+  },
+  {
+    id: 'p-4',
+    partnerName: 'Horizon Property Group',
+    adminName: 'Elena Rodriguez',
+    email: 'elena.r@horizonproperties.es',
+    phone: '+34 91 123 4567',
+    status: 'Active',
+    since: 'May 25, 2026'
+  },
+  {
+    id: 'p-5',
+    partnerName: 'Desert Rose Administration',
+    adminName: 'Fatima Al Mansoori',
+    email: 'f.almansoori@desertrose.ae',
+    phone: '+971 54 777 8888',
+    status: 'Active',
+    since: 'May 22, 2026'
+  },
+  {
+    id: 'p-6',
+    partnerName: 'Nordic Bistro Network',
+    adminName: 'Erik Svensson',
+    email: 'erik.s@nordicbistro.no',
+    phone: '+47 20 12 34 56',
+    status: 'Active',
+    since: 'May 22, 2026'
+  }
+];
+
 /**
  * Generates mock organizations with professional naming conventions.
  */
@@ -28,6 +85,7 @@ function generateMockOrganizations(count: number): Organization[] {
       numberOfOutlets: 2,
       numberOfUsers: 12,
       merchantId: 'M-78291',
+      partnerId: 'p-1'
     },
     {
       id: '2',
@@ -46,6 +104,7 @@ function generateMockOrganizations(count: number): Organization[] {
       globalGatewayIds: [],
       numberOfOutlets: 1,
       numberOfUsers: 3,
+      partnerId: 'p-2'
     }
   ];
 
@@ -85,6 +144,7 @@ function generateMockOrganizations(count: number): Organization[] {
       numberOfOutlets: (i % 5) + 1,
       numberOfUsers: (i % 15) + 3,
       merchantId: status === 'Active' ? `M-${10000 + i}` : undefined,
+      partnerId: initialPartners[i % initialPartners.length].id
     });
   }
 
@@ -194,81 +254,6 @@ export const initialGateways: Gateway[] = [
     provider: 'NGenius',
     type: 'Credit Card',
     supportedCurrencies: ['AED', 'SAR']
-  }
-];
-
-export const initialPartners: Partner[] = [
-  {
-    id: 'p-1',
-    partnerName: 'Global Hospitality Solutions',
-    adminName: 'Marcus Vane',
-    email: 'm.vane@global-hospitality.com',
-    phone: '+971 50 111 2222',
-    status: 'Active',
-    since: 'June 03, 2026'
-  },
-  {
-    id: 'p-2',
-    partnerName: 'Urban Dining Partners',
-    adminName: 'Sarah Chen',
-    email: 's.chen@urbandining.ae',
-    phone: '+971 52 333 4444',
-    status: 'Active',
-    since: 'June 02, 2026'
-  },
-  {
-    id: 'p-3',
-    partnerName: 'Elite Management Group',
-    adminName: 'James Sterling',
-    email: 'j.sterling@elitemgmt.com',
-    phone: '+1 212 555 0198',
-    status: 'Active',
-    since: 'May 27, 2026'
-  },
-  {
-    id: 'p-4',
-    partnerName: 'Horizon Property Group',
-    adminName: 'Elena Rodriguez',
-    email: 'elena.r@horizonproperties.es',
-    phone: '+34 91 123 4567',
-    status: 'Active',
-    since: 'May 25, 2026'
-  },
-  {
-    id: 'p-5',
-    partnerName: 'Desert Rose Administration',
-    adminName: 'Fatima Al Mansoori',
-    email: 'f.almansoori@desertrose.ae',
-    phone: '+971 54 777 8888',
-    status: 'Active',
-    since: 'May 22, 2026'
-  },
-  {
-    id: 'p-6',
-    partnerName: 'Nordic Bistro Network',
-    adminName: 'Erik Svensson',
-    email: 'erik.s@nordicbistro.no',
-    phone: '+47 20 12 34 56',
-    status: 'Active',
-    since: 'May 22, 2026'
-  },
-  {
-    id: 'p-7',
-    partnerName: 'Summit Hospitality Services',
-    adminName: 'Michael O’Brian',
-    email: 'm.obrian@summit-hosp.ie',
-    phone: '+353 1 555 9876',
-    status: 'Active',
-    since: 'May 21, 2026'
-  },
-  {
-    id: 'p-8',
-    partnerName: 'Pacific Coast Estates',
-    adminName: 'Robert Miller',
-    email: 'r.miller@pacificcoast.com',
-    phone: '+1 415 555 0122',
-    status: 'Active',
-    since: 'May 21, 2026'
   }
 ];
 

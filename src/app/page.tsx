@@ -40,13 +40,14 @@ import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 
 const ITEMS_PER_PAGE = 8
-// Bumping version to v7 to clear out any old "Testuser" data from localStorage
+// Bumping version to v8 to initialize partnerId links
 const STORAGE_KEYS = {
-  ORGANIZATIONS: 'dine-net-organizations-v7',
-  OUTLETS: 'dine-net-outlets-v7',
-  USERS: 'dine-net-users-v7',
-  GATEWAYS: 'dine-net-gateways-v7',
-  PARTNERS: 'dine-net-partners-v7',
+  ORGANIZATIONS: 'dine-net-organizations-v8',
+  OUTLETS: 'dine-net-outlets-v8',
+  USERS: 'dine-net-users-v8',
+  GATEWAYS: 'dine-net-gateways-v8',
+  PARTNERS: 'dine-net-partners-v8',
+  SELECTED_PARTNER: 'dine-net-selected-partner-v8'
 }
 
 export default function DashboardPage() {
@@ -57,6 +58,7 @@ export default function DashboardPage() {
   const [users, setUsers] = React.useState<User[]>([])
   const [gateways, setGateways] = React.useState<Gateway[]>([])
   const [partners, setPartners] = React.useState<Partner[]>([])
+  const [selectedPartnerId, setSelectedPartnerId] = React.useState<string | null>(null)
   const [isLoaded, setIsLoaded] = React.useState(false)
 
   const [searchQuery, setSearchQuery] = React.useState("")
@@ -86,12 +88,14 @@ export default function DashboardPage() {
     const u = localStorage.getItem(STORAGE_KEYS.USERS)
     const g = localStorage.getItem(STORAGE_KEYS.GATEWAYS)
     const p = localStorage.getItem(STORAGE_KEYS.PARTNERS)
+    const sp = localStorage.getItem(STORAGE_KEYS.SELECTED_PARTNER)
 
     setOrganizations(o ? JSON.parse(o) : initialOrganizations)
     setOutlets(out ? JSON.parse(out) : initialOutlets)
     setUsers(u ? JSON.parse(u) : initialUsers)
     setGateways(g ? JSON.parse(g) : initialGateways)
     setPartners(p ? JSON.parse(p) : initialPartners)
+    setSelectedPartnerId(sp ? JSON.parse(sp) : null)
     setIsLoaded(true)
   }, [])
 
@@ -102,12 +106,29 @@ export default function DashboardPage() {
       localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users))
       localStorage.setItem(STORAGE_KEYS.GATEWAYS, JSON.stringify(gateways))
       localStorage.setItem(STORAGE_KEYS.PARTNERS, JSON.stringify(partners))
+      localStorage.setItem(STORAGE_KEYS.SELECTED_PARTNER, JSON.stringify(selectedPartnerId))
     }
-  }, [organizations, outlets, users, gateways, partners, isLoaded])
+  }, [organizations, outlets, users, gateways, partners, selectedPartnerId, isLoaded])
 
-  // Filter logic
+  // Partner Global Filtering Logic
+  const filteredByPartner = React.useMemo(() => {
+    const orgs = selectedPartnerId 
+      ? organizations.filter(o => o.partnerId === selectedPartnerId)
+      : organizations
+    
+    const orgIds = new Set(orgs.map(o => o.id))
+    
+    const outs = outlets.filter(out => orgIds.has(out.organizationId))
+    const outIds = new Set(outs.map(o => o.id))
+    
+    const filteredUsers = users.filter(u => orgIds.has(u.organizationId))
+
+    return { organizations: orgs, outlets: outs, users: filteredUsers }
+  }, [organizations, outlets, users, selectedPartnerId])
+
+  // List filter logic (UI Search + Status)
   const filteredOrganizations = React.useMemo(() => {
-    return organizations.filter(o => {
+    return filteredByPartner.organizations.filter(o => {
       const matchesSearch = 
         o.organizationName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         o.contactEmail.toLowerCase().includes(searchQuery.toLowerCase())
@@ -115,7 +136,7 @@ export default function DashboardPage() {
       const matchesFilter = !filterStatus || o.configurationStatus === filterStatus
       return matchesSearch && matchesFilter
     })
-  }, [organizations, searchQuery, filterStatus])
+  }, [filteredByPartner.organizations, searchQuery, filterStatus])
 
   const totalPages = Math.ceil(filteredOrganizations.length / ITEMS_PER_PAGE)
   const paginatedOrganizations = React.useMemo(() => {
@@ -125,7 +146,7 @@ export default function DashboardPage() {
 
   React.useEffect(() => {
     setCurrentPage(1)
-  }, [searchQuery, filterStatus])
+  }, [searchQuery, filterStatus, selectedPartnerId])
 
   const handleAddOrganization = (data: Partial<Organization>) => {
     if (editingOrganization) {
@@ -140,6 +161,7 @@ export default function DashboardPage() {
         globalGatewayIds: [],
         numberOfOutlets: 0,
         numberOfUsers: 0,
+        partnerId: selectedPartnerId || undefined
       } as Organization
       setOrganizations(prev => [newOrg, ...prev])
       toast({ title: "New Organization Added", description: `${data.organizationName} is now registered on the platform.` })
@@ -246,7 +268,7 @@ export default function DashboardPage() {
   const renderContent = () => {
     if (!isLoaded) return <div className="flex-1 flex items-center justify-center"><p className="text-sm font-bold text-slate-400 animate-pulse">Initializing Data...</p></div>
 
-    if (activeTab === 'dashboard') return <DashboardOverview />
+    if (activeTab === 'dashboard') return <DashboardOverview filteredOrganizations={filteredByPartner.organizations} />
     
     if (activeTab === 'partners') return (
       <PartnerListView 
@@ -260,10 +282,10 @@ export default function DashboardPage() {
 
     if (activeTab === 'outlets') return (
       <OutletListView 
-        allOutlets={outlets}
+        allOutlets={filteredByPartner.outlets}
         setAllOutlets={setOutlets}
-        allOrganizations={organizations}
-        allUsers={users}
+        allOrganizations={filteredByPartner.organizations}
+        allUsers={filteredByPartner.users}
         onViewUsers={(outlet) => {
           const owner = organizations.find(o => o.id === outlet.organizationId)
           setSelectedOrganization(owner || null)
@@ -275,10 +297,10 @@ export default function DashboardPage() {
 
     if (activeTab === 'users') return (
       <UserListView 
-        allUsers={users}
+        allUsers={filteredByPartner.users}
         setAllUsers={setUsers}
-        allOrganizations={organizations}
-        allOutlets={outlets}
+        allOrganizations={filteredByPartner.organizations}
+        allOutlets={filteredByPartner.outlets}
         onAddUser={handleAddUserGlobal}
         onEditUser={(user) => {
           setEditingUser(user)
@@ -301,7 +323,14 @@ export default function DashboardPage() {
           <div className="max-w-7xl mx-auto w-full flex-1 flex flex-col min-h-0">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
               <div>
-                <h1 className="text-3xl font-black text-slate-900 tracking-tight">Organization Management</h1>
+                <div className="flex items-center gap-4">
+                  <h1 className="text-3xl font-black text-slate-900 tracking-tight">Organization Management</h1>
+                  {selectedPartnerId && (
+                    <Badge className="bg-primary/5 text-primary border-none font-bold text-[10px] uppercase px-3 py-1">
+                      Filtering by {partners.find(p => p.id === selectedPartnerId)?.partnerName}
+                    </Badge>
+                  )}
+                </div>
                 <p className="text-sm text-slate-500 mt-1">Manage your global brand network and properties.</p>
               </div>
               <div className="flex items-center gap-2">
@@ -356,24 +385,32 @@ export default function DashboardPage() {
             </div>
 
             <div className="flex-1 overflow-y-auto pr-2 scrollbar-hide">
-              <div className={cn(viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-8' : 'space-y-3 pb-8')}>
-                {paginatedOrganizations.map((org) => (
-                  <OrganizationCard 
-                    key={org.id} 
-                    organization={org} 
-                    viewMode={viewMode} 
-                    onEdit={(o) => {
-                      setEditingOrganization(o)
-                      setIsFormOpen(true)
-                    }}
-                    onView={handleViewOrganization}
-                    onConfigure={handleConfigureOrganization}
-                    onDelete={handleDeleteOrganization}
-                    onOutletsClick={handleOutletsNavigation}
-                    onUsersClick={handleUsersNavigation}
-                  />
-                ))}
-              </div>
+              {paginatedOrganizations.length > 0 ? (
+                <div className={cn(viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-8' : 'space-y-3 pb-8')}>
+                  {paginatedOrganizations.map((org) => (
+                    <OrganizationCard 
+                      key={org.id} 
+                      organization={org} 
+                      viewMode={viewMode} 
+                      onEdit={(o) => {
+                        setEditingOrganization(o)
+                        setIsFormOpen(true)
+                      }}
+                      onView={handleViewOrganization}
+                      onConfigure={handleConfigureOrganization}
+                      onDelete={handleDeleteOrganization}
+                      onOutletsClick={handleOutletsNavigation}
+                      onUsersClick={handleUsersNavigation}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-40 text-center">
+                  <UsersIcon className="h-12 w-12 text-slate-200 mb-4" />
+                  <p className="text-sm font-bold text-slate-400">No organizations found matching your criteria.</p>
+                  <Button variant="link" className="mt-2 text-primary font-black" onClick={resetFilters}>Clear all filters</Button>
+                </div>
+              )}
             </div>
 
             {totalPages > 1 && (
@@ -435,15 +472,26 @@ export default function DashboardPage() {
     return null
   }
 
+  const resetFilters = () => {
+    setSearchQuery("")
+    setFilterStatus(null)
+  }
+
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-background overflow-hidden">
-        <DashboardSidebar activeTab={activeTab} onTabChange={(tab) => {
-          setActiveTab(tab)
-          setSelectedOrganization(null)
-          setEditingUser(null)
-          setIsAddingNewUser(false)
-        }} />
+        <DashboardSidebar 
+          activeTab={activeTab} 
+          partners={partners}
+          selectedPartnerId={selectedPartnerId}
+          onPartnerChange={setSelectedPartnerId}
+          onTabChange={(tab) => {
+            setActiveTab(tab)
+            setSelectedOrganization(null)
+            setEditingUser(null)
+            setIsAddingNewUser(false)
+          }} 
+        />
         <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
           <DashboardHeader />
           <div className="flex-1 overflow-hidden flex flex-col">
@@ -460,3 +508,4 @@ export default function DashboardPage() {
     </SidebarProvider>
   )
 }
+import { Users as UsersIcon } from "lucide-react"

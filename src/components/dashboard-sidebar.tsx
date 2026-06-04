@@ -9,6 +9,12 @@ import {
   Mail,
   Key,
   Handshake,
+  Search,
+  Check,
+  ChevronsUpDown,
+  Building2,
+  Settings,
+  ShieldCheck
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
@@ -23,6 +29,15 @@ import {
   SidebarGroupLabel,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { Partner } from "@/lib/types"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 const navGroups = [
   {
@@ -52,11 +67,32 @@ const navGroups = [
 interface DashboardSidebarProps {
   activeTab: string;
   onTabChange: (id: string) => void;
+  partners: Partner[];
+  selectedPartnerId: string | null;
+  onPartnerChange: (id: string | null) => void;
 }
 
-export function DashboardSidebar({ activeTab, onTabChange }: DashboardSidebarProps) {
+export function DashboardSidebar({ 
+  activeTab, 
+  onTabChange, 
+  partners, 
+  selectedPartnerId, 
+  onPartnerChange 
+}: DashboardSidebarProps) {
   const { state } = useSidebar()
   const isCollapsed = state === "collapsed"
+  const [partnerSearch, setPartnerSearch] = React.useState("")
+  const [isPartnerOpen, setIsPartnerOpen] = React.useState(false)
+
+  const selectedPartner = React.useMemo(() => 
+    partners.find(p => p.id === selectedPartnerId), 
+    [partners, selectedPartnerId]
+  )
+
+  const filteredPartners = React.useMemo(() => 
+    partners.filter(p => p.partnerName.toLowerCase().includes(partnerSearch.toLowerCase())),
+    [partners, partnerSearch]
+  )
 
   return (
     <Sidebar collapsible="icon" className="border-r border-slate-200 bg-[#f8f9fc]">
@@ -108,17 +144,123 @@ export function DashboardSidebar({ activeTab, onTabChange }: DashboardSidebarPro
       </SidebarContent>
 
       <SidebarFooter className="p-3 border-t border-slate-100 bg-slate-50/30">
-        <div className={cn("flex items-center gap-3", isCollapsed && "justify-center")}>
-          <div className="h-9 w-9 rounded-xl bg-[#0f172a] flex items-center justify-center text-white font-black text-[10px] shrink-0 shadow-lg">
-            SA
-          </div>
-          {!isCollapsed && (
-            <div className="flex flex-col min-w-0 animate-in fade-in slide-in-from-left-2">
-              <span className="text-xs font-black text-slate-900 leading-none mb-0.5">Sys Admin</span>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Level 4</span>
+        <Popover open={isPartnerOpen} onOpenChange={setIsPartnerOpen}>
+          <PopoverTrigger asChild>
+            <button className={cn(
+              "flex items-center gap-3 w-full p-2 rounded-xl transition-all duration-300 hover:bg-white hover:shadow-md border border-transparent hover:border-slate-100",
+              isCollapsed && "justify-center"
+            )}>
+              <div className="h-9 w-9 rounded-xl bg-[#0f172a] flex items-center justify-center text-white font-black text-[10px] shrink-0 shadow-lg">
+                {selectedPartner ? selectedPartner.partnerName.substring(0, 2).toUpperCase() : "GW"}
+              </div>
+              {!isCollapsed && (
+                <div className="flex flex-col min-w-0 text-left flex-1 animate-in fade-in slide-in-from-left-2">
+                  <span className="text-xs font-black text-slate-900 leading-none mb-1 truncate">
+                    {selectedPartner ? selectedPartner.partnerName : "Global Access"}
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
+                      {selectedPartner ? "Management Partner" : "System Admin"}
+                    </span>
+                    <ChevronsUpDown className="h-2.5 w-2.5 text-slate-300" />
+                  </div>
+                </div>
+              )}
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-72 p-0 shadow-2xl rounded-2xl overflow-hidden border-slate-200" align="start" side="right" sideOffset={10}>
+            <div className="bg-slate-50/80 p-4 border-b border-slate-100">
+              <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
+                <ShieldCheck className="h-3 w-3" />
+                Select Management Partner
+              </div>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                <Input 
+                  placeholder="Search partners..." 
+                  className="pl-9 h-9 text-xs bg-white border-slate-200 rounded-lg"
+                  value={partnerSearch}
+                  onChange={(e) => setPartnerSearch(e.target.value)}
+                />
+              </div>
             </div>
-          )}
-        </div>
+            
+            <ScrollArea className="max-h-[350px]">
+              <div className="p-2 space-y-1">
+                <button
+                  className={cn(
+                    "w-full flex items-center gap-3 p-2.5 rounded-xl transition-all group",
+                    selectedPartnerId === null ? "bg-primary/5" : "hover:bg-slate-50"
+                  )}
+                  onClick={() => {
+                    onPartnerChange(null)
+                    setIsPartnerOpen(false)
+                  }}
+                >
+                  <div className={cn(
+                    "h-8 w-8 rounded-lg flex items-center justify-center text-[10px] font-bold transition-all",
+                    selectedPartnerId === null ? "bg-primary text-white" : "bg-slate-100 text-slate-400 group-hover:bg-white"
+                  )}>
+                    GA
+                  </div>
+                  <div className="flex flex-col text-left flex-1 min-w-0">
+                    <span className={cn(
+                      "text-xs font-black truncate",
+                      selectedPartnerId === null ? "text-primary" : "text-slate-700"
+                    )}>Platform-Wide Access</span>
+                    <span className="text-[10px] font-bold text-slate-400">All Partners & Brands</span>
+                  </div>
+                  {selectedPartnerId === null && <Check className="h-4 w-4 text-primary shrink-0" />}
+                </button>
+
+                <div className="h-px bg-slate-100 my-1 mx-2" />
+
+                {filteredPartners.map((partner) => (
+                  <button
+                    key={partner.id}
+                    className={cn(
+                      "w-full flex items-center gap-3 p-2.5 rounded-xl transition-all group",
+                      selectedPartnerId === partner.id ? "bg-primary/5" : "hover:bg-slate-50"
+                    )}
+                    onClick={() => {
+                      onPartnerChange(partner.id)
+                      setIsPartnerOpen(false)
+                    }}
+                  >
+                    <div className={cn(
+                      "h-8 w-8 rounded-lg flex items-center justify-center text-[10px] font-bold transition-all",
+                      selectedPartnerId === partner.id ? "bg-primary text-white" : "bg-slate-100 text-slate-400 group-hover:bg-white"
+                    )}>
+                      {partner.partnerName.substring(0, 2).toUpperCase()}
+                    </div>
+                    <div className="flex flex-col text-left flex-1 min-w-0">
+                      <span className={cn(
+                        "text-xs font-black truncate",
+                        selectedPartnerId === partner.id ? "text-primary" : "text-slate-700"
+                      )}>{partner.partnerName}</span>
+                      <span className="text-[10px] font-bold text-slate-400">{partner.adminName}</span>
+                    </div>
+                    {selectedPartnerId === partner.id && <Check className="h-4 w-4 text-primary shrink-0" />}
+                  </button>
+                ))}
+
+                {filteredPartners.length === 0 && (
+                  <div className="p-8 text-center">
+                    <p className="text-xs text-slate-400 font-bold">No partners found matching "{partnerSearch}"</p>
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+
+            <div className="p-2 bg-slate-50 border-t border-slate-100 flex items-center justify-between px-4 py-3">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">System Version v7.0</span>
+              <button className="text-[10px] font-black text-primary uppercase tracking-widest flex items-center gap-1.5 hover:underline">
+                <Settings className="h-2.5 w-2.5" />
+                Settings
+              </button>
+            </div>
+          </PopoverContent>
+        </Popover>
       </SidebarFooter>
     </Sidebar>
   )

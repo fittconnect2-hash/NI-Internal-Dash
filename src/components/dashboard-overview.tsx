@@ -36,6 +36,7 @@ import {
 } from "@/lib/mock-data"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
+import { Organization } from "@/lib/types"
 
 // Analytical Data
 const revenueTrend = [
@@ -75,7 +76,11 @@ const networkDistData = [
 type DashboardTab = 'revenue' | 'orders' | 'growth' | 'efficiency';
 type TimeRange = '7d' | 'Today' | 'MTD';
 
-export function DashboardOverview() {
+interface DashboardOverviewProps {
+  filteredOrganizations?: Organization[];
+}
+
+export function DashboardOverview({ filteredOrganizations }: DashboardOverviewProps) {
   const [activeTab, setActiveTab] = React.useState<DashboardTab>('revenue')
   const [timeRange, setTimeRange] = React.useState<TimeRange>('Today')
   const [isRefreshing, setIsRefreshing] = React.useState(false)
@@ -85,12 +90,20 @@ export function DashboardOverview() {
     setTimeout(() => setIsRefreshing(false), 800)
   }
 
+  // Reactive brand list based on selection
+  const displayBrands = React.useMemo(() => {
+    if (!filteredOrganizations) return topRestaurants;
+    const orgNames = new Set(filteredOrganizations.map(o => o.organizationName));
+    return topRestaurants.filter(r => orgNames.has(o => o.organizationName));
+  }, [filteredOrganizations]);
+
   // Simplified stats for everyone to understand
   const getStats = (range: TimeRange) => {
+    const orgCount = filteredOrganizations ? filteredOrganizations.length : 247;
     const baseStats = [
       { id: 'revenue', label: "Total Sales", value: "AED 84.2k", change: "+12%", trend: "up", icon: DollarSign, color: "text-primary", desc: "Money collected from all shops" },
       { id: 'orders', label: "Number of Orders", value: "1,382", change: "+7%", trend: "up", icon: Receipt, color: "text-[#22c55e]", desc: "How many customers bought food" },
-      { id: 'growth', label: "Total Restaurants", value: "247", change: "-3", trend: "down", icon: Store, color: "text-primary", desc: "Number of shops currently open" },
+      { id: 'growth', label: "Total Restaurants", value: orgCount.toString(), change: "-3", trend: "down", icon: Store, color: "text-primary", desc: "Number of shops currently open" },
       { id: 'efficiency', label: "Average Service Time", value: "28 min", change: "-3 min", trend: "up", icon: Clock, color: "text-amber-600", desc: "How fast we get food to tables" },
     ]
 
@@ -131,7 +144,7 @@ export function DashboardOverview() {
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={revenueTrend} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                     <defs>
-                      <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                      <linearGradient id="colorRev" x1="0" x1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.1}/>
                         <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
                       </linearGradient>
@@ -177,7 +190,7 @@ export function DashboardOverview() {
                   <p className="text-sm text-slate-500">The most popular restaurant brands in your network.</p>
                 </CardHeader>
                 <CardContent className="p-0">
-                  {topRestaurants.slice(0, 3).map((res, i) => (
+                  {displayBrands.slice(0, 3).map((res, i) => (
                     <div key={i} className="p-6 border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition-colors flex items-center justify-between">
                       <div className="flex items-center gap-4">
                         <div className="h-10 w-10 rounded-xl bg-slate-100 flex items-center justify-center font-bold text-slate-400">{res.name[0]}</div>
@@ -331,7 +344,7 @@ export function DashboardOverview() {
                 <p className="text-sm text-slate-500">Every restaurant company currently using our platform.</p>
               </CardHeader>
               <CardContent className="p-0">
-                {topRestaurants.map((res, i) => (
+                {displayBrands.map((res, i) => (
                   <div key={i} className="p-6 border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition-colors flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className="h-10 w-10 rounded-xl bg-slate-100 flex items-center justify-center font-bold text-slate-400">{res.name[0]}</div>

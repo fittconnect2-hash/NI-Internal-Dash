@@ -21,6 +21,7 @@ export interface Organization {
   merchantId?: string;
   additionalNotes?: string;
   imageUrl?: string;
+  partnerId?: string; // The management partner overseeing this organization
 }
 
 export interface Outlet {
