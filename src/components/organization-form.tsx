@@ -33,6 +33,25 @@ import {
 } from "@/components/ui/select"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
+const COUNTRY_DATA: Record<string, { cities: string[], states: string[] }> = {
+  "UAE": {
+    cities: ["Dubai", "Abu Dhabi", "Sharjah", "Ajman", "Umm Al Quwain", "Ras Al Khaimah", "Fujairah"],
+    states: ["Dubai", "Abu Dhabi", "Sharjah", "Ajman", "Umm Al Quwain", "Ras Al Khaimah", "Fujairah"]
+  },
+  "KSA": {
+    cities: ["Riyadh", "Jeddah", "Mecca", "Medina", "Dammam", "Khobar", "Tabuk", "Abha"],
+    states: ["Riyadh Region", "Makkah Region", "Eastern Province", "Madinah Region", "Asir Region"]
+  },
+  "USA": {
+    cities: ["New York", "Los Angeles", "Chicago", "Houston", "Phoenix", "Philadelphia", "San Antonio", "San Diego", "Dallas"],
+    states: ["California", "New York", "Texas", "Florida", "Illinois", "Pennsylvania", "Ohio", "Georgia", "North Carolina"]
+  },
+  "UK": {
+    cities: ["London", "Birmingham", "Manchester", "Glasgow", "Newcastle", "Sheffield", "Liverpool", "Leeds"],
+    states: ["England", "Scotland", "Wales", "Northern Ireland"]
+  }
+}
+
 const formSchema = z.object({
   organizationName: z.string().min(1, "Business Name is required"),
   contactName: z.string().min(1, "Contact Name is required"),
@@ -74,6 +93,8 @@ export function OrganizationForm({ organization, isOpen, onClose, onSubmit }: Or
     },
   })
 
+  const watchCountry = form.watch("country")
+
   React.useEffect(() => {
     if (isOpen) {
       setIsLoading(true)
@@ -109,6 +130,20 @@ export function OrganizationForm({ organization, isOpen, onClose, onSubmit }: Or
       setTimeout(() => setIsLoading(false), 500)
     }
   }, [organization, form, isOpen])
+
+  // Handle country change to reset city/state
+  React.useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === "country") {
+        form.setValue("city", "")
+        form.setValue("state", "")
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [form])
+
+  const cities = watchCountry ? COUNTRY_DATA[watchCountry]?.cities || [] : []
+  const states = watchCountry ? COUNTRY_DATA[watchCountry]?.states || [] : []
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -249,7 +284,7 @@ export function OrganizationForm({ organization, isOpen, onClose, onSubmit }: Or
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel className="text-[13px] font-bold text-[#1e293b]">Country <span className="text-red-500 font-black">*</span></FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
                                   <SelectTrigger className="h-12 bg-white border-slate-200">
                                     <SelectValue placeholder="Select a country" />
@@ -257,6 +292,7 @@ export function OrganizationForm({ organization, isOpen, onClose, onSubmit }: Or
                                 </FormControl>
                                 <SelectContent>
                                   <SelectItem value="UAE">United Arab Emirates</SelectItem>
+                                  <SelectItem value="KSA">Saudi Arabia</SelectItem>
                                   <SelectItem value="USA">United States</SelectItem>
                                   <SelectItem value="UK">United Kingdom</SelectItem>
                                 </SelectContent>
@@ -272,10 +308,17 @@ export function OrganizationForm({ organization, isOpen, onClose, onSubmit }: Or
                           name="state"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-[13px] font-bold text-[#1e293b]">State <span className="text-red-500 font-black">*</span></FormLabel>
-                              <FormControl>
-                                <Input placeholder="Enter the state" {...field} className="h-12 bg-white border-slate-200" />
-                              </FormControl>
+                              <FormLabel className="text-[13px] font-bold text-[#1e293b]">State / Region <span className="text-red-500 font-black">*</span></FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value} disabled={!watchCountry}>
+                                <FormControl>
+                                  <SelectTrigger className="h-12 bg-white border-slate-200">
+                                    <SelectValue placeholder={watchCountry ? "Select state" : "Choose country first"} />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                                </SelectContent>
+                              </Select>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -288,9 +331,16 @@ export function OrganizationForm({ organization, isOpen, onClose, onSubmit }: Or
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel className="text-[13px] font-bold text-[#1e293b]">City <span className="text-red-500 font-black">*</span></FormLabel>
-                              <FormControl>
-                                <Input placeholder="Enter the city" {...field} className="h-12 bg-white border-slate-200" />
-                              </FormControl>
+                              <Select onValueChange={field.onChange} value={field.value} disabled={!watchCountry}>
+                                <FormControl>
+                                  <SelectTrigger className="h-12 bg-white border-slate-200">
+                                    <SelectValue placeholder={watchCountry ? "Select city" : "Choose country first"} />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {cities.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                                </SelectContent>
+                              </Select>
                               <FormMessage />
                             </FormItem>
                           )}

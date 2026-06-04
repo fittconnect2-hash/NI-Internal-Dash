@@ -34,6 +34,25 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
 
+const COUNTRY_DATA: Record<string, { cities: string[], states: string[] }> = {
+  "UAE": {
+    cities: ["Dubai", "Abu Dhabi", "Sharjah", "Ajman", "Umm Al Quwain", "Ras Al Khaimah", "Fujairah"],
+    states: ["Dubai", "Abu Dhabi", "Sharjah", "Ajman", "Umm Al Quwain", "Ras Al Khaimah", "Fujairah"]
+  },
+  "KSA": {
+    cities: ["Riyadh", "Jeddah", "Mecca", "Medina", "Dammam", "Khobar", "Tabuk", "Abha"],
+    states: ["Riyadh Region", "Makkah Region", "Eastern Province", "Madinah Region", "Asir Region"]
+  },
+  "USA": {
+    cities: ["New York", "Los Angeles", "Chicago", "Houston", "Phoenix", "Philadelphia", "San Antonio", "San Diego", "Dallas"],
+    states: ["California", "New York", "Texas", "Florida", "Illinois", "Pennsylvania", "Ohio", "Georgia", "North Carolina"]
+  },
+  "UK": {
+    cities: ["London", "Birmingham", "Manchester", "Glasgow", "Newcastle", "Sheffield", "Liverpool", "Leeds"],
+    states: ["England", "Scotland", "Wales", "Northern Ireland"]
+  }
+}
+
 const formSchema = z.object({
   partnerName: z.string().min(1, "Company name is required"),
   adminName: z.string().min(1, "Contact name is required"),
@@ -82,6 +101,8 @@ export function PartnerForm({ partner, isOpen, onClose, onSubmit }: PartnerFormP
     },
   })
 
+  const watchCountry = form.watch("country")
+
   React.useEffect(() => {
     if (isOpen) {
       setIsLoading(true)
@@ -119,6 +140,17 @@ export function PartnerForm({ partner, isOpen, onClose, onSubmit }: PartnerFormP
     }
   }, [partner, form, isOpen])
 
+  // Handle country change to reset city/state
+  React.useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === "country") {
+        form.setValue("city", "")
+        form.setValue("state", "")
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [form])
+
   const handleNext = async () => {
     if (currentStep === 1) {
       const isValid = await form.trigger()
@@ -137,6 +169,9 @@ export function PartnerForm({ partner, isOpen, onClose, onSubmit }: PartnerFormP
       setCurrentStep(prev => prev - 1)
     }
   }
+
+  const cities = watchCountry ? COUNTRY_DATA[watchCountry]?.cities || [] : []
+  const states = watchCountry ? COUNTRY_DATA[watchCountry]?.states || [] : []
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -304,7 +339,7 @@ export function PartnerForm({ partner, isOpen, onClose, onSubmit }: PartnerFormP
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel className="text-[14px] font-extrabold text-slate-700">Country <span className="text-red-500">*</span></FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
                                   <SelectTrigger className="h-12 bg-white border-slate-200 rounded-xl">
                                     <SelectValue placeholder="Select a country" />
@@ -312,9 +347,9 @@ export function PartnerForm({ partner, isOpen, onClose, onSubmit }: PartnerFormP
                                 </FormControl>
                                 <SelectContent className="rounded-xl border-slate-200">
                                   <SelectItem value="UAE">United Arab Emirates</SelectItem>
+                                  <SelectItem value="KSA">Saudi Arabia</SelectItem>
                                   <SelectItem value="USA">United States</SelectItem>
                                   <SelectItem value="UK">United Kingdom</SelectItem>
-                                  <SelectItem value="KSA">Saudi Arabia</SelectItem>
                                 </SelectContent>
                               </Select>
                               <FormMessage />
@@ -328,10 +363,17 @@ export function PartnerForm({ partner, isOpen, onClose, onSubmit }: PartnerFormP
                           name="state"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-[14px] font-extrabold text-slate-700">State <span className="text-red-500">*</span></FormLabel>
-                              <FormControl>
-                                <Input placeholder="Enter the state" {...field} className="h-12 bg-white border-slate-200 rounded-xl" />
-                              </FormControl>
+                              <FormLabel className="text-[14px] font-extrabold text-slate-700">State / Region <span className="text-red-500">*</span></FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value} disabled={!watchCountry}>
+                                <FormControl>
+                                  <SelectTrigger className="h-12 bg-white border-slate-200 rounded-xl">
+                                    <SelectValue placeholder={watchCountry ? "Select state" : "Choose country first"} />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent className="rounded-xl border-slate-200">
+                                  {states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                                </SelectContent>
+                              </Select>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -344,9 +386,16 @@ export function PartnerForm({ partner, isOpen, onClose, onSubmit }: PartnerFormP
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel className="text-[14px] font-extrabold text-slate-700">City <span className="text-red-500">*</span></FormLabel>
-                              <FormControl>
-                                <Input placeholder="Enter the city" {...field} className="h-12 bg-white border-slate-200 rounded-xl" />
-                              </FormControl>
+                              <Select onValueChange={field.onChange} value={field.value} disabled={!watchCountry}>
+                                <FormControl>
+                                  <SelectTrigger className="h-12 bg-white border-slate-200 rounded-xl">
+                                    <SelectValue placeholder={watchCountry ? "Select city" : "Choose country first"} />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent className="rounded-xl border-slate-200">
+                                  {cities.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                                </SelectContent>
+                              </Select>
                               <FormMessage />
                             </FormItem>
                           )}
