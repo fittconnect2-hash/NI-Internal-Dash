@@ -50,9 +50,9 @@ const navGroups = [
     label: "MANAGEMENT",
     items: [
       { icon: Handshake, label: "Partners", id: "partners" },
-      { icon: Users, label: "Organizations", id: "organizations" },
+      { icon: Building2, label: "Organizations", id: "organizations" },
       { icon: Store, label: "Outlets", id: "outlets" },
-      { icon: User, label: "Users", id: "users" },
+      { icon: Users, label: "Users", id: "users" },
     ]
   },
   {
@@ -187,6 +187,9 @@ export function DashboardSidebar({
             
             <ScrollArea className="max-h-[350px]">
               <div className="p-2 space-y-1">
+                <div className="px-2 py-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                  System Admin
+                </div>
                 <button
                   className={cn(
                     "w-full flex items-center gap-3 p-2.5 rounded-xl transition-all group",
@@ -213,8 +216,11 @@ export function DashboardSidebar({
                   {selectedPartnerId === null && <Check className="h-4 w-4 text-primary shrink-0" />}
                 </button>
 
-                <div className="h-px bg-slate-100 my-1 mx-2" />
+                <div className="h-px bg-slate-100 my-2 mx-2" />
 
+                <div className="px-2 py-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                  Partner Portfolio
+                </div>
                 {filteredPartners.map((partner) => (
                   <button
                     key={partner.id}
