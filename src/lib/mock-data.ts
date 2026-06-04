@@ -4,14 +4,14 @@ const businessTypes = ['Hotel', 'Fast Food', 'Restaurant', 'Cafe', 'Catering', '
 const statusOptions: ('Active' | 'Configuration pending' | 'Inactive')[] = ['Active', 'Configuration pending', 'Active', 'Active', 'Inactive'];
 
 /**
- * Generates mock organizations with NO payment gateways selected by default.
+ * Generates mock organizations with professional naming conventions.
  */
 function generateMockOrganizations(count: number): Organization[] {
   const organizations: Organization[] = [
     {
       id: '1',
       organizationName: 'Grand Hyatt Dining',
-      contactName: 'Jane Doe',
+      contactName: 'Sarah Jenkins',
       businessType: 'Hotel',
       country: 'UAE',
       state: 'Dubai',
@@ -24,7 +24,7 @@ function generateMockOrganizations(count: number): Organization[] {
       lastLoginDate: '2024-05-15',
       isPaymentGatewayConfigured: false,
       paymentGatewayMode: 'global',
-      globalGatewayIds: [], // Strictly empty by default
+      globalGatewayIds: [],
       numberOfOutlets: 2,
       numberOfUsers: 12,
       merchantId: 'M-78291',
@@ -32,7 +32,7 @@ function generateMockOrganizations(count: number): Organization[] {
     {
       id: '2',
       organizationName: 'QuickBite Express',
-      contactName: 'John Smith',
+      contactName: 'James Miller',
       businessType: 'Fast Food',
       country: 'USA',
       state: 'New York',
@@ -43,7 +43,7 @@ function generateMockOrganizations(count: number): Organization[] {
       contactEmail: 'setup@quickbite.io',
       contactPhone: '+1 555 987 6543',
       isPaymentGatewayConfigured: false,
-      globalGatewayIds: [], // Strictly empty by default
+      globalGatewayIds: [],
       numberOfOutlets: 1,
       numberOfUsers: 3,
     }
@@ -69,7 +69,7 @@ function generateMockOrganizations(count: number): Organization[] {
     organizations.push({
       id,
       organizationName: name,
-      contactName: `Manager ${id}`,
+      contactName: `Executive ${id}`,
       businessType: type,
       country: i % 2 === 0 ? 'UAE' : 'USA',
       state: i % 2 === 0 ? 'Dubai' : 'California',
@@ -81,7 +81,7 @@ function generateMockOrganizations(count: number): Organization[] {
       contactPhone: `+971 50 ${1000000 + i}`,
       lastLoginDate: '2024-05-20',
       isPaymentGatewayConfigured: false,
-      globalGatewayIds: [], // Strictly empty by default
+      globalGatewayIds: [],
       numberOfOutlets: (i % 5) + 1,
       numberOfUsers: (i % 15) + 3,
       merchantId: status === 'Active' ? `M-${10000 + i}` : undefined,
@@ -113,7 +113,7 @@ function generateMockOutlets(organizations: Organization[]): Outlet[] {
         zipCode: org.zipCode,
         status: 'Active',
         userCount: Math.floor(Math.random() * 10) + 2,
-        gatewayIds: [] // Strictly empty by default
+        gatewayIds: []
       });
     }
   });

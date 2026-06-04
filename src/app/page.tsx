@@ -40,12 +40,13 @@ import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 
 const ITEMS_PER_PAGE = 8
+// Bumping version to v7 to clear out any old "Testuser" data from localStorage
 const STORAGE_KEYS = {
-  ORGANIZATIONS: 'dine-net-organizations-v6',
-  OUTLETS: 'dine-net-outlets-v6',
-  USERS: 'dine-net-users-v6',
-  GATEWAYS: 'dine-net-gateways-v6',
-  PARTNERS: 'dine-net-partners-v6',
+  ORGANIZATIONS: 'dine-net-organizations-v7',
+  OUTLETS: 'dine-net-outlets-v7',
+  USERS: 'dine-net-users-v7',
+  GATEWAYS: 'dine-net-gateways-v7',
+  PARTNERS: 'dine-net-partners-v7',
 }
 
 export default function DashboardPage() {
